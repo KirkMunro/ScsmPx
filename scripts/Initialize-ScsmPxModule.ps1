@@ -117,7 +117,13 @@ function Initialize-ScsmPxModule {
             Import-Module $scsmModuleManifest.FullName
         }
         if ($defaultScsmManagementServer) {
-            New-SCManagementGroupConnection -ComputerName $defaultScsmManagementServer
+            try {
+                New-SCManagementGroupConnection -ComputerName $defaultScsmManagementServer -ErrorAction Stop
+            } catch {
+                # This will fail if the default management server is offline, in which case we
+                # absorb warn them about the error and allow the user to connect on their own.
+                Write-Warning "Unable to connect to the default SCSM Management Server ('${defaultScsmManagementServer}'). Use the New-SCManagementGroupConnection cmdlet to establish a valid connection to an SCSM Management Server."
+            }
         }
         if (-not (Get-Module -Name Microsoft.EnterpriseManagement.Warehouse.Cmdlets)) {
             Import-Module $scsmDwModuleManifest.FullName
