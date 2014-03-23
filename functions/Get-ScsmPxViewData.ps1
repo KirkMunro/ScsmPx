@@ -1,8 +1,10 @@
 ﻿<#############################################################################
-The ScsmPx module facilitates automation with System Center Service Manager by
-auto-loading the native modules and enabling automatic discovery of the native
-module commands. It also includes additional complementary commands that are
-not available out of the box.
+The ScsmPx module facilitates automation with Microsoft System Center Service
+Manager by auto-loading the native modules that are included as part of that
+product and enabling automatic discovery of the commands that are contained
+within the native modules. It also includes dozens of complementary commands
+that are not available out of the box to allow you to do much more with your
+PowerShell automation efforts using the platform.
 
 Copyright (c) 2014 Provance Technologies.
 
