@@ -26,7 +26,7 @@ license folder that is included in the ScsmPx module. If not, see
 # version of ScsmPx from the GitHub page where it is hosted.
 
 [CmdletBinding(SupportsShouldProcess=$true, DefaultParameterSetName='InCurrentLocation')]
-[OutputType([System.Management.Automation.PSModuleInfo])
+[OutputType([System.Management.Automation.PSModuleInfo])]
 param(
     [Parameter(ParameterSetName='ForCurrentUser')]
     [System.Management.Automation.SwitchParameter]
@@ -203,8 +203,8 @@ try {
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU8Vhwnxz/8Oa8bH92di/DFnzt
-# jcigghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUohyBwqvMhlJBxNVTTxuM271M
+# yPGgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -318,22 +318,22 @@ try {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEApTqdkpPhkqKAt3DZXRkLwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFNSTzxcvyTIkSioXZxqDhw1iRK0PMA0GCSqGSIb3DQEBAQUABIIBAEXZ
-# d7qvnnitT6y7/Zn3T41ImFs3280HMskRWZol1B99PPvRfqKItS4V5u2J/rr3TFJc
-# RYwGqpfNJZwAzKCCcxSus5Eotez9W9K1vYTypohS/2DzRz4JBGzY3v5eDPXD/Nny
-# RJFdeztUZW8wUTmxUgj42Y8WIjAzPKSae7i3+53ebuLbz0Nsp1MK1WTh5s2mZ4IN
-# oUlhm7okkQOMzCvVfqWkES6SxGFmRSs9zUp7/Tg9d0vLyhF0qryOpcvKogGayMGr
-# C/ILYw+dTcV/B3GjiW+/STHWgks012DVqPUMqPrfo8PeOm/yCbZHOP+R8Ynz5B4t
-# 6hLkFlACnfBGDOLmSHahggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFKvX2pYA33mZXMxBY1wI9zk8vNa2MA0GCSqGSIb3DQEBAQUABIIBABmF
+# A8L5VaEvUme7ULyzuFRKV1+TATVkG76H6aE0ACxzJR2D+Okg4syEZ62JnUHhuBx3
+# vl/dhY79z2fnY/BmtjAtE+DCdD8VYYj0FIsfa5P5wuXwArrBRj73te90Pzt6xlcA
+# HlIptvvnZVNuDX/up7Xhl6qySD7smRBhqpEllaKyp4UENaJ58F+bM4rbNczEstvT
+# yY1nG/S55dnyNVR9R5WBL05AIKrbxuJOCHjVwCTvWEDH6aqq9GEUC2t3qz1a9IXf
+# JaktnHIvFHuIdkCVAH0FvahuhOnn1SpysqiJ7kjaoLBoIAC0Av06Ur+P5P3jFll5
+# jLrWJfG0Xd0uM9HV8uuhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI0MjEwNzE1WjAjBgkqhkiG9w0B
-# CQQxFgQUCkN4a4b4/dgNY+f3tzVDfKBgDdcwDQYJKoZIhvcNAQEBBQAEggEAJGTb
-# Fx+9kbkBZv/ELohwj/K1/W6K4/Ggk/1lusDkBbpc5deYjgIP6Hf3N0NyPXxVIMVj
-# E3jGSNpuZianQIxxOux3+f+UVpWGhVjbkewUUpVZ8z9vgZWYZ5QI5TypHT+PzOo9
-# R50fuqCo3ApMA4zN7d9u/K5G48aYIsqRHZehVcZzdiOSEYp4OgnGU/Tgpj8AEW2x
-# OuFnKJkOhNU9ka9s3/Q4KzilHXDbYLr67LrcVISj0pzeB71uaTZpX/j12eacp9UF
-# av+f2QB5HtslO6HZrcAJGhgrGDssbISf06RUZcQOL9TdaUr1PHGltqFPyE1ZJdUb
-# b4ThsOrmOwF6RM2oBA==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI0MjExMDQwWjAjBgkqhkiG9w0B
+# CQQxFgQUZoLhEro+FltNbeyKR/buXMsUbD4wDQYJKoZIhvcNAQEBBQAEggEAk+TP
+# 89fRyhgvFow61RaDku8t/50zhQqlrQPVnut564TOO7bJXm3dcqEcgxZEkerrinHG
+# 7AtU7aH1FymxnosUAiZ8yD/psOn+b/OO7DcrjRXw5bc2jwp2dsA3/OMN2xPttbw0
+# 4qS/XP53cQ72u+bpJDzQruA8AsauGbl6KBShrJeFW7AQqHxqmzEXXAGRuCsv2zuU
+# bfvt/lN5kgLIY41x7lZNX4E3f+o8b7+Qz+oO28yn15laSLjjEvYDVRXMZsBo50dO
+# MbQTf/v2RnejYetCDzfRox6qqw4wkwOdSho6zZQibev6eOv7YDn9HP+YYWfqrXdN
+# 5GeHEL2TOms1F2CG3g==
 # SIG # End signature block
