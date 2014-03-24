@@ -26,6 +26,7 @@ license folder that is included in the ScsmPx module. If not, see
 # version of ScsmPx from the GitHub page where it is hosted.
 
 [CmdletBinding(SupportsShouldProcess=$true, DefaultParameterSetName='InCurrentLocation')]
+[OutputType([System.Management.Automation.PSModuleInfo])
 param(
     [Parameter(ParameterSetName='ForCurrentUser')]
     [System.Management.Automation.SwitchParameter]
@@ -35,10 +36,9 @@ param(
     [System.Management.Automation.SwitchParameter]
     $AllUsers,
 
-    [Parameter(Position=0, Mandatory=$true, ParameterSetName='InCustomLocation')]
-    [ValidateNotNullOrEmpty()]
-    [System.String]
-    $Path
+    [Parameter()]
+    [System.Management.Automation.SwitchParameter]
+    $PassThru
 )
 try {
     #region Fail fast if we are not meeting the prerequisite requirements.
@@ -89,8 +89,6 @@ try {
         $modulesFolder = $modulesFolders.AllUsers
     } elseif ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('CurrentUser') -and $CurrentUser) {
         $modulesFolder = $modulesFolders.CurrentUser
-    } elseif ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Path')) {
-        $modulesFolder = $Path
     } elseif ($module) {
         # Grab the modules folder from the current installed location.
         $modulesFolder = $module.ModuleBase | Split-Path -Parent
@@ -108,12 +106,21 @@ try {
     }
     if (@($env:PSModulePath -split ';') -notcontains $modulesFolder) {
         Write-Progress -Activity 'Installing ScsmPx' -Status 'Updating the PSModulePath environment variable.'
-        $systemPSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath',[System.EnvironmentVariableTarget]::Machine) -as [System.String]
+        if ($modulesFolder -match "^$([System.Text.RegularExpressions.RegEx]::Escape($env:USERPROFILE))") {
+            $environmentVariableTarget = [System.EnvironmentVariableTarget]::User
+        } else {
+            $environmentVariableTarget = [System.EnvironmentVariableTarget]::Machine
+        }
+        $systemPSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath',$environmentVariableTarget) -as [System.String]
         if ($systemPSModulePath -notmatch ';$') {
             $systemPSModulePath += ';'
         }
         $systemPSModulePath += $modulesFolder
-        [System.Environment]::SetEnvironmentVariable('PSModulePath',$systemPSModulePath,[System.EnvironmentVariableTarget]::Machine)
+        [System.Environment]::SetEnvironmentVariable('PSModulePath',$systemPSModulePath,$environmentVariableTarget)
+        if ($env:PSModulePath -notmatch ';$') {
+            $env:PSModulePath += ';'
+        }
+        $env:PSModulePath += $modulesFolder
     }
 
     #endregion
@@ -182,14 +189,22 @@ try {
         | Rename-Item -NewName ScsmPx
 
     #endregion
+
+    #region Now return the updated module to the caller if they requested it.
+
+    if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('PassThru') -and $PassThru) {
+        Get-Module -ListAvailable -Name ScsmPx
+    }
+
+    #endregion
 } catch {
     throw
 }
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUFT5K6fq38Gkv4tRLRzz5jeW9
-# 8BSgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU8Vhwnxz/8Oa8bH92di/DFnzt
+# jcigghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -303,22 +318,22 @@ try {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEApTqdkpPhkqKAt3DZXRkLwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFKwD/WVG72TTNvbRIeIGk8fGlkD0MA0GCSqGSIb3DQEBAQUABIIBABEG
-# OHaMqHoM397LgmA3afRVgNAje/TLrnwSln0gK4Lngut5ygdBmHprO5G7i9rEWOs9
-# MPGXzGIEU2ukaLWLYeczb05TrLYH8E1LQyQTaY5DQnbJF9xbmhj8Xw0xi2Jk/4rE
-# pbcPBm3PEaX+vIwXd0dE7hbSnLmN0PohqDUu1kwYlFxZF4WsmbkKjc8JsJAQqpbz
-# /w0n6dUckUcVO/bIf9woZoMklNNWFhwr9pOiLBTunMr4+kM7TeGtbXe2yrKfNQqQ
-# u8kSfnQtXdyYqu8k/MGC7nDPh5HK7+O6Rj+0ooY5u8cK2AwYTk3Mba72oxOq55Cw
-# CfwYD76F0LVjsIjtPoChggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFNSTzxcvyTIkSioXZxqDhw1iRK0PMA0GCSqGSIb3DQEBAQUABIIBAEXZ
+# d7qvnnitT6y7/Zn3T41ImFs3280HMskRWZol1B99PPvRfqKItS4V5u2J/rr3TFJc
+# RYwGqpfNJZwAzKCCcxSus5Eotez9W9K1vYTypohS/2DzRz4JBGzY3v5eDPXD/Nny
+# RJFdeztUZW8wUTmxUgj42Y8WIjAzPKSae7i3+53ebuLbz0Nsp1MK1WTh5s2mZ4IN
+# oUlhm7okkQOMzCvVfqWkES6SxGFmRSs9zUp7/Tg9d0vLyhF0qryOpcvKogGayMGr
+# C/ILYw+dTcV/B3GjiW+/STHWgks012DVqPUMqPrfo8PeOm/yCbZHOP+R8Ynz5B4t
+# 6hLkFlACnfBGDOLmSHahggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI0MjA0NjM2WjAjBgkqhkiG9w0B
-# CQQxFgQUT2QnvXFG9KJ0rFIrhDRI/+vaAiEwDQYJKoZIhvcNAQEBBQAEggEAfNt9
-# pjiYdE6YFcSywXgqDAelVTWimo7cdrRnOOt0vfLtEFL6OEjgc0Wn2+i3l3naEDDJ
-# 1EtHtwIUKflKnvpEJQhq7pyXq4HTZeiHTpIfZVPBCc9V1biMzI9guQw/9LwWut3z
-# Czh+E42hDwlny2FP1DEOJ6FXXOIw8BVVJYzQb7AdhbXHWFC4hFTYUKYeMC9Ntyau
-# +L+3ctpcKrSS2fkhdxm1p9VKFjsL/oy2H0dSDTKY1K0EbOewyfRxiMrpWsPFDimO
-# 2AdW+sDXN5KPBjgiTzirRY/dq87zZX/kFwaSrO12WUKIkh9Ew0ttEfIQnHUzTKxk
-# nUpMD0Jj9Ef+pH9nHA==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI0MjEwNzE1WjAjBgkqhkiG9w0B
+# CQQxFgQUCkN4a4b4/dgNY+f3tzVDfKBgDdcwDQYJKoZIhvcNAQEBBQAEggEAJGTb
+# Fx+9kbkBZv/ELohwj/K1/W6K4/Ggk/1lusDkBbpc5deYjgIP6Hf3N0NyPXxVIMVj
+# E3jGSNpuZianQIxxOux3+f+UVpWGhVjbkewUUpVZ8z9vgZWYZ5QI5TypHT+PzOo9
+# R50fuqCo3ApMA4zN7d9u/K5G48aYIsqRHZehVcZzdiOSEYp4OgnGU/Tgpj8AEW2x
+# OuFnKJkOhNU9ka9s3/Q4KzilHXDbYLr67LrcVISj0pzeB71uaTZpX/j12eacp9UF
+# av+f2QB5HtslO6HZrcAJGhgrGDssbISf06RUZcQOL9TdaUr1PHGltqFPyE1ZJdUb
+# b4ThsOrmOwF6RM2oBA==
 # SIG # End signature block
