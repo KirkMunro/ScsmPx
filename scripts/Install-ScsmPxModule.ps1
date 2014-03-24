@@ -26,7 +26,7 @@ license folder that is included in the ScsmPx module. If not, see
 # version of ScsmPx from the GitHub page where it is hosted.
 
 [CmdletBinding(SupportsShouldProcess=$true, DefaultParameterSetName='InCurrentLocation')]
-[OutputType([System.Management.Automation.PSModuleInfo])
+[OutputType([System.Management.Automation.PSModuleInfo])]
 param(
     [Parameter(ParameterSetName='ForCurrentUser')]
     [System.Management.Automation.SwitchParameter]
