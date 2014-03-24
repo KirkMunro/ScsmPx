@@ -104,7 +104,7 @@ try {
 
     if (-not (Test-Path -LiteralPath $modulesFolder)) {
         Write-Progress -Activity 'Installing ScsmPx' -Status 'Creating modules folder.'
-        New-Item -Path $modulesFolder -ErrorAction Stop > $null
+        New-Item -Path $modulesFolder -ItemType Directory -ErrorAction Stop > $null
     }
     if (@($env:PSModulePath -split ';') -notcontains $modulesFolder) {
         Write-Progress -Activity 'Installing ScsmPx' -Status 'Updating the PSModulePath environment variable.'
@@ -188,8 +188,8 @@ try {
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsUZLXLsHEPqwT3Y5nZEEKWB8
-# FBigghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUFT5K6fq38Gkv4tRLRzz5jeW9
+# 8BSgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -303,22 +303,22 @@ try {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEApTqdkpPhkqKAt3DZXRkLwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFFuTxlvdXzhZsXF+29fodz8R29imMA0GCSqGSIb3DQEBAQUABIIBAH3W
-# ZbslcVVZW3zm0JA3N/tWCd3g0xIEDva3RkbB3qhi9CkVzazC+WUGyaFsZCXtrUAB
-# j/88b9AU0Q/orjwrJVdpPtRWc1SDuDImC6uAsDMjb522koIY/lMWXafFdzEHLE9b
-# jgaekk+U643QnaeipsuTlch69eG9kfJegweYcl051im1uIgTaG8zSJ1cUQw7Lds2
-# MDbqr4FlrarexiAz6ZGuXPdCvutTHLCfxH80KCyL7j+w253tM0GNkA5aoH9ojDtZ
-# o7Q/snaFKpflnNWzSAkO0fKLP6VmqaNho/+1U8uXzS2SB2M/2/EQgZ86jNrwpK+S
-# pRskBqyvX7qaGkhS/iyhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFKwD/WVG72TTNvbRIeIGk8fGlkD0MA0GCSqGSIb3DQEBAQUABIIBABEG
+# OHaMqHoM397LgmA3afRVgNAje/TLrnwSln0gK4Lngut5ygdBmHprO5G7i9rEWOs9
+# MPGXzGIEU2ukaLWLYeczb05TrLYH8E1LQyQTaY5DQnbJF9xbmhj8Xw0xi2Jk/4rE
+# pbcPBm3PEaX+vIwXd0dE7hbSnLmN0PohqDUu1kwYlFxZF4WsmbkKjc8JsJAQqpbz
+# /w0n6dUckUcVO/bIf9woZoMklNNWFhwr9pOiLBTunMr4+kM7TeGtbXe2yrKfNQqQ
+# u8kSfnQtXdyYqu8k/MGC7nDPh5HK7+O6Rj+0ooY5u8cK2AwYTk3Mba72oxOq55Cw
+# CfwYD76F0LVjsIjtPoChggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI0MjAzMTUyWjAjBgkqhkiG9w0B
-# CQQxFgQUXC/q6FohHtYjilNt90zpyWC7QWgwDQYJKoZIhvcNAQEBBQAEggEANZNh
-# bqYOml2QdGT0jr0gi3T3sak5BVmY+n0rfNVJ497N6uGWRtfdWU+bHHOCkApsoe7/
-# 6jnZwUngE4w4txhMCFXgBNnidFS1JsMrqhn4ObMrGmP6PO1RiEdinmW8yOE55u+o
-# nqlBZHQlaUh2nYM+DLTBvpRMVp2BeNJuXJDVqEmTNk4+w6ISfIEAbTBa3x1SkNjl
-# 2Vz64mKXHUwnb1n6pKF2VoMnJJwMhRb2s6U+mkkibKWhWuzbpOfhtOl8OxPCymnx
-# AnAcw1LZ8KHKRN4Q2leaDLKffhP7OcfTef08W4gTgAWX0H3YZ6tVqmgaMEP85Jpp
-# qeFop44AMXaIHRJFng==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI0MjA0NjM2WjAjBgkqhkiG9w0B
+# CQQxFgQUT2QnvXFG9KJ0rFIrhDRI/+vaAiEwDQYJKoZIhvcNAQEBBQAEggEAfNt9
+# pjiYdE6YFcSywXgqDAelVTWimo7cdrRnOOt0vfLtEFL6OEjgc0Wn2+i3l3naEDDJ
+# 1EtHtwIUKflKnvpEJQhq7pyXq4HTZeiHTpIfZVPBCc9V1biMzI9guQw/9LwWut3z
+# Czh+E42hDwlny2FP1DEOJ6FXXOIw8BVVJYzQb7AdhbXHWFC4hFTYUKYeMC9Ntyau
+# +L+3ctpcKrSS2fkhdxm1p9VKFjsL/oy2H0dSDTKY1K0EbOewyfRxiMrpWsPFDimO
+# 2AdW+sDXN5KPBjgiTzirRY/dq87zZX/kFwaSrO12WUKIkh9Ew0ttEfIQnHUzTKxk
+# nUpMD0Jj9Ef+pH9nHA==
 # SIG # End signature block
