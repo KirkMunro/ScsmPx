@@ -26,6 +26,7 @@ license folder that is included in the ScsmPx module. If not, see
 # version of ScsmPx from the GitHub page where it is hosted.
 
 [CmdletBinding(SupportsShouldProcess=$true, DefaultParameterSetName='InCurrentLocation')]
+[OutputType([System.Management.Automation.PSModuleInfo])
 param(
     [Parameter(ParameterSetName='ForCurrentUser')]
     [System.Management.Automation.SwitchParameter]
@@ -35,10 +36,9 @@ param(
     [System.Management.Automation.SwitchParameter]
     $AllUsers,
 
-    [Parameter(Position=0, Mandatory=$true, ParameterSetName='InCustomLocation')]
-    [ValidateNotNullOrEmpty()]
-    [System.String]
-    $Path
+    [Parameter()]
+    [System.Management.Automation.SwitchParameter]
+    $PassThru
 )
 try {
     #region Fail fast if we are not meeting the prerequisite requirements.
@@ -89,8 +89,6 @@ try {
         $modulesFolder = $modulesFolders.AllUsers
     } elseif ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('CurrentUser') -and $CurrentUser) {
         $modulesFolder = $modulesFolders.CurrentUser
-    } elseif ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Path')) {
-        $modulesFolder = $Path
     } elseif ($module) {
         # Grab the modules folder from the current installed location.
         $modulesFolder = $module.ModuleBase | Split-Path -Parent
@@ -108,12 +106,21 @@ try {
     }
     if (@($env:PSModulePath -split ';') -notcontains $modulesFolder) {
         Write-Progress -Activity 'Installing ScsmPx' -Status 'Updating the PSModulePath environment variable.'
-        $systemPSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath',[System.EnvironmentVariableTarget]::Machine) -as [System.String]
+        if ($modulesFolder -match "^$([System.Text.RegularExpressions.RegEx]::Escape($env:USERPROFILE))") {
+            $environmentVariableTarget = [System.EnvironmentVariableTarget]::User
+        } else {
+            $environmentVariableTarget = [System.EnvironmentVariableTarget]::Machine
+        }
+        $systemPSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath',$environmentVariableTarget) -as [System.String]
         if ($systemPSModulePath -notmatch ';$') {
             $systemPSModulePath += ';'
         }
         $systemPSModulePath += $modulesFolder
-        [System.Environment]::SetEnvironmentVariable('PSModulePath',$systemPSModulePath,[System.EnvironmentVariableTarget]::Machine)
+        [System.Environment]::SetEnvironmentVariable('PSModulePath',$systemPSModulePath,$environmentVariableTarget)
+        if ($env:PSModulePath -notmatch ';$') {
+            $env:PSModulePath += ';'
+        }
+        $env:PSModulePath += $modulesFolder
     }
 
     #endregion
@@ -180,6 +187,14 @@ try {
         | Sort-Object -Property LastWriteTime -Descending `
         | Select-Object -First 1 `
         | Rename-Item -NewName ScsmPx
+
+    #endregion
+
+    #region Now return the updated module to the caller if they requested it.
+
+    if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('PassThru') -and $PassThru) {
+        Get-Module -ListAvailable -Name ScsmPx
+    }
 
     #endregion
 } catch {
