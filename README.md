@@ -1,6 +1,6 @@
-# System Center Service Manager PowerShell Extensions
+## System Center Service Manager PowerShell Extensions
 
-## Overview
+### Overview
 
 The ScsmPx module facilitates automation with Microsoft System Center Service
 Manager by auto-loading the native modules that are included as part of that
@@ -11,7 +11,7 @@ PowerShell automation efforts using the platform.
 
 Copyright (c) 2014 Provance Technologies.
 
-## License
+### License
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -26,7 +26,7 @@ You should have received a copy of the GNU General Public License in the
 license folder that is included in the ScsmPx module. If not, see
 <https://www.gnu.org/licenses/gpl.html>.
 
-## ScsmPx, the native SCSM cmdlets, and SMLets
+### ScsmPx, the native SCSM cmdlets, and SMLets
 
 The ScsmPx module was designed to address some of the challenges presented
 by other Microsoft Windows PowerShell modules that were intended to
@@ -95,7 +95,7 @@ Note that while ScsmPx adds many valuable commands today, it does not yet
 cover all of the capabilities provided by the SMLets module. Over time
 more commands will be added to provide this additional coverage.
 
-## How to load the module
+### How to load the module
 
 To load the ScsmPx module into PowerShell, invoke the following command:
 
@@ -108,7 +108,7 @@ PowerShell 3.0 or later and if module auto-loading is enabled (default).
 The presence of this module also enables auto-loading of the native modules
 that ship with Microsoft System Center Service Manager 2012 and later.
 
-## ScsmPx Commands
+### ScsmPx Commands
 
 There are 148 commands available in the ScsmPx module today, and 116 cmdlets
 in the native modules, offering a total of 264 commands to make Microsoft
@@ -127,7 +127,7 @@ second command will return a list of commands that are included in the
 ScsmPx module. Note that all ScsmPx module commands start with the ScsmPx
 noun prefix.
 
-##  Managing Microsoft System Center Service Manager with ScsmPx
+###  Managing Microsoft System Center Service Manager with ScsmPx
 
 To see a list of all incidents that you have in your environment, invoke
 the following command:
