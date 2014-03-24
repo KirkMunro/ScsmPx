@@ -1,4 +1,4 @@
-## System Center Service Manager PowerShell Extensions
+## ScsmPx
 
 ### Overview
 
