@@ -104,7 +104,7 @@ try {
 
     if (-not (Test-Path -LiteralPath $modulesFolder)) {
         Write-Progress -Activity 'Installing ScsmPx' -Status 'Creating modules folder.'
-        New-Item -Path $modulesFolder -ErrorAction Stop > $null
+        New-Item -Path $modulesFolder -ItemType Directory -ErrorAction Stop > $null
     }
     if (@($env:PSModulePath -split ';') -notcontains $modulesFolder) {
         Write-Progress -Activity 'Installing ScsmPx' -Status 'Updating the PSModulePath environment variable.'
