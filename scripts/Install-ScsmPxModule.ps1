@@ -70,7 +70,7 @@ try {
     #endregion
 
     #region Get the currently installed module (if there is one).
-    
+
     Write-Progress -Activity 'Installing ScsmPx' -Status 'Looking for an installed ScsmPx module.'
     $module = Get-Module -ListAvailable | Where-Object {$_.Guid -eq [System.Guid]'2fb132d0-0eea-434f-9619-e8c134e12c57'}
     if ($module -is [System.Array]) {
