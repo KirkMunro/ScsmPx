@@ -31,7 +31,7 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3><a name="module-overview" class="anchor" href="#module-overview"><span class="octicon octicon-link"></span></a>Module Overview</h3>
+        <h3><a name="module-overview" class="anchor" href="#module-overview"><span class="octicon octicon-link"></span></a>An Overview of ScsmPx</h3>
 
         <p>
         The ScsmPx module facilitates automation with Microsoft System Center Service
@@ -42,7 +42,7 @@
         PowerShell automation efforts using the platform.
         </p>
 
-        <h3><a name="module-" class="anchor" href="#module-overview"><span class="octicon octicon-link"></span></a>Installing ScsmPx</h3>
+        <h3><a name="install-module" class="anchor" href="#install-module"><span class="octicon octicon-link"></span></a>Installing the ScsmPx Module</h3>
 
         <p>
         The ScsmPx module is installed in two steps. The first step is to download
@@ -52,39 +52,63 @@
         simply by performing these steps again.
         </p>
 
+        <h4><a name="download-installerscript" class="anchor" href="#download-installerscript"><span class="octicon octicon-link"></span></a>Download the ScsmPx Installer Script</h4>
+
         <p>
-        To download the installation script, invoke the following commands in the
+        To download the installation script, invoke the following script in the
         PowerShell console of your choice:
         </p>
 
-<script src="https://gist.github.com/KirkMunro/9765959.js?file=Copy-ScsmPxInstallerScript.ps1"></script>
+        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Copy-ScsmPxInstallerScript.ps1"></script>
 
-        <pre><code>$installerScript = [System.IO.Path]::GetTempFileName() -replace '\.tmp$','.ps1'
-$wc = New-Object -TypeName System.Net.WebClient
-$wc.DownloadFile('https://raw.githubusercontent.com/KirkMunro/ScsmPx/release/scripts/Install-ScsmPxModule.ps1',$installerScript)
-Unblock-File -LiteralPath $installerScript</code></pre>
+        <p>
+        Once you have run that script, your $installerScript variable will contain
+        the path to the installer script file. You can then proceed with the module
+        installation by running any one of the commands listed below.
+        </p>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+        <h4><a name="invoke-installerscript1" class="anchor" href="#invoke-installerscript1"><span class="octicon octicon-link"></span></a>Install ScsmPx for the Current User</h4>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+        <p>
+        This command installs the ScsmPx module for the current user.
+        </p>
+
+        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript1.ps1"></script>
+
+        <h4><a name="invoke-installerscript2" class="anchor" href="#invoke-installerscript2"><span class="octicon octicon-link"></span></a>Install ScsmPx for All Users</h4>
+
+        <p>
+        This command installs the ScsmPx module for all users.
+        </p>
+
+        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript2.ps1"></script>
+
+        <h4><a name="invoke-installerscript3" class="anchor" href="#invoke-installerscript3"><span class="octicon octicon-link"></span></a>Install or Upgrade ScsmPx Using the Default Installation Path</h4>
+
+        <p>
+        This command upgrades the ScsmPx module in its current location. If it is has not
+        been installed yet, this command will install the ScsmPx module for the current
+        user.
+        </p>
+
+        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript3.ps1"></script>
+
+        <h3><a name="how-to-use-the-module" class="anchor" href="#how-to-use-the-module"><span class="octicon octicon-link"></span></a>How to Use the ScsmPx Module</h3>
 
 <p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<h3><a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
 
 <p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+        <h3><a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+        <p>The ScsmPx module was created by Kirk Munro (<a href="https://github.com/KirkMunro" class="user-mention">@KirkMunro</a>) and sponsored by <a href="http://www.provance.com">Provance Technologies</a>.</p>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+        <h3><a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+        <p>Want to report a bug or suggest a new feature? Having problems with ScsmPx? Open a new issue at <a href="https://github.com/KirkMunro/ScsmPx/issues">https://github.com/KirkMunro/ScsmPx/issues</a> and we’ll help you sort it out.</p>
+
       </section>
     </div>
 
@@ -96,17 +120,17 @@ Unblock-File -LiteralPath $installerScript</code></pre>
       </footer>
     </div>
 
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-49293762-1");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
-
+    <!-- GOOGLE ANALYTICS -->
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+        var pageTracker = _gat._getTracker("UA-49293762-1");
+        pageTracker._trackPageview();
+      } catch(err) {}
+    </script>
 
   </body>
 </html>
