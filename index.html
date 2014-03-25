@@ -43,9 +43,11 @@ that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 </p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<pre><code>
+$installerScript = [System.IO.Path]::GetTempFileName() -replace '\.tmp$','.ps1'
+$wc = New-Object -TypeName System.Net.WebClient
+$wc.DownloadFile('https://raw.githubusercontent.com/KirkMunro/ScsmPx/release/scripts/Install-ScsmPxModule.ps1',$installerScript)
+Unblock-File -LiteralPath $installerScript
 </code></pre>
 
 <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
