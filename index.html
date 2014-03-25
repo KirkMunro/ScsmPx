@@ -31,24 +31,38 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>
-<a name="module-overview" class="anchor" href="#module-overview"><span class="octicon octicon-link"></span></a>Module Overview</h3>
+        <h3><a name="module-overview" class="anchor" href="#module-overview"><span class="octicon octicon-link"></span></a>Module Overview</h3>
 
-<p>
-The ScsmPx module facilitates automation with Microsoft System Center Service
-Manager by auto-loading the native modules that are included as part of that
-product and enabling automatic discovery of the commands that are contained
-within the native modules. It also includes dozens of complementary commands
-that are not available out of the box to allow you to do much more with your
-PowerShell automation efforts using the platform.
-</p>
+        <p>
+        The ScsmPx module facilitates automation with Microsoft System Center Service
+        Manager by auto-loading the native modules that are included as part of that
+        product and enabling automatic discovery of the commands that are contained
+        within the native modules. It also includes dozens of complementary commands
+        that are not available out of the box to allow you to do much more with your
+        PowerShell automation efforts using the platform.
+        </p>
 
-<pre><code>
-$installerScript = [System.IO.Path]::GetTempFileName() -replace '\.tmp$','.ps1'
+        <h3><a name="module-" class="anchor" href="#module-overview"><span class="octicon octicon-link"></span></a>Installing ScsmPx</h3>
+
+        <p>
+        The ScsmPx module is installed in two steps. The first step is to download
+        the installation script, and the second step is to invoke that installation
+        script with parameters identifying where you want the module installed.
+        Note that you can update the ScsmPx module to the latest version at any time
+        simply by performing these steps again.
+        </p>
+
+        <p>
+        To download the installation script, invoke the following commands in the
+        PowerShell console of your choice:
+        </p>
+
+<script src="https://gist.github.com/KirkMunro/9765959.js?file=Copy-ScsmPxInstallerScript.ps1"></script>
+
+        <pre><code>$installerScript = [System.IO.Path]::GetTempFileName() -replace '\.tmp$','.ps1'
 $wc = New-Object -TypeName System.Net.WebClient
 $wc.DownloadFile('https://raw.githubusercontent.com/KirkMunro/ScsmPx/release/scripts/Install-ScsmPxModule.ps1',$installerScript)
-Unblock-File -LiteralPath $installerScript
-</code></pre>
+Unblock-File -LiteralPath $installerScript</code></pre>
 
 <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
 
