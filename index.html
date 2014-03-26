@@ -22,8 +22,8 @@
           <h2 id="project_tagline">System Center Service Manager PowerShell Extensions</h2>
 
             <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/KirkMunro/ScsmPx/zipball/release">Download the latest release of this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/KirkMunro/ScsmPx/tarball/release">Download the latest release of this project as a tar.gz file</a>
+              <a class="zip_download_link" href="https://github.com/KirkMunro/ScsmPx/zipball/release">Download the latest official release of this project as a .zip file</a>
+              <a class="zip_beta_download_link" href="https://github.com/KirkMunro/ScsmPx/zipball/master">Download the latest beta release of this project as a .zip file</a>
             </section>
         </header>
     </div>
@@ -42,7 +42,7 @@
         PowerShell automation efforts using the platform.
         </p>
 
-        <h3><a name="install-module" class="anchor" href="#install-module"><span class="octicon octicon-link"></span></a>Installing the ScsmPx Module</h3>
+        <h3><a name="install-module" class="anchor" href="#install-module"><span class="octicon octicon-link"></span></a>Installing the ScsmPx Module the Easy Way</h3>
 
         <p>
         The ScsmPx module is installed in two steps. The first step is to download
@@ -59,7 +59,7 @@
         PowerShell console of your choice:
         </p>
 
-        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Copy-ScsmPxInstallerScript.ps1"></script>
+        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Copy-ScsmPxInstallerScript.ps1"> </script>
 
         <p>
         Once you have run that script, your $installerScript variable will contain
@@ -73,7 +73,7 @@
         This command installs the ScsmPx module for the current user.
         </p>
 
-        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript1.ps1"></script>
+        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript1.ps1"> </script>
 
         <h4><a name="invoke-installerscript2" class="anchor" href="#invoke-installerscript2"><span class="octicon octicon-link"></span></a>Install ScsmPx for All Users</h4>
 
@@ -81,7 +81,7 @@
         This command installs the ScsmPx module for all users.
         </p>
 
-        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript2.ps1"></script>
+        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript2.ps1"> </script>
 
         <h4><a name="invoke-installerscript3" class="anchor" href="#invoke-installerscript3"><span class="octicon octicon-link"></span></a>Install or Upgrade ScsmPx Using the Default Installation Path</h4>
 
@@ -91,23 +91,138 @@
         user.
         </p>
 
-        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript3.ps1"></script>
+        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript3.ps1"> </script>
+
+        <h3><a name="manual-install" class="anchor" href="#manual-install"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+
+        <p>
+        While installation via the installer script is preferred, if your someone who
+        prefers to manually deploy your modules, or if you would like to use the most
+        recent development build of the ScsmPx module, this section is for you. Download
+        the build that you want to install by simply clicking on the folder button at
+        the top of this page that corresponds to the build you are interested in. You
+        should note that the beta release is unsigned, and the official release is
+        signed. Once you have downloaded that file, make sure that it is unblocked by
+        opening its properties and clicking on the Unblock button if it is present. Then
+        extract the contents of that file into any of the following folders:
+        </p>
+
+        <li>your current user's "Documents\WindowsPowerShell\Modules" folder</li>
+        <li>the "Program Files\WindowsPowerShell\Modules" folder</li>
+        <li>any other folder where you want to install the module</li>
+
+        <p>
+        Note that it is strongly recommended that the folder you choose be included in
+        the PSModulePath environment variable.
+        </p>
+
+        <p>
+        Once you have the module in place, rename the root folder of the module as
+        "ScsmPx". At this point, manual setup of the module will be complete.
+        </p>
 
         <h3><a name="how-to-use-the-module" class="anchor" href="#how-to-use-the-module"><span class="octicon octicon-link"></span></a>How to Use the ScsmPx Module</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+        <p>
+        There are 148 commands available in the ScsmPx module today, and 116 cmdlets
+        in the native modules, offering a total of 264 commands to make Microsoft
+        System Center Service Manager automation easier. To see a list of all of the
+        commands that are available in the ScsmPx and native modules, invoke the
+        following commands:
+        </p>
 
-<h3><a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+        <script src="https://gist.github.com/KirkMunro/9791294.js?file=.Start-ScsmPxIntroduction.ps1"> </script>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+        <p>
+        Note that when you first run these commands, there will be a short delay as the
+        module is loaded into the PowerShell session (unless you have disabled module
+        auto-loading in your environment, in which case you will have to invoke the
+        Import&#8209;Module cmdlet first to manually import the ScsmPx module and the native
+        SCSM modules that it loads for you).
+        </p>
+
+        <p>
+        The first command will return a list of commands that are included in the
+        native modules that ship with Microsoft System Center Service Manager. The
+        second command will return a list of commands that are included in the
+        ScsmPx module. Note that all ScsmPx module commands start with the ScsmPx
+        noun prefix.
+        </p>
+
+        <h4><a name="get-scsmpxincident" class="anchor" href="#get-scsmpxincident"><span class="octicon octicon-link"></span></a>Managing Microsoft System Center Service Manager with ScsmPx</h4>
+
+        <p>
+        To see a list of all incidents that you have in your environment, invoke
+        the following command:
+        </p>
+
+        <script src="https://gist.github.com/KirkMunro/9791294.js?file=Get-ScsmPxIncident1.ps1"> </script>
+
+        <p>
+        This data represents individual instances of the System.WorkItem.Incident
+        class, and it does not identify any of the objects that are related to those
+        instances. Commands invoked like this allow for very efficient management of
+        Microsoft System Center Service Manager object data. If you want to work
+        with more complex data that includes multiple related instances combined
+        into a single view, you can request a specific view of that data instead by
+        using the -View parameter. For example, to see a more user friendly view of
+        the incidents in your environment you could invoke the following command
+        instead:
+        </p>
+
+        <script src="https://gist.github.com/KirkMunro/9791294.js?file=Get-ScsmPxIncident2.ps1"> </script>
+
+        <p>
+        This data provides the same information that you see when you access the
+        corresponding "All Incidents" view in the management console. Note that you
+        cannot apply filters when you are looking up data using a view. In those
+        cases, the filters that are defined as part of the view are used.
+        </p>
+
+        <p>
+        To see what you can do with that data once you have it, have a look at the
+        other ScsmPxIncident commands by invoking the following command:
+        </p>
+
+        <script src="https://gist.github.com/KirkMunro/9791294.js?file=Get-ScsmPxIncidentCommand.ps1"> </script>
+
+        <p>
+        This identifies that there are other commands that work with incidents. To
+        use these commands to modify incidents, you can leverage the pipeline. For
+        example, to automatically resolve any incidents that have been closed for
+        more than 7 days, you could use the Set&#8209;ScsmPxIncident command in the
+        following script:
+        </p>
+
+        <script src="https://gist.github.com/KirkMunro/9791294.js?file=Set-ScsmPxIncidentResolved.ps1"> </script>
+
+        <p>
+        That demonstrates one simple example to a common problem that these commands
+        can help resolve with little effort. Between PowerShell scripts, PowerShell
+        workflows, Microsoft System Center Service Manager workflows, Microsoft
+        System Center Orchestrator workflows, and now the new Service Management
+        Automation (SMA) feature of Microsoft System Center Orchestrator, there are
+        plenty of opportunities to use PowerShell commands to automate Microsoft
+        System Center Service Manager. Experiment with the other commands in the
+        ScsmPx module and see what solutions you can come up with.
+        </p>
 
         <h3><a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
 
-        <p>The ScsmPx module was created by Kirk Munro (<a href="https://github.com/KirkMunro" class="user-mention">@KirkMunro</a>) and sponsored by <a href="http://www.provance.com">Provance Technologies</a>.</p>
+        <p>
+        The ScsmPx module was created by Kirk Munro (
+        <a href="https://github.com/KirkMunro" class="user-mention">@KirkMunro</a>) and
+        sponsored by <a href="http://www.provance.com">Provance Technologies</a>.
+        </p>
 
         <h3><a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
 
-        <p>Want to report a bug or suggest a new feature? Having problems with ScsmPx? Open a new issue at <a href="https://github.com/KirkMunro/ScsmPx/issues">https://github.com/KirkMunro/ScsmPx/issues</a> and we’ll help you sort it out.</p>
+        <p>
+        Want to report a bug or suggest a new feature? Having problems with ScsmPx? Open
+        a new issue at
+        <a href="https://github.com/KirkMunro/ScsmPx/issues">https://github.com/KirkMunro/ScsmPx/issues</a>
+        and we’ll help you sort it out.
+        </p>
 
       </section>
     </div>
