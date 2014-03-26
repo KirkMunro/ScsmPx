@@ -50,7 +50,7 @@ try {
     # The module itself handles prerequisite checking on the system where it
     # is loaded.
     Write-Progress -Activity 'Installing ScsmPx' -Status 'Verifying the PowerShell requirements.'
-    if ($PSVersionTable.PSVersion -lt [System.Version]'3.0.0.0') {
+    if ($PSVersionTable.PSVersion -lt [System.Version]'3.0') {
         [System.String]$message = 'PowerShell 3.0 is required by the ScsmPx module. Install the Windows Management Framework 3.0 or later and then try again.'
         [System.Management.Automation.PSNotSupportedException]$exception = New-Object -TypeName System.Management.Automation.PSNotSupportedException -ArgumentList $message
         [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'MissingPrerequisiteException',([System.Management.Automation.ErrorCategory]::NotInstalled),'Install-ScsmPxModule'
@@ -203,8 +203,8 @@ try {
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUohyBwqvMhlJBxNVTTxuM271M
-# yPGgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUD2xqiWzDHT7ircK6p0AE6KHz
+# KPOgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -318,22 +318,22 @@ try {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEApTqdkpPhkqKAt3DZXRkLwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFKvX2pYA33mZXMxBY1wI9zk8vNa2MA0GCSqGSIb3DQEBAQUABIIBABmF
-# A8L5VaEvUme7ULyzuFRKV1+TATVkG76H6aE0ACxzJR2D+Okg4syEZ62JnUHhuBx3
-# vl/dhY79z2fnY/BmtjAtE+DCdD8VYYj0FIsfa5P5wuXwArrBRj73te90Pzt6xlcA
-# HlIptvvnZVNuDX/up7Xhl6qySD7smRBhqpEllaKyp4UENaJ58F+bM4rbNczEstvT
-# yY1nG/S55dnyNVR9R5WBL05AIKrbxuJOCHjVwCTvWEDH6aqq9GEUC2t3qz1a9IXf
-# JaktnHIvFHuIdkCVAH0FvahuhOnn1SpysqiJ7kjaoLBoIAC0Av06Ur+P5P3jFll5
-# jLrWJfG0Xd0uM9HV8uuhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFOnbZpGpR3VRy6o2sJSZcq4YiKbxMA0GCSqGSIb3DQEBAQUABIIBAAuB
+# 4CEYNO6hyPRJMlxtha+w79XAg+cDVMRDN5dW4aXgZ9Pa+y4nhuhttrg6AXiBRdJa
+# rwan93SF7jNisHKzFx80YIRbS0EaS74nFgTlEbZCpUxQi4jx8aPudW1RvCTjbaOj
+# 6R6BuT8Bycmp/x2bhTsF9aihWniig4ghvkVuEfMROIZq7YnwZdZbYmMY8C6Rvx5u
+# ZTA+wMu3S3383wNcbtm2NUCwV/eXk5SY+4NKhDIjjyHhF45RHuU7akrIHOsSMpd3
+# QHWBdM3B2a98FOLGg1uL0qo/lgDvq1yreHeIaNJL57VpwyvgXt3vr7yJ7klseQqk
+# B6X0G5lbQoaap8WEKVChggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI0MjExMDQwWjAjBgkqhkiG9w0B
-# CQQxFgQUZoLhEro+FltNbeyKR/buXMsUbD4wDQYJKoZIhvcNAQEBBQAEggEAk+TP
-# 89fRyhgvFow61RaDku8t/50zhQqlrQPVnut564TOO7bJXm3dcqEcgxZEkerrinHG
-# 7AtU7aH1FymxnosUAiZ8yD/psOn+b/OO7DcrjRXw5bc2jwp2dsA3/OMN2xPttbw0
-# 4qS/XP53cQ72u+bpJDzQruA8AsauGbl6KBShrJeFW7AQqHxqmzEXXAGRuCsv2zuU
-# bfvt/lN5kgLIY41x7lZNX4E3f+o8b7+Qz+oO28yn15laSLjjEvYDVRXMZsBo50dO
-# MbQTf/v2RnejYetCDzfRox6qqw4wkwOdSho6zZQibev6eOv7YDn9HP+YYWfqrXdN
-# 5GeHEL2TOms1F2CG3g==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI2MjEzMzM4WjAjBgkqhkiG9w0B
+# CQQxFgQUYPosZqBkmzh5h+LulWc66xVwlEowDQYJKoZIhvcNAQEBBQAEggEAHfDz
+# xSS9HdcmvdKPAI5+p+MyBl972BrgR5y4jl3eaL90Qt4z1tOX6fhW3gvQee+FcrPX
+# Tfs4BS8ZbaGL7aWSw0IQbEO9/YjKLAxxsi0iC/xQ81LID0dbETYOtkC3MgY0HDnS
+# iUm4whU1fBhRrHMUdmm6oRGLaPuFX8ieNQpC6y4RYykElNwxUQfQS3T0O1W5irET
+# hHoc/40mhav4F6+BRMcwDphYCzXjMDv3ZAUQ7pS3JCsxKpc4Cgm2bfhrbuegx5UY
+# yZfTCGrJ9N1aO5L7avcWL1Iw3ru6EzGmGBRqbR9nykWirLhqvWyevWxeyLnlb4uq
+# g7FjsNU0IftiSEuq3w==
 # SIG # End signature block
