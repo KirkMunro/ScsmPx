@@ -50,7 +50,7 @@ try {
     # The module itself handles prerequisite checking on the system where it
     # is loaded.
     Write-Progress -Activity 'Installing ScsmPx' -Status 'Verifying the PowerShell requirements.'
-    if ($PSVersionTable.PSVersion -lt [System.Version]'3.0.0.0') {
+    if ($PSVersionTable.PSVersion -lt [System.Version]'3.0') {
         [System.String]$message = 'PowerShell 3.0 is required by the ScsmPx module. Install the Windows Management Framework 3.0 or later and then try again.'
         [System.Management.Automation.PSNotSupportedException]$exception = New-Object -TypeName System.Management.Automation.PSNotSupportedException -ArgumentList $message
         [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'MissingPrerequisiteException',([System.Management.Automation.ErrorCategory]::NotInstalled),'Install-ScsmPxModule'
