@@ -44,6 +44,11 @@ function Get-ScsmPxViewData {
         [System.String[]]
         $ViewDisplayName = '*',
 
+#        [Parameter()]
+#        [ValidateNotNullOrEmpty()]
+#        [System.String[]]
+#        $Filter,
+
         [Parameter(ParameterSetName='FromViewNameAndManagementGroupConnection')]
         [Parameter(ParameterSetName='FromViewDisplayNameAndManagementGroupConnection')]
         [ValidateNotNullOrEmpty()]
@@ -331,48 +336,65 @@ function Get-ScsmPxViewData {
                     #endregion
 
                     if ($queryParameters.Keys -notmatch '^TypeProjection') {
-                        #region If the view does not use any type projections, look up the view objects using the view criteria.
+                        #region Identify the management pack class for the view.
 
-                        if (($node = $viewXml.SelectSingleNode('/View/Data/Criteria')) -and
-                            (($elementList = $node.GetElementsByTagName('Criteria')).Count -gt 1)) {
-                            $connectionParameters = @{
-                                ComputerName = $viewMp.Store.ConnectionSettings.ServerName
-                            }
-                            if ($viewMp.Store.ConnectionSettings.UserName) {
-                                $connectionParameters['Credential'] = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "$($viewMp.Store.ConnectionSettings.Domain)\$($viewMp.Store.ConnectionSettings.UserName)",$viewMp.Store.ConnectionSettings.Password
-                            }
-                            if ($queryParameters.Keys -contains 'ManagementPackClassId') {
-                                $elementReference = $viewMp.ProcessElementReference($queryParameters['ManagementPackClassId'])
-                                $class = $viewMp.Store.EntityTypes.GetClass($elementReference.Id)
-                            } else {
-                                $class = $viewMp.Store.EntityTypes.GetClass([System.Guid]$item.Target.Id)
-                            }
-                            [Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria]$emoCriteria = New-Object -TypeName Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria -ArgumentList $elementList[1].OuterXml,$class,$viewMp,$viewMp.Store
-                            [Type[]]$methodType = ([Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria],[Microsoft.EnterpriseManagement.Common.ObjectQueryOptions])
-                            $getObjectReaderMethod = $viewMp.Store.EntityObjects.GetType().GetMethod("GetObjectReader", $methodType)
-                            $getObjectReaderGenericMethod = $getObjectReaderMethod.MakeGenericMethod([Microsoft.EnterpriseManagement.Common.EnterpriseManagementObject])
-                            $reader = $getObjectReaderGenericMethod.Invoke($viewMp.Store.EntityObjects, ($emoCriteria, [Microsoft.EnterpriseManagement.Common.ObjectQueryOptions]::Default))
-                            for ($i = 0; $i -lt $reader.Count; $i++) {
-                                New-ScsmPxViewDataRecord -EnterpriseManagementObject $reader.GetData($i)
-                            }
-                        } elseif ($queryParameters.Keys -contains 'ManagementPackClassId') {
+                        if ($queryParameters.Keys -contains 'ManagementPackClassId') {
                             $elementReference = $viewMp.ProcessElementReference($queryParameters['ManagementPackClassId'])
                             $class = $viewMp.Store.EntityTypes.GetClass($elementReference.Id)
-                            [Type[]]$methodType = ([Microsoft.EnterpriseManagement.Configuration.ManagementPackClass],[Microsoft.EnterpriseManagement.Common.ObjectQueryOptions])
-                            $getObjectReaderMethod = $viewMp.Store.EntityObjects.GetType().GetMethod("GetObjectReader", $methodType)
-                            $getObjectReaderGenericMethod = $getObjectReaderMethod.MakeGenericMethod([Microsoft.EnterpriseManagement.Common.EnterpriseManagementObject])
-                            $reader = $getObjectReaderGenericMethod.Invoke($viewMp.Store.EntityObjects, ($class, [Microsoft.EnterpriseManagement.Common.ObjectQueryOptions]::Default))
-                            for ($i = 0; $i -lt $reader.Count; $i++) {
-                                New-ScsmPxViewDataRecord -EnterpriseManagementObject $reader.GetData($i)
-                            }
+                        } elseif ($item.Target -is [Microsoft.EnterpriseManagement.Configuration.ManagementPackElementReference`1[Microsoft.EnterpriseManagement.Configuration.ManagementPackClass]]) {
+                            $class = $viewMp.Store.EntityTypes.GetClass([System.Guid]$item.Target.Id)
                         } else {
-                            Write-Error "View $($item.Name) does not have a criteria definition or a Management Pack class id and therefore is not supported by this command at this time."
+                            Write-Error "View $($item.Name) does not have a Management Pack class id and therefore is not supported by this command at this time."
                             continue
                         }
 
                         #endregion
+
+                        #region Use search criteria if any is present or if a filter is applied.
+
+                        $criteriaXml = $null
+                        if (($node = $viewXml.SelectSingleNode('/View/Data/Criteria')) -and
+                            (($elementList = $node.GetElementsByTagName('Criteria')).Count -gt 1)) {
+                            $criteriaXml = $elementList[1].OuterXml
+#                            if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                                foreach ($filterItem in $Filter) {
+#                                    $additionalCriteria = New-ScsmPxObjectSearchCriteria -Class $class -Filter $filterItem
+#                                    $criteriaXml = (Join-CriteriaXml -CriteriaXml $criteriaXml -AdditionalCriteriaXml $additionalCriteria.Criteria).OuterXml
+#                                }
+#                            }
+#                        } elseif ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                            foreach ($filterItem in $Filter) {
+#                                if (-not $criteriaXml) {
+#                                    $criteriaXml = (New-ScsmPxObjectSearchCriteria -Class $class -Filter $filterItem).Criteria
+#                                } else {
+#                                    $additionalCriteria = New-ScsmPxObjectSearchCriteria -Class $class -Filter $filterItem
+#                                    $criteriaXml = (Join-CriteriaXml -CriteriaXml $criteriaXml -AdditionalCriteriaXml $additionalCriteria.Criteria).OuterXml
+#                                }
+#                            }
+                        }
+
+                        #endregion
+
+                        #region Look up the view data using the view criteria or class.
+
+                        if ($criteriaXml) {
+                            $objectReaderSourceType = [Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria]
+                            [Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria]$objectReaderSource = New-Object -TypeName Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria -ArgumentList $criteriaXml,$class,$viewMp,$viewMp.Store
+                        } else {
+                            $objectReaderSourceType = [Microsoft.EnterpriseManagement.Configuration.ManagementPackClass]
+                            $objectReaderSource = $class
+                        }
+                        [Type[]]$methodType = ($objectReaderSourceType,[Microsoft.EnterpriseManagement.Common.ObjectQueryOptions])
+                        $getObjectReaderMethod = $viewMp.Store.EntityObjects.GetType().GetMethod("GetObjectReader", $methodType)
+                        $getObjectReaderGenericMethod = $getObjectReaderMethod.MakeGenericMethod([Microsoft.EnterpriseManagement.Common.EnterpriseManagementObject])
+                        $reader = $getObjectReaderGenericMethod.Invoke($viewMp.Store.EntityObjects, ($objectReaderSource, [Microsoft.EnterpriseManagement.Common.ObjectQueryOptions]::Default))
+                        for ($i = 0; $i -lt $reader.Count; $i++) {
+                            New-ScsmPxViewDataRecord -EnterpriseManagementObject $reader.GetData($i)
+                        }
+
+                        #endregion
                     } else {
-                        #region If the view does use a type projection, look up the type projection object using the query parameters.
+                        #region Look up the type projection object using the query parameters.
 
                         foreach ($queryParameterName in $queryParameters.Keys) {
                             if ($queryParameterName -eq 'TypeProjectionName') {
@@ -402,15 +424,39 @@ function Get-ScsmPxViewData {
 
                         #endregion
 
+                        #region Use search criteria if any is present or if a filter is applied.
+
+                        $projectionCriteriaXml = $null
                         if (($node = $viewXml.SelectSingleNode('/View/Data/Criteria')) -and
-                            (($elementList = @($node.GetElementsByTagName('Criteria'))).Count -gt 1)) {
-                            #region If the view defines criteria, use the view criteria with the type projection to create the object projection criteria.
+                            (($elementList = $node.GetElementsByTagName('Criteria')).Count -gt 1)) {
+                            $projectionCriteriaXml = $elementList[1].OuterXml
+#                            if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                                foreach ($filterItem in $Filter) {
+#                                    $additionalProjectionCriteriaXml = ConvertTo-TypeProjectionCriteriaXml -TypeProjection $typeProjection -ViewMp $viewMp -Filter $filterItem
+#                                    $projectionCriteriaXml = (Join-CriteriaXml -CriteriaXml $projectionCriteriaXml -AdditionalCriteriaXml $additionalProjectionCriteriaXml).OuterXml
+#                                }
+#                            }
+#                        } elseif ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                            foreach ($filterItem in $Filter) {
+#                                if (-not $projectionCriteriaXml) {
+#                                    $projectionCriteriaXml = ConvertTo-TypeProjectionCriteriaXml -TypeProjection $typeProjection -ViewMp $viewMp -Filter $filterItem
+#                                } else {
+#                                    $additionalProjectionCriteriaXml = ConvertTo-TypeProjectionCriteriaXml -TypeProjection $typeProjection -ViewMp $viewMp -Filter $filterItem
+#                                    $projectionCriteriaXml = (Join-CriteriaXml -CriteriaXml $projectionCriteriaXml -AdditionalCriteriaXml $additionalProjectionCriteriaXml).OuterXml
+#                                }
+#                            }
+                        }
+
+                        #endregion
+
+                        if ($projectionCriteriaXml) {
+                            #region If we have search criteria, use it with the type projection to create the object projection criteria.
                         
-                            [Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria]$opc = New-Object -TypeName Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria -ArgumentList $elementList[1].OuterXml,$typeProjection,$viewMp,$viewMp.Store
+                            [Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria]$opc = New-Object -TypeName Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria -ArgumentList $projectionCriteriaXml,$typeProjection,$viewMp,$viewMp.Store
 
                             #endregion
                         } else {
-                            #region If there is no criteria in the view to filter the type projection, create the object projection criteria using the type projection by itself.
+                            #region Otherwise create the object projection criteria using the type projection by itself.
 
                             [Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria]$opc = New-Object -TypeName Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria -ArgumentList $typeProjection
 
@@ -503,7 +549,13 @@ function Get-ScsmPxViewData {
 
                 try {
                     if ($views = Get-SCSMView @passThruParameters) {
-                        Get-ScsmPxViewData -View $views
+                        $passThruParameters = @{
+                            View = $views
+                        }
+#                        if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                            $passThruParameters['Filter'] = $PSCmdlet.MyInvocation.BoundParameters['Filter']
+#                        }
+                        Get-ScsmPxViewData @passThruParameters
                     }
                 } catch [Microsoft.EnterpriseManagement.Common.ObjectNotFoundException] {
                     # Object not found exceptions should not be exposed to PowerShell. As a workaround,

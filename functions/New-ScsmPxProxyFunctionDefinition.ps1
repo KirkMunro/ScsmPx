@@ -66,8 +66,9 @@ function ${proxyFunctionName} {
     [CmdletBinding(DefaultParameterSetName='FromManagementGroupConnection')]
     [OutputType([Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance])]
     param(
-        [Parameter()]
+        [Parameter(Position=0, Mandatory=`$true)]
         [ValidateNotNullOrEmpty()]
+        [Alias('PropertyValues')]
         [System.Collections.Hashtable]
         `$Property,
 
@@ -639,8 +640,9 @@ function ${proxyFunctionName} {
 
         [Parameter(Position=1, Mandatory=`$true, ValueFromPipelineByPropertyName=`$true)]
         [ValidateNotNullOrEmpty()]
+        [Alias('PropertyValues')]
         [System.Collections.Hashtable]
-        `$PropertyValues,
+        `$Property,
 
         [Parameter()]
         [System.Management.Automation.SwitchParameter]

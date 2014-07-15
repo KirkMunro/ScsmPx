@@ -29,8 +29,9 @@ function New-ScsmPxObjectSearchCriteria {
     param(
         [Parameter(Position=0, Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
+        [Alias('SearchString')]
         [System.String]
-        $SearchString,
+        $Filter,
 
         [Parameter(Position=1, Mandatory=$true)]
         [ValidateNotNull()]
@@ -67,17 +68,40 @@ function New-ScsmPxObjectSearchCriteria {
 
         #endregion
 
+        #region Replace any property names that are not using the correct case-sensitivity.
+
+        $properties = @{}
+        foreach ($item in @($Class) + @($Class.GetBaseTypes())) {
+            foreach ($property in $item.GetProperties()) {
+                if (-not $properties.ContainsKey($property.Name)) {
+                    $properties[$property.Name] = $property
+                }
+            }
+        }
+        $stringBuilder = [System.Text.StringBuilder]$Filter
+        foreach ($token in [System.Management.Automation.PSParser]::Tokenize($Filter,([REF]$null))) {
+            if ($token.Type -ne [System.Management.Automation.PSTokenType]::Command) {
+                continue
+            }
+            if ($properties.ContainsKey($token.Content)) {
+                $stringBuilder = $stringBuilder.Replace($token.Content, $properties[$token.Content].Name, $token.Start, $token.Length)
+            }
+        }
+        $Filter = [string]$stringBuilder
+
+        #endregion
+
         #region Transform the search string using the operator and wildcard maps.
 
-        $SearchString = $SearchString -replace '"',''''
+        $Filter = $Filter -replace '"',''''
         foreach ($operator in $operatorMap.Keys) {
-            $SearchString = $SearchString -replace "([^0-9a-z]*)$([System.Text.RegularExpressions.Regex]::Escape($operator))([^0-9a-z]*)","`$1$($operatorMap.$operator)`$2"
+            $Filter = $Filter -replace "([^0-9a-z]*)$([System.Text.RegularExpressions.Regex]::Escape($operator))([^0-9a-z]*)","`$1$($operatorMap.$operator)`$2"
         }
         foreach ($wildcard in $wildcardMap.Keys) {
             # First replace the unescaped wildcard characters
-            $SearchString = $SearchString -replace "(?<!``)$([System.Text.RegularExpressions.Regex]::Escape($wildcard))",$wildcardMap.$wildcard
+            $Filter = $Filter -replace "(?<!``)$([System.Text.RegularExpressions.Regex]::Escape($wildcard))",$wildcardMap.$wildcard
             # Now remove the escape characters from the wildcards that are escaped
-            $SearchString = $SearchString -replace "``$([System.Text.RegularExpressions.Regex]::Escape($wildcard))",$wildcard
+            $Filter = $Filter -replace "``$([System.Text.RegularExpressions.Regex]::Escape($wildcard))",$wildcard
         }
 
         #endregion
@@ -85,7 +109,7 @@ function New-ScsmPxObjectSearchCriteria {
         #region Create and return the new search criteria object, applying the appropriate XML escape characters and replacing PowerShell operators where necessary.
 
         New-Object -TypeName Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria -ArgumentList @(
-            $SearchString
+            $Filter
             $Class
         )
 

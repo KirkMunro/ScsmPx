@@ -25,7 +25,7 @@ license folder that is included in the ScsmPx module. If not, see
 # .ExternalHelp ScsmPx-help.xml
 function Get-ScsmPxRelatedObject {
     [CmdletBinding(DefaultParameterSetName='RelatedToSourceFromManagementGroupConnection')]
-    [OutputType([Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance])]
+    [OutputType('Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance#RelatedObject')]
     param(
         [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToSourceFromManagementGroupConnection')]
         [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToSourceFromComputerName')]
@@ -126,7 +126,10 @@ function Get-ScsmPxRelatedObject {
                     )
                     foreach ($relatedItem in $getRelationshipObjectsGenericMethod.Invoke($emg.EntityObjects, $getRelationshipObjectsGenericMethodParameters)) {
                         $rawEmi = [Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance]$relatedItem.$relatedItemPropertyName
-                        $rawEmi.ToPSObject()
+                        $psObject = $rawEmi.ToPSObject()
+                        Add-Member -InputObject $psObject -MemberType NoteProperty -Name "RelatedTo${searchParameter}" -Value $item
+                        Add-Member -InputObject $psObject -MemberType NoteProperty -Name RelationshipClass -Value $relationship
+                        $psObject
                     }
 
                     #endregion
@@ -161,10 +164,13 @@ function Get-ScsmPxRelatedObject {
 
                         if ($relatedItem = [Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance]$relationshipInstance.$relatedItemPropertyName) {
                             if ($relatedItem.PSTypeNames[0].StartsWith($relatedItem.GetType().FullName)) {
-                                $relatedItem.ToPSObject()
+                                $psObject = $relatedItem.ToPSObject()
                             } else {
-                                $relatedItem
+                                $psObject = $relatedItem
                             }
+                            Add-Member -InputObject $psObject -MemberType NoteProperty -Name "RelatedTo${searchParameter}" -Value $item
+                            Add-Member -InputObject $psObject -MemberType NoteProperty -Name RelationshipClass -Value ($relationshipInstance.ManagementGroup.EntityTypes.GetRelationshipClass($relationshipInstance.RelationshipId))
+                            $psObject
                         }
 
                         #endregion

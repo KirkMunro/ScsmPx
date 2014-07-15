@@ -26,42 +26,88 @@ Set-StrictMode -Version Latest
 Export-ModuleMember
 $PSModuleRoot = $PSScriptRoot
 
-#region If PowerShell erroneously created an Initialize-Scsmx module, remove it.
+#region If PowerShell erroneously created an Initialize-NativeScsmEnvironment module, remove it.
 
 # This is a workaround to a bug in PowerShell 3.0 and later.
-if (Get-Module -Name Initialize-ScsmPxModule) {
-    Remove-Module -Name Initialize-ScsmPxModule
+if (Get-Module -Name Initialize-NativeScsmEnvironment) {
+    Remove-Module -Name Initialize-NativeScsmEnvironment
 }
 
 #endregion
 
 #region If the ScriptToProcess script raised an exception, throw it from here.
 
-if ($initializeScsmPxModuleException = Get-Variable -Scope Global -Name InitializeScsmPxModuleException -ValueOnly -ErrorAction SilentlyContinue) {
-    Remove-Variable -Scope Global -Name InitializeScsmPxModuleException
-    throw $initializeScsmPxModuleException
+# This is a workaround to a bug in PowerShell 2.0 and later.
+if ($initializeNativeScsmEnvironmentException = Get-Variable -Scope Global -Name InitializeNativeScsmEnvironmentException -ValueOnly -ErrorAction SilentlyContinue) {
+    Remove-Variable -Scope Global -Name InitializeNativeScsmEnvironmentException
+    # The switch block and the command that follows are a workaround to a module error output bug in PowerShell.
+    switch ($Host.Name) {
+        'Windows PowerShell ISE Host' {
+            $writeHostColors = @{}
+            foreach ($position in 'Foreground','Background') {
+                switch ($psISE.Options."Error${position}Color") {
+                    ([System.Windows.Media.Colors]::Transparent) {
+                        break
+                    }
+                    ([System.Windows.Media.Colors]::Olive) {
+                        $writeHostColors["${position}Color"] = [System.ConsoleColor]::DarkYellow
+                        break
+                    }
+                    default {
+                        foreach ($color in 'Black','DarkBlue','DarkGreen','DarkCyan','DarkRed','DarkMagenta','Gray','DarkGray','Blue','Green','Cyan','Red','Magenta','Yellow','White') {
+                            if ($psISE.Options."Error${position}Color" -eq [System.Windows.Media.Colors]::$color) {
+                                $writeHostColors["${position}Color"] = [System.ConsoleColor]::$color
+                                break
+                            }
+                        }
+                        break
+                    }
+                }
+            }
+            break
+        }
+        'ConsoleHost' {
+            $writeHostColors = @{
+                ForegroundColor = $Host.PrivateData.ErrorForegroundColor
+                BackgroundColor = $Host.PrivateData.ErrorBackgroundColor
+            }
+            break
+        }
+        default {
+            $writeHostColors = @{}
+            break
+        }
+    }
+    $initializeNativeScsmEnvironmentException | Out-String | Write-Host @writeHostColors
+    throw $initializeNativeScsmEnvironmentException
 }
 
 #endregion
 
 #region Import helper (private) function definitions.
 
-# There are no helper (private) functions for now.
+. $PSScriptRoot\helpers\ConvertTo-TypeProjectionCriteriaXml.ps1
+. $PSScriptRoot\helpers\Join-CriteriaXml.ps1
 
 #endregion
 
 #region Import public function definitions.
 
+. $PSScriptRoot\functions\Add-ScsmPxFileAttachment.ps1
+. $PSScriptRoot\functions\Add-ScsmPxTroubleTicketComment.ps1
 . $PSScriptRoot\functions\Get-ScsmPxCommand.ps1
 . $PSScriptRoot\functions\Get-ScsmPxConnectedUser.ps1
 . $PSScriptRoot\functions\Get-ScsmPxDwName.ps1
 . $PSScriptRoot\functions\Get-ScsmPxEnterpriseManagementGroup.ps1
+. $PSScriptRoot\functions\Get-ScsmPxInstallDirectory.ps1
 . $PSScriptRoot\functions\Get-ScsmPxList.ps1
 . $PSScriptRoot\functions\Get-ScsmPxListItem.ps1
 . $PSScriptRoot\functions\Get-ScsmPxObject.ps1
+. $PSScriptRoot\functions\Get-ScsmPxObjectHistory.ps1
 . $PSScriptRoot\functions\Get-ScsmPxPrimaryManagementServer.ps1
 . $PSScriptRoot\functions\Get-ScsmPxRelatedObject.ps1
 . $PSScriptRoot\functions\Get-ScsmPxViewData.ps1
+. $PSScriptRoot\functions\New-ScsmPxManagementPackBundle.ps1
 . $PSScriptRoot\functions\New-ScsmPxObject.ps1
 . $PSScriptRoot\functions\New-ScsmPxObjectSearchCriteria.ps1
 . $PSScriptRoot\functions\New-ScsmPxProxyFunctionDefinition.ps1
@@ -106,6 +152,43 @@ if ($PSVersionTable.PSVersion -ge '3.0') {
         Write-Warning -Message 'Updating the ToString method for Management Pack enumerations failed.'
     }
 }
+
+#endregion
+
+#region Add a Name parameter to the Workflow type.
+
+if ($PSVersionTable.PSVersion -ge '3.0') {
+    Update-TypeData -TypeName Microsoft.EnterpriseManagement.ServiceManager.Sdk.Workflows.Workflow -MemberName Name -MemberType ScriptProperty -Value {$this.WorkflowSubscription.Name} -Force
+} else {
+    # Update-TypeData requires PowerShell 3.0 or later. To support extensions like this in 2.0 without
+    # requiring a ps1xml file, we need to use some internal methods. These methods won't change at
+    # this point though, so this should be a safe workaround for PowerShell 2.0. If it were to fail
+    # though, we don't want to raise a fuss, so continue loading the module.
+    try {
+        $runspaceConfiguration = $Host.Runspace.RunspaceConfiguration
+        if (($typeTableProperty = $runspaceConfiguration.GetType().GetProperty('TypeTable',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
+            ($typeTable = $typeTableProperty.GetValue($runspaceConfiguration,$null)) -and
+            ($membersField = $typeTable.GetType().GetField('members',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
+            ($members = $membersField.GetValue($typeTable))) {
+            if ((-not $members.ContainsKey('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration')) -and
+                ($psMemberInfoInternalCollectionType = [System.Management.Automation.PSObject].Assembly.GetType('System.Management.Automation.PSMemberInfoInternalCollection`1',$true,$true)) -and
+                ($psMemberInfoGenericCollection = $psMemberInfoInternalCollectionType.MakeGenericType([System.Management.Automation.PSMemberInfo])) -and
+                ($genericCollectionConstructor = $psMemberInfoGenericCollection.GetConstructor('NonPublic,Instance',$null,@(),@()))) {
+                $genericCollection = $genericCollectionConstructor.Invoke(@())
+                $scriptProperty = New-Object -TypeName System.Management.Automation.PSScriptProperty -ArgumentList 'Name',{$this.WorkflowSubscription.Name}
+                $genericCollection.Add($scripProperty)
+                $members.Add('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration',$genericCollection)
+            } else {
+                $scriptProperty = New-Object -TypeName System.Management.Automation.PSScriptProperty -ArgumentList 'Name',{$this.WorkflowSubscription.Name}
+                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Remove('Name')
+                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Add($this.WorkflowSubscription.Name)
+            }
+        }
+    } catch {
+        Write-Warning -Message 'Updating the Name property for Management Pack workflows failed.'
+    }
+}
+
 
 #endregion
 
@@ -293,6 +376,7 @@ $nounMap = @{
                 DwCube = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.Warehouse.SystemCenterCube'            ; ConfigItem = $false }
           DwDataSource = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.DataWarehouse.DataSource'              ; ConfigItem = $false }
            Environment = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Environment'                                           ; ConfigItem = $true  }
+        FileAttachment = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.FileAttachment'                                        ; ConfigItem = $false }
               Incident = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Incident'                                     ; ConfigItem = $false }
       KnowledgeArticle = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Knowledge.Article'                                     ; ConfigItem = $true  }
       ManagementServer = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.SystemCenter.ManagementServer'                      ; ConfigItem = $true  }
