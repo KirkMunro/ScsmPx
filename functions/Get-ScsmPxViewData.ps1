@@ -44,6 +44,11 @@ function Get-ScsmPxViewData {
         [System.String[]]
         $ViewDisplayName = '*',
 
+#        [Parameter()]
+#        [ValidateNotNullOrEmpty()]
+#        [System.String[]]
+#        $Filter,
+
         [Parameter(ParameterSetName='FromViewNameAndManagementGroupConnection')]
         [Parameter(ParameterSetName='FromViewDisplayNameAndManagementGroupConnection')]
         [ValidateNotNullOrEmpty()]
@@ -331,48 +336,65 @@ function Get-ScsmPxViewData {
                     #endregion
 
                     if ($queryParameters.Keys -notmatch '^TypeProjection') {
-                        #region If the view does not use any type projections, look up the view objects using the view criteria.
+                        #region Identify the management pack class for the view.
 
-                        if (($node = $viewXml.SelectSingleNode('/View/Data/Criteria')) -and
-                            (($elementList = $node.GetElementsByTagName('Criteria')).Count -gt 1)) {
-                            $connectionParameters = @{
-                                ComputerName = $viewMp.Store.ConnectionSettings.ServerName
-                            }
-                            if ($viewMp.Store.ConnectionSettings.UserName) {
-                                $connectionParameters['Credential'] = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "$($viewMp.Store.ConnectionSettings.Domain)\$($viewMp.Store.ConnectionSettings.UserName)",$viewMp.Store.ConnectionSettings.Password
-                            }
-                            if ($queryParameters.Keys -contains 'ManagementPackClassId') {
-                                $elementReference = $viewMp.ProcessElementReference($queryParameters['ManagementPackClassId'])
-                                $class = $viewMp.Store.EntityTypes.GetClass($elementReference.Id)
-                            } else {
-                                $class = $viewMp.Store.EntityTypes.GetClass([System.Guid]$item.Target.Id)
-                            }
-                            [Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria]$emoCriteria = New-Object -TypeName Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria -ArgumentList $elementList[1].OuterXml,$class,$viewMp,$viewMp.Store
-                            [Type[]]$methodType = ([Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria],[Microsoft.EnterpriseManagement.Common.ObjectQueryOptions])
-                            $getObjectReaderMethod = $viewMp.Store.EntityObjects.GetType().GetMethod("GetObjectReader", $methodType)
-                            $getObjectReaderGenericMethod = $getObjectReaderMethod.MakeGenericMethod([Microsoft.EnterpriseManagement.Common.EnterpriseManagementObject])
-                            $reader = $getObjectReaderGenericMethod.Invoke($viewMp.Store.EntityObjects, ($emoCriteria, [Microsoft.EnterpriseManagement.Common.ObjectQueryOptions]::Default))
-                            for ($i = 0; $i -lt $reader.Count; $i++) {
-                                New-ScsmPxViewDataRecord -EnterpriseManagementObject $reader.GetData($i)
-                            }
-                        } elseif ($queryParameters.Keys -contains 'ManagementPackClassId') {
+                        if ($queryParameters.Keys -contains 'ManagementPackClassId') {
                             $elementReference = $viewMp.ProcessElementReference($queryParameters['ManagementPackClassId'])
                             $class = $viewMp.Store.EntityTypes.GetClass($elementReference.Id)
-                            [Type[]]$methodType = ([Microsoft.EnterpriseManagement.Configuration.ManagementPackClass],[Microsoft.EnterpriseManagement.Common.ObjectQueryOptions])
-                            $getObjectReaderMethod = $viewMp.Store.EntityObjects.GetType().GetMethod("GetObjectReader", $methodType)
-                            $getObjectReaderGenericMethod = $getObjectReaderMethod.MakeGenericMethod([Microsoft.EnterpriseManagement.Common.EnterpriseManagementObject])
-                            $reader = $getObjectReaderGenericMethod.Invoke($viewMp.Store.EntityObjects, ($class, [Microsoft.EnterpriseManagement.Common.ObjectQueryOptions]::Default))
-                            for ($i = 0; $i -lt $reader.Count; $i++) {
-                                New-ScsmPxViewDataRecord -EnterpriseManagementObject $reader.GetData($i)
-                            }
+                        } elseif ($item.Target -is [Microsoft.EnterpriseManagement.Configuration.ManagementPackElementReference`1[Microsoft.EnterpriseManagement.Configuration.ManagementPackClass]]) {
+                            $class = $viewMp.Store.EntityTypes.GetClass([System.Guid]$item.Target.Id)
                         } else {
-                            Write-Error "View $($item.Name) does not have a criteria definition or a Management Pack class id and therefore is not supported by this command at this time."
+                            Write-Error "View $($item.Name) does not have a Management Pack class id and therefore is not supported by this command at this time."
                             continue
                         }
 
                         #endregion
+
+                        #region Use search criteria if any is present or if a filter is applied.
+
+                        $criteriaXml = $null
+                        if (($node = $viewXml.SelectSingleNode('/View/Data/Criteria')) -and
+                            (($elementList = $node.GetElementsByTagName('Criteria')).Count -gt 1)) {
+                            $criteriaXml = $elementList[1].OuterXml
+#                            if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                                foreach ($filterItem in $Filter) {
+#                                    $additionalCriteria = New-ScsmPxObjectSearchCriteria -Class $class -Filter $filterItem
+#                                    $criteriaXml = (Join-CriteriaXml -CriteriaXml $criteriaXml -AdditionalCriteriaXml $additionalCriteria.Criteria).OuterXml
+#                                }
+#                            }
+#                        } elseif ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                            foreach ($filterItem in $Filter) {
+#                                if (-not $criteriaXml) {
+#                                    $criteriaXml = (New-ScsmPxObjectSearchCriteria -Class $class -Filter $filterItem).Criteria
+#                                } else {
+#                                    $additionalCriteria = New-ScsmPxObjectSearchCriteria -Class $class -Filter $filterItem
+#                                    $criteriaXml = (Join-CriteriaXml -CriteriaXml $criteriaXml -AdditionalCriteriaXml $additionalCriteria.Criteria).OuterXml
+#                                }
+#                            }
+                        }
+
+                        #endregion
+
+                        #region Look up the view data using the view criteria or class.
+
+                        if ($criteriaXml) {
+                            $objectReaderSourceType = [Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria]
+                            [Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria]$objectReaderSource = New-Object -TypeName Microsoft.EnterpriseManagement.Common.EnterpriseManagementObjectCriteria -ArgumentList $criteriaXml,$class,$viewMp,$viewMp.Store
+                        } else {
+                            $objectReaderSourceType = [Microsoft.EnterpriseManagement.Configuration.ManagementPackClass]
+                            $objectReaderSource = $class
+                        }
+                        [Type[]]$methodType = ($objectReaderSourceType,[Microsoft.EnterpriseManagement.Common.ObjectQueryOptions])
+                        $getObjectReaderMethod = $viewMp.Store.EntityObjects.GetType().GetMethod("GetObjectReader", $methodType)
+                        $getObjectReaderGenericMethod = $getObjectReaderMethod.MakeGenericMethod([Microsoft.EnterpriseManagement.Common.EnterpriseManagementObject])
+                        $reader = $getObjectReaderGenericMethod.Invoke($viewMp.Store.EntityObjects, ($objectReaderSource, [Microsoft.EnterpriseManagement.Common.ObjectQueryOptions]::Default))
+                        for ($i = 0; $i -lt $reader.Count; $i++) {
+                            New-ScsmPxViewDataRecord -EnterpriseManagementObject $reader.GetData($i)
+                        }
+
+                        #endregion
                     } else {
-                        #region If the view does use a type projection, look up the type projection object using the query parameters.
+                        #region Look up the type projection object using the query parameters.
 
                         foreach ($queryParameterName in $queryParameters.Keys) {
                             if ($queryParameterName -eq 'TypeProjectionName') {
@@ -402,15 +424,39 @@ function Get-ScsmPxViewData {
 
                         #endregion
 
+                        #region Use search criteria if any is present or if a filter is applied.
+
+                        $projectionCriteriaXml = $null
                         if (($node = $viewXml.SelectSingleNode('/View/Data/Criteria')) -and
-                            (($elementList = @($node.GetElementsByTagName('Criteria'))).Count -gt 1)) {
-                            #region If the view defines criteria, use the view criteria with the type projection to create the object projection criteria.
+                            (($elementList = $node.GetElementsByTagName('Criteria')).Count -gt 1)) {
+                            $projectionCriteriaXml = $elementList[1].OuterXml
+#                            if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                                foreach ($filterItem in $Filter) {
+#                                    $additionalProjectionCriteriaXml = ConvertTo-TypeProjectionCriteriaXml -TypeProjection $typeProjection -ViewMp $viewMp -Filter $filterItem
+#                                    $projectionCriteriaXml = (Join-CriteriaXml -CriteriaXml $projectionCriteriaXml -AdditionalCriteriaXml $additionalProjectionCriteriaXml).OuterXml
+#                                }
+#                            }
+#                        } elseif ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                            foreach ($filterItem in $Filter) {
+#                                if (-not $projectionCriteriaXml) {
+#                                    $projectionCriteriaXml = ConvertTo-TypeProjectionCriteriaXml -TypeProjection $typeProjection -ViewMp $viewMp -Filter $filterItem
+#                                } else {
+#                                    $additionalProjectionCriteriaXml = ConvertTo-TypeProjectionCriteriaXml -TypeProjection $typeProjection -ViewMp $viewMp -Filter $filterItem
+#                                    $projectionCriteriaXml = (Join-CriteriaXml -CriteriaXml $projectionCriteriaXml -AdditionalCriteriaXml $additionalProjectionCriteriaXml).OuterXml
+#                                }
+#                            }
+                        }
+
+                        #endregion
+
+                        if ($projectionCriteriaXml) {
+                            #region If we have search criteria, use it with the type projection to create the object projection criteria.
                         
-                            [Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria]$opc = New-Object -TypeName Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria -ArgumentList $elementList[1].OuterXml,$typeProjection,$viewMp,$viewMp.Store
+                            [Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria]$opc = New-Object -TypeName Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria -ArgumentList $projectionCriteriaXml,$typeProjection,$viewMp,$viewMp.Store
 
                             #endregion
                         } else {
-                            #region If there is no criteria in the view to filter the type projection, create the object projection criteria using the type projection by itself.
+                            #region Otherwise create the object projection criteria using the type projection by itself.
 
                             [Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria]$opc = New-Object -TypeName Microsoft.EnterpriseManagement.Common.ObjectProjectionCriteria -ArgumentList $typeProjection
 
@@ -503,7 +549,13 @@ function Get-ScsmPxViewData {
 
                 try {
                     if ($views = Get-SCSMView @passThruParameters) {
-                        Get-ScsmPxViewData -View $views
+                        $passThruParameters = @{
+                            View = $views
+                        }
+#                        if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('Filter')) {
+#                            $passThruParameters['Filter'] = $PSCmdlet.MyInvocation.BoundParameters['Filter']
+#                        }
+                        Get-ScsmPxViewData @passThruParameters
                     }
                 } catch [Microsoft.EnterpriseManagement.Common.ObjectNotFoundException] {
                     # Object not found exceptions should not be exposed to PowerShell. As a workaround,
@@ -525,8 +577,8 @@ Export-ModuleMember -Function Get-ScsmPxViewData
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUA2TLcXSSBpGpJWJDt61fOqK+
-# VoGgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUcfP7ceyWh+U9ucCk4iepZsxI
+# 7wSgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -572,22 +624,22 @@ Export-ModuleMember -Function Get-ScsmPxViewData
 # EfzdXHZuT14ORUZBbg2w6jiasTraCXEQ/Bx5tIB7rGn0/Zy2DBYr8X9bCT2bW+IW
 # yhOBbQAuOA2oKY8s4bL0WqkBrxWcLC9JG9siu8P+eJRRw4axgohd8D20UaF5Mysu
 # e7ncIAkTcetqGVvP6KUwVyyJST+5z3/Jvz4iaGNTmr1pdKzFHTx/kuDDvBzYBHUw
-# ggVuMIIEVqADAgECAhAKU6nZKT4ZKigLdw2V0ZC8MA0GCSqGSIb3DQEBBQUAMIG0
+# ggVuMIIEVqADAgECAhBaCt8RSzACYI8wikJ38dScMA0GCSqGSIb3DQEBBQUAMIG0
 # MQswCQYDVQQGEwJVUzEXMBUGA1UEChMOVmVyaVNpZ24sIEluYy4xHzAdBgNVBAsT
 # FlZlcmlTaWduIFRydXN0IE5ldHdvcmsxOzA5BgNVBAsTMlRlcm1zIG9mIHVzZSBh
 # dCBodHRwczovL3d3dy52ZXJpc2lnbi5jb20vcnBhIChjKTEwMS4wLAYDVQQDEyVW
-# ZXJpU2lnbiBDbGFzcyAzIENvZGUgU2lnbmluZyAyMDEwIENBMB4XDTEzMDQwODAw
-# MDAwMFoXDTE0MDUwODIzNTk1OVowgbExCzAJBgNVBAYTAkNBMQ8wDQYDVQQIEwZR
+# ZXJpU2lnbiBDbGFzcyAzIENvZGUgU2lnbmluZyAyMDEwIENBMB4XDTE0MDUwNzAw
+# MDAwMFoXDTE2MDYwNTIzNTk1OVowgbExCzAJBgNVBAYTAkNBMQ8wDQYDVQQIEwZR
 # dWViZWMxETAPBgNVBAcTCEdhdGluZWF1MR4wHAYDVQQKFBVQcm92YW5jZSBUZWNo
 # bm9sb2dpZXMxPjA8BgNVBAsTNURpZ2l0YWwgSUQgQ2xhc3MgMyAtIE1pY3Jvc29m
 # dCBTb2Z0d2FyZSBWYWxpZGF0aW9uIHYyMR4wHAYDVQQDFBVQcm92YW5jZSBUZWNo
-# bm9sb2dpZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC04Yt50uP8
-# newqG0tbz7MJHGQwrG6lf4LrqnnYvK+jHJY+mkXjOR1VQouSeteYmWzsqSiNFagM
-# SFxAzO3CRZt1xP0FPQgXjsyJWcEUOokgPl+a5vFrFhmhphe7QztiO5kOR3rBr7cW
-# DQhgv7yWStLg4ymNSrJbbNO0kczsl2FV/5pZ1pEdKzEDOO1X5Xx9Oaz3lb3ldrPk
-# zn+Lwr36YTkU+jTPHoXPyHy4lBYK/qcNbuPTTE1BeH+rwENx9nkEUa6dPPcDKDPf
-# EULo/g7P25ILApWoGJmdcefseebsu6CjtO5xYKTvk0ylWxXXoqnJvFw2z5Y8tUjA
-# W0E43nmf73ApAgMBAAGjggF7MIIBdzAJBgNVHRMEAjAAMA4GA1UdDwEB/wQEAwIH
+# bm9sb2dpZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDLiRcW2j5o
+# eaNIUBUtmxBdBtkjTfBphgAJQVr7j1OPpBYAlpgUdBQ7nA5XYgPsmrRWYr7KaytF
+# vigAvn6smkYz41DE2mFpYakhpo5/vW+ppgXdIDuNy/WCjHQadrpXNn41hVWxoig+
+# pXYVe5UsxAH9S2B+r1x1qiTiPtVuLQGgNAwJaRTGI98oYGQZAwEetKywofwcq5em
+# KB2V+4+Caac+X2tizlqQ6Wntzkcti02OmeWxUb3jwCjkgUmIlOOb43AiC4vfBys+
+# mcniWCYMgGPsDjeThmDKTSChQJIcf/EmqUSkfSV7QVACcJVIRuDgwxQpdaCDBJ5c
+# LTjePE1yiR+hAgMBAAGjggF7MIIBdzAJBgNVHRMEAjAAMA4GA1UdDwEB/wQEAwIH
 # gDBABgNVHR8EOTA3MDWgM6Axhi9odHRwOi8vY3NjMy0yMDEwLWNybC52ZXJpc2ln
 # bi5jb20vQ1NDMy0yMDEwLmNybDBEBgNVHSAEPTA7MDkGC2CGSAGG+EUBBxcDMCow
 # KAYIKwYBBQUHAgEWHGh0dHBzOi8vd3d3LnZlcmlzaWduLmNvbS9ycGEwEwYDVR0l
@@ -595,13 +647,13 @@ Export-ModuleMember -Function Get-ScsmPxViewData
 # Oi8vb2NzcC52ZXJpc2lnbi5jb20wOwYIKwYBBQUHMAKGL2h0dHA6Ly9jc2MzLTIw
 # MTAtYWlhLnZlcmlzaWduLmNvbS9DU0MzLTIwMTAuY2VyMB8GA1UdIwQYMBaAFM+Z
 # qep7JvRLyY6P1/AFJu/j0qedMBEGCWCGSAGG+EIBAQQEAwIEEDAWBgorBgEEAYI3
-# AgEbBAgwBgEBAAEB/zANBgkqhkiG9w0BAQUFAAOCAQEASuMSDX2Mfs+c92nmVE9Q
-# hhbHGRXgn7X3oWPQ4LVBgBvAjrqvBh/cxZuPjr8jRZPEyg6h1csvP2DZAjVi1oyO
-# SDNSyWuGb+IW6IoCFz73h1GlLJyz816rOoD2YhBRCXJ+eCZZeoRxdG7jn1w/zq74
-# FJWW1LDqnT6kXouZpPKEQXult0Cfeg3i/q0DKMbfq9qC66G1DqsDz/edORRirZ+a
-# fhW+o0khAuNNDZN7Xm9pc0fr0itMrshfzUOoVChvU1xPCUryqtpz2URJWlcckVtC
-# f4Vffsc/9W+FMfRuww6ahatjLWeT1fNerhWaY6YbD8OAbgj6DG+kmvorZYDX6boS
-# kjCCBgowggTyoAMCAQICEFIA5aolVvwahu2WydRLM8cwDQYJKoZIhvcNAQEFBQAw
+# AgEbBAgwBgEBAAEB/zANBgkqhkiG9w0BAQUFAAOCAQEAthqiVI8NgoeOb07LiC6e
+# GpOKoY/ClKrwbPcgvj8jkr7JgLR1n2PmfF1K1z8mW3GnWeBNsilBPfLMIHWtYasP
+# pN08eIDcAyvr7QKKQPW5AY3HmCADofNCAqcgAC2YxJ5pstYwRDKkBcrV211s+jmE
+# W+2ij0XivPvXokVcfaiSG6ovftQu58yEJZ3knMS3BIC/tPSVFt2GSalDTHCLtCBP
+# TJ2XrZKnBvmCnFoifPrD3DSMT10FeZp6gHlDtpOD1oODu4fquFjmGyrhjgnrzu4N
+# atHfFbVW4if/662W3Cso3C4zo502fMWgz+mHBbbNF0yeuwUG6NJUG/rQdbCqw2QD
+# ijCCBgowggTyoAMCAQICEFIA5aolVvwahu2WydRLM8cwDQYJKoZIhvcNAQEFBQAw
 # gcoxCzAJBgNVBAYTAlVTMRcwFQYDVQQKEw5WZXJpU2lnbiwgSW5jLjEfMB0GA1UE
 # CxMWVmVyaVNpZ24gVHJ1c3QgTmV0d29yazE6MDgGA1UECxMxKGMpIDIwMDYgVmVy
 # aVNpZ24sIEluYy4gLSBGb3IgYXV0aG9yaXplZCB1c2Ugb25seTFFMEMGA1UEAxM8
@@ -637,25 +689,25 @@ Export-ModuleMember -Function Get-ScsmPxViewData
 # FQYDVQQKEw5WZXJpU2lnbiwgSW5jLjEfMB0GA1UECxMWVmVyaVNpZ24gVHJ1c3Qg
 # TmV0d29yazE7MDkGA1UECxMyVGVybXMgb2YgdXNlIGF0IGh0dHBzOi8vd3d3LnZl
 # cmlzaWduLmNvbS9ycGEgKGMpMTAxLjAsBgNVBAMTJVZlcmlTaWduIENsYXNzIDMg
-# Q29kZSBTaWduaW5nIDIwMTAgQ0ECEApTqdkpPhkqKAt3DZXRkLwwCQYFKw4DAhoF
+# Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFGQ+Xc4pmOR/HVaCZGFfpYFNwg4AMA0GCSqGSIb3DQEBAQUABIIBAAyr
-# TslfbTdPKcbvwQWriAOR9v6Y3sEz4rOiT6dZm8cWZkxib1Yd7RcokcezPWEATIRb
-# yWF7DIWLSMm4LRlnoSWKc5G2mSOVastzMzEcqxJiNzfGHB7sqqvy08ZaXicc1cr2
-# 2eKD4zYBjoK18rZoo44D5cgNuR5sXROYGK4GY/Z+X9zv69h+BNEdh/zSJCg72Aod
-# ah4fqaR5Rl6KaD1MXeLpKxKUFQJf/BIhKkK0CArg6cYLTs7Bh8tVsZUyK28hOl7s
-# du+bMmVLLFcPJapvmsEaY0pZjIoItQib4n/OppdoO2O17ID4glde67nWgE3U0IKE
-# G5rTau28J0VSkFs3XHuhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFHcFmsdjLZm41+AqzhaoT+3enHNDMA0GCSqGSIb3DQEBAQUABIIBAF4L
+# Jbkoi7aVSdpf5AToJFLZgWwvAPlAcjGd30Osb2hRuy1SUOa38CMIxUqixeHLXsfa
+# ZPTUSoICsInRtkKkrqiIyHwtcv+qtJ1dRV+lD5jHrasVpaC6ilY/QgixXq9ft5y4
+# f2d+blnLslbqExwdaK06zhQflh1o0qzyZY9gk6coolyug9VG5LN/YCWHgE3bCGEg
+# 6BGtEPRNE0Xr0dihSsrQlcV2x/eQCgwFtaO/CEAe3hzLuRinmjjoEcNuT4l3ruQF
+# ta1lXkihd+BDNna/r0c0Iq3qafYs6nYQ/lT61hSXccNocWp/z5cqPw7SKeRyD173
+# AidWMszidl+bzIMDs6ehggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwMzI2MjEzMzM3WjAjBgkqhkiG9w0B
-# CQQxFgQUC80rxEjfqIwvMcKlATRtx2rZKWEwDQYJKoZIhvcNAQEBBQAEggEAkUS6
-# H+1cK40BiqmUxuPpA0XDxkAgmjsvvDDHAe3w+gVkl496d0VedZzK6bgOLYYLRjhb
-# 6Z4eOY9brhj6CB6QLuxbgzJjijsJszxiEBt1E/UZXpV55cMYo9TTRcM+zLrdSlIN
-# GrcAeEPYLjvnjRX4vEAy3T71YVlT5GWghnzFN9tBkSQ/Mv+sVuJ6NTiod/s3mqgf
-# YWdsdTL4gNREFlzy84S+nekwZbbjv5CTj/GqudCsvYGxsMAWq3VjTWx1l/p1eL8W
-# Z0RWmhfP2FhKOSHkYZSW41AsJ1JvV8Xvqg3Hti7OZC0Yl6S8g1906Y6PSII8D8Fb
-# St1t3H3g86nTGRKv1A==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzE2MTY1NjQ3WjAjBgkqhkiG9w0B
+# CQQxFgQU9m9SLW7RbxRsL5CxDqYwmgkZcfIwDQYJKoZIhvcNAQEBBQAEggEAOOnw
+# P3ZcbvEpFD+azYfEIvD2DFqy7w8dXorf3i32zKWqeO+hKN6mHHKqN5+Sja+S+YYx
+# ZmzE8T9aNqFYlyGHfLhAmwUdTYPYJRormPyNZBYh1UTxMGt+ZgJUIHLHWz+gFApv
+# 6t4aBQriPdscviOJzatH1hSpPsf5ywoexFIUEO3rRWBom38qeiiP2wGsXZS4RjDi
+# gaK/Y/UMVOQvlT1Id90zWQuX2vkSJFH9vFN+DD/iGl3EGmRMPKZN5k4En5ROmYf/
+# aOKUnDs2J07f8cZNhDRWvHHXbqMuBCIMghlrzpvTXqX5cOQ9lv2vU0AQ/cAgozwL
+# OYRBMn48LyTdVz4kLw==
 # SIG # End signature block
