@@ -25,7 +25,7 @@ license folder that is included in the ScsmPx module. If not, see
 # .ExternalHelp ScsmPx-help.xml
 function Get-ScsmPxPrimaryManagementServer {
     [CmdletBinding(DefaultParameterSetName='FromManagementGroupConnection')]
-    [OutputType('Microsoft.SystemCenter.RootManagementServer')]
+    [OutputType('Microsoft.SystemCenter.ManagedComputerServer')]
     param(
         [Parameter(Mandatory=$true, ParameterSetName='FromComputerName')]
         [ValidateNotNullOrEmpty()]
@@ -55,39 +55,42 @@ function Get-ScsmPxPrimaryManagementServer {
 
         #endregion
 
-        #region Get the relationships we need so that we can use them later.
-
-        $chlaRelationship = Get-SCRelationship -Name Microsoft.Windows.ComputerHostsLocalApplication @remotingParameters
-        $hsmeRelationship = Get-SCRelationship -Name Microsoft.SystemCenter.HealthServiceManagesEntity @remotingParameters
-
-        #endregion
-
-        #region Get a list of the computers that are running SCSM Management Servers.
-
-        $windowsComputers = @()
-        foreach ($scsmManagementServer in Get-ScsmPxManagementServer @remotingParameters) {
-            if ($windowsComputer = $scsmManagementServer.GetRelatedObjectsWhereTarget($chlaRelationship.Id)) {
-                $windowsComputers += $windowsComputer.EnterpriseManagementObject
-            }
-        }
-
-        #endregion
-
-        #region Identify which of the SCSM Management Servers has an associated Health Service (this is the workflow server).
-
-        # This logic was derived from details on the following SCSM blog post (search for "a little bit of magic"):
+        # The logic below was derived from details on the following SCSM team blog post (search for "a little bit of magic"):
         # http://blogs.technet.com/b/servicemanager/archive/2009/08/21/targeting-workflows-in-service-manager.aspx
 
-        :outer foreach ($hs in Get-ScsmPxObject -ClassName Microsoft.SystemCenter.HealthService @remotingParameters) {
-            $relatedTargets = @($hs.GetRelatedObjectsWhereSource($hsmeRelationship.Id) | Select-Object -ExpandProperty EnterpriseManagementObject)
-            foreach ($windowsComputer in $windowsComputers) {
-                if ($relatedTargets -contains $windowsComputer) {
-                    $windowsComputerInstance = $windowsComputer -as [Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance]
-                    $windowsComputerInstance.ToPSObject()
-                    break outer
-                }
-            }
+        #region Look up the WWF target singleton instance.
+
+        $wwfTarget = Get-ScsmPxObject -ClassName Microsoft.SystemCenter.WorkflowFoundation.WorkflowTarget @remotingParameters
+
+        #endregion
+
+        #region Identify the health service instance that manages the WWF target.
+
+        $healthService = Get-ScsmPxRelatedObject -Target $wwfTarget -RelationshipClassName Microsoft.SystemCenter.HealthServiceManagesEntity @remotingParameters
+        if (-not $healthService -or $healthService.GetType().IsArray) {
+            [System.String]$message = 'Failed to find the health service that manages the WWF target.'
+            [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Get-ScsmPxPrimaryManagementServer'
+            $PSCmdlet.ThrowTerminatingError($errorRecord)
         }
+
+        #endregion
+
+        #region Return the computer that hosts the health service application.
+
+        $computer = Get-ScsmPxRelatedObject -Target $healthService -RelationshipClassName Microsoft.Windows.ComputerHostsLocalApplication @remotingParameters
+        if (-not $computer -or $computer.GetType().IsArray) {
+            [System.String]$message = 'Failed to find the computer that hosts the health service application.'
+            [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Get-ScsmPxPrimaryManagementServer'
+            $PSCmdlet.ThrowTerminatingError($errorRecord)
+        }
+
+        #endregion
+        
+        #region Then return the computer that hosts the health service (the primary management server) to the caller.
+
+        $computer
 
         #endregion
     } catch {
