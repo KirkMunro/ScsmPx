@@ -25,7 +25,7 @@ license folder that is included in the ScsmPx module. If not, see
 # .ExternalHelp ScsmPx-help.xml
 function Get-ScsmPxPrimaryManagementServer {
     [CmdletBinding(DefaultParameterSetName='FromManagementGroupConnection')]
-    [OutputType('Microsoft.SystemCenter.RootManagementServer')]
+    [OutputType('Microsoft.SystemCenter.ManagedComputerServer')]
     param(
         [Parameter(Mandatory=$true, ParameterSetName='FromComputerName')]
         [ValidateNotNullOrEmpty()]
@@ -55,39 +55,42 @@ function Get-ScsmPxPrimaryManagementServer {
 
         #endregion
 
-        #region Get the relationships we need so that we can use them later.
-
-        $chlaRelationship = Get-SCRelationship -Name Microsoft.Windows.ComputerHostsLocalApplication @remotingParameters
-        $hsmeRelationship = Get-SCRelationship -Name Microsoft.SystemCenter.HealthServiceManagesEntity @remotingParameters
-
-        #endregion
-
-        #region Get a list of the computers that are running SCSM Management Servers.
-
-        $windowsComputers = @()
-        foreach ($scsmManagementServer in Get-ScsmPxManagementServer @remotingParameters) {
-            if ($windowsComputer = $scsmManagementServer.GetRelatedObjectsWhereTarget($chlaRelationship.Id)) {
-                $windowsComputers += $windowsComputer.EnterpriseManagementObject
-            }
-        }
-
-        #endregion
-
-        #region Identify which of the SCSM Management Servers has an associated Health Service (this is the workflow server).
-
-        # This logic was derived from details on the following SCSM blog post (search for "a little bit of magic"):
+        # The logic below was derived from details on the following SCSM team blog post (search for "a little bit of magic"):
         # http://blogs.technet.com/b/servicemanager/archive/2009/08/21/targeting-workflows-in-service-manager.aspx
 
-        :outer foreach ($hs in Get-ScsmPxObject -ClassName Microsoft.SystemCenter.HealthService @remotingParameters) {
-            $relatedTargets = @($hs.GetRelatedObjectsWhereSource($hsmeRelationship.Id) | Select-Object -ExpandProperty EnterpriseManagementObject)
-            foreach ($windowsComputer in $windowsComputers) {
-                if ($relatedTargets -contains $windowsComputer) {
-                    $windowsComputerInstance = $windowsComputer -as [Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance]
-                    $windowsComputerInstance.ToPSObject()
-                    break outer
-                }
-            }
+        #region Look up the WWF target singleton instance.
+
+        $wwfTarget = Get-ScsmPxObject -ClassName Microsoft.SystemCenter.WorkflowFoundation.WorkflowTarget @remotingParameters
+
+        #endregion
+
+        #region Identify the health service instance that manages the WWF target.
+
+        $healthService = Get-ScsmPxRelatedObject -Target $wwfTarget -RelationshipClassName Microsoft.SystemCenter.HealthServiceManagesEntity @remotingParameters
+        if (-not $healthService -or $healthService.GetType().IsArray) {
+            [System.String]$message = 'Failed to find the health service that manages the WWF target.'
+            [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Get-ScsmPxPrimaryManagementServer'
+            $PSCmdlet.ThrowTerminatingError($errorRecord)
         }
+
+        #endregion
+
+        #region Return the computer that hosts the health service application.
+
+        $computer = Get-ScsmPxRelatedObject -Target $healthService -RelationshipClassName Microsoft.Windows.ComputerHostsLocalApplication @remotingParameters
+        if (-not $computer -or $computer.GetType().IsArray) {
+            [System.String]$message = 'Failed to find the computer that hosts the health service application.'
+            [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Get-ScsmPxPrimaryManagementServer'
+            $PSCmdlet.ThrowTerminatingError($errorRecord)
+        }
+
+        #endregion
+        
+        #region Then return the computer that hosts the health service (the primary management server) to the caller.
+
+        $computer
 
         #endregion
     } catch {
@@ -99,8 +102,8 @@ Export-ModuleMember -Function Get-ScsmPxPrimaryManagementServer
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUSTV2LVQQlpPHoxy0TDN4K/uN
-# 7z2gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUwV1ilXU2yzUoMnkfcOzUqJ08
+# HSOgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -214,22 +217,22 @@ Export-ModuleMember -Function Get-ScsmPxPrimaryManagementServer
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFDhk9QdVuCFmQ0kr8A8yLnZqXo5QMA0GCSqGSIb3DQEBAQUABIIBACpH
-# ZpHUM1VJCTptt5XqBb5STZnGTdcKOQJO3Lad3laWf00bCnnWvCUCWUdEznX24FgJ
-# DdNO83K+vGSmd7HCVYAo6q+/9+ZtreMoNOZHajzYsp2mh+AM49QR+b+KgqMuJqkR
-# S0pobLRai+3yAqDBxFEM+YJ4UokBDVaSSCnzWz7F1Ym/oRhb4uiNq3SFGezH1Skp
-# ocY2ObPWu5jMiVBl38QqB9wzFvMGngr7QzMNQntaeDrcqMa+MciR0xbhm+MVqr9I
-# moTbZZoFeUe+6UjhXGvr8HwALbwMoBckHdR9/FwZV+FSNLUb3ewPpeqXj95sjSdp
-# Er9Onj9Fnn9aAf98ofahggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFI0/0bqF/W+Z30gtGRr7vXqOnnYsMA0GCSqGSIb3DQEBAQUABIIBAMYS
+# PvJpGJ/h/NTKjNrdSIikYDPvmK6q2MfiQovz0XeKQFtUAKanNARKbnHy1UXGWBco
+# nbxKrt509dt8WySW1PKvRWRjDVuiToofNDzyEzJ5QLljkzSXegbuDzY4fA8gZjuU
+# WZ3dLVQXRBUbAgj+A5bh90hRh5y17cdOjBINX7vGqhCnkUBZOwzSfRZdKj794/lU
+# tBxn3nfKBt46bSFAmdi3zcTgeIb3E2sqzpC5+JT2/HVi5FAHlpmtTBJkNEQZA8EI
+# JlmB7MbK9OOUzfKUW9J0dGDBSJwZYJ1w5IAsgxS6PxHrog/UcRzzX66qUSsj5ina
+# bFEjQvrQ5jTfVADB+QWhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzE2MTY1NjQ3WjAjBgkqhkiG9w0B
-# CQQxFgQUkn+tZHRYhrY+7jRytrRuskWDOSwwDQYJKoZIhvcNAQEBBQAEggEAbrA5
-# Jhsf86eDZLf3YsEksi+hu/wocDLB544a8Oaj2Rln3Vm4QngvzrhQu8utr4HTd3+V
-# iSR+Bo1GNzmxlx1WrhEgmXj1qUhR7TYAJyxh2SAPkjpDkVrtNmigeNzAy/npPwjF
-# /s11F6wGrgO66EHzI3dLvQGAb03xK4DVfLkf1w8aLzOEjlHhpXr5s4mwJUZ4LqN5
-# qR9qsEOokkdxoEy9ZunBoLBDGbpBqeNTInYUQXyAV4davC9AocxRnwWosvwW17UX
-# VDQ4+npsa2RtRS/jfWKtDRg6zHJFIrOPpCNrTUSOp3gT4QVIa9SVRjUCRSw3Xmbf
-# zB5ASe6TAV4o+COYGA==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM3WjAjBgkqhkiG9w0B
+# CQQxFgQUNiyVEdhHL34leIclj9e3oWtFhBEwDQYJKoZIhvcNAQEBBQAEggEAaENC
+# vljGlWkFg2KGc0hD4RIBmza/eTVCAJplbmqxQovICK7f+JKVineZ7oH8j02N4pAR
+# ij4aEJ+5hyAYEWR/NpLArq1Udi/9Kpc11it4CxPPrlI4+bynD3xCCDNGZ73jLYcS
+# bG0PeFsrZoZomYc4D2svL1PGgNPD5eYKPdpeWWfoF4gZjrof7wjlBM6DcU+A7cAF
+# Q5+dPrr/P217MUi0ZLUYErS3r8jLtJSU3xBA/QUWzztdxvdXTpMHnJfjSVB/oWnk
+# UTnsCN5/RhsBuRsxAU6TgyByVcV5191SFqYdre1D/jDWJaZCH5OGvdtSKflb6dt5
+# B1i9EwJmZy0WgrmtpQ==
 # SIG # End signature block
