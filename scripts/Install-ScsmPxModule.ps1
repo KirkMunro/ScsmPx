@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # This script should only be invoked when you want to download the latest
@@ -53,8 +52,8 @@ try {
     if ($PSVersionTable.PSVersion -lt [System.Version]'3.0') {
         [System.String]$message = 'PowerShell 3.0 is required by the ScsmPx module. Install the Windows Management Framework 3.0 or later and then try again.'
         [System.Management.Automation.PSNotSupportedException]$exception = New-Object -TypeName System.Management.Automation.PSNotSupportedException -ArgumentList $message
-        [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'MissingPrerequisiteException',([System.Management.Automation.ErrorCategory]::NotInstalled),'Install-ScsmPxModule'
-        $PSCmdlet.ThrowTerminatingError($errorRecord)
+        [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'MissingPrerequisiteException',([System.Management.Automation.ErrorCategory]::NotInstalled),$PSVersionTable
+        throw $errorRecord
     }
 
     #endregion
@@ -76,8 +75,8 @@ try {
     if ($module -is [System.Array]) {
         [System.String]$message = 'More than one version of ScsmPx (or ScsmLoader) are installed on this system. Manually remove the old versions and then try again.'
         [System.Management.Automation.SessionStateException]$exception = New-Object -TypeName System.Management.Automation.SessionStateException -ArgumentList $message
-        [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'SessionStateException',([System.Management.Automation.ErrorCategory]::InvalidOperation),'Install-ScsmPxModule'
-        $PSCmdlet.ThrowTerminatingError($errorRecord)
+        [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'SessionStateException',([System.Management.Automation.ErrorCategory]::InvalidOperation),$module
+        throw $errorRecord
     }
 
     #endregion
@@ -198,5 +197,5 @@ try {
 
     #endregion
 } catch {
-    throw
+    $PSCmdlet.ThrowTerminatingError($_)
 }

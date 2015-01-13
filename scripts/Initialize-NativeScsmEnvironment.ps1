@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 function Initialize-NativeScsmEnvironment {
@@ -37,11 +36,11 @@ function Initialize-NativeScsmEnvironment {
 
         #region Raise an error if the SMLets module is loaded (compatibility issues).
 
-        if (Get-Module -Name SMLets) {
+        if ($smlets = Get-Module -Name SMLets) {
             [System.String]$message = 'You cannot load the native SCSM cmdlets into a session where the SMLets module is loaded. The SMLets module defines a type extension that is not compatible with the native SCSM cmdlets. Unload the SMLets module and then try again.'
             [System.Management.Automation.SessionStateException]$exception = New-Object -TypeName System.Management.Automation.SessionStateException -ArgumentList $message
-            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'IncompatibilityException',([System.Management.Automation.ErrorCategory]::InvalidOperation),'Initialize-NativeScsmEnvironment'
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'IncompatibilityException',([System.Management.Automation.ErrorCategory]::InvalidOperation),$smlets
+            throw $errorRecord
         }
 
         #endregion
@@ -84,9 +83,8 @@ function Initialize-NativeScsmEnvironment {
             (-not ($scsmDwModuleManifest = Get-Item -LiteralPath "$($scsmSetupKeyProperties.InstallDirectory)\Microsoft.EnterpriseManagement.Warehouse.Cmdlets.psd1" -ErrorAction SilentlyContinue))) {
             [System.String]$message = 'The Service Manager cmdlets do not appear to be properly installed on this system.'
             [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
-            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'FileNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Initialize-NativeScsmEnvironment'
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
-            throw 
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'FileNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),$scsmSetupKeyPath
+            throw $errorRecord
         }
 
         #endregion
@@ -137,7 +135,7 @@ function Initialize-NativeScsmEnvironment {
 
         #endregion
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 

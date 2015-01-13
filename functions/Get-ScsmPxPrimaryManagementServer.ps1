@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # .ExternalHelp ScsmPx-help.xml
@@ -70,8 +69,8 @@ function Get-ScsmPxPrimaryManagementServer {
         if (-not $healthService -or $healthService.GetType().IsArray) {
             [System.String]$message = 'Failed to find the health service that manages the WWF target.'
             [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
-            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Get-ScsmPxPrimaryManagementServer'
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),$healthService
+            throw $errorRecord
         }
 
         #endregion
@@ -82,8 +81,8 @@ function Get-ScsmPxPrimaryManagementServer {
         if (-not $computer -or $computer.GetType().IsArray) {
             [System.String]$message = 'Failed to find the computer that hosts the health service application.'
             [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
-            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Get-ScsmPxPrimaryManagementServer'
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),$computer
+            throw $errorRecord
         }
 
         #endregion
@@ -94,7 +93,7 @@ function Get-ScsmPxPrimaryManagementServer {
 
         #endregion
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 

@@ -1,4 +1,4 @@
-## ScsmPx
+﻿## ScsmPx
 
 ### Overview
 
@@ -9,7 +9,7 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
 ### License
 

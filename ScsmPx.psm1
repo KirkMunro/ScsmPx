@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 Set-StrictMode -Version Latest
@@ -86,6 +85,7 @@ if ($initializeNativeScsmEnvironmentException = Get-Variable -Scope Global -Name
 
 #region Import helper (private) function definitions.
 
+. $PSScriptRoot\helpers\Add-ClassHierarchyToTypeNameList.ps1
 . $PSScriptRoot\helpers\ConvertTo-TypeProjectionCriteriaXml.ps1
 . $PSScriptRoot\helpers\Join-CriteriaXml.ps1
 
@@ -121,74 +121,13 @@ if ($initializeNativeScsmEnvironmentException = Get-Variable -Scope Global -Name
 
 #region Add a custom ToString method to the ManagementPackEnumeration type.
 
-if ($PSVersionTable.PSVersion -ge '3.0') {
-    Update-TypeData -TypeName Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration -MemberName ToString -MemberType ScriptMethod -Value {$this.DisplayName} -Force
-} else {
-    # Update-TypeData requires PowerShell 3.0 or later. To support extensions like this in 2.0 without
-    # requiring a ps1xml file, we need to use some internal methods. These methods won't change at
-    # this point though, so this should be a safe workaround for PowerShell 2.0. If it were to fail
-    # though, we don't want to raise a fuss, so continue loading the module.
-    try {
-        $runspaceConfiguration = $Host.Runspace.RunspaceConfiguration
-        if (($typeTableProperty = $runspaceConfiguration.GetType().GetProperty('TypeTable',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
-            ($typeTable = $typeTableProperty.GetValue($runspaceConfiguration,$null)) -and
-            ($membersField = $typeTable.GetType().GetField('members',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
-            ($members = $membersField.GetValue($typeTable))) {
-            if ((-not $members.ContainsKey('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration')) -and
-                ($psMemberInfoInternalCollectionType = [System.Management.Automation.PSObject].Assembly.GetType('System.Management.Automation.PSMemberInfoInternalCollection`1',$true,$true)) -and
-                ($psMemberInfoGenericCollection = $psMemberInfoInternalCollectionType.MakeGenericType([System.Management.Automation.PSMemberInfo])) -and
-                ($genericCollectionConstructor = $psMemberInfoGenericCollection.GetConstructor('NonPublic,Instance',$null,@(),@()))) {
-                $genericCollection = $genericCollectionConstructor.Invoke(@())
-                $scriptMethod = New-Object -TypeName System.Management.Automation.PSScriptMethod -ArgumentList 'ToString',{$this.DisplayName}
-                $genericCollection.Add($scriptMethod)
-                $members.Add('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration',$genericCollection)
-            } else {
-                $scriptMethod = New-Object -TypeName System.Management.Automation.PSScriptMethod -ArgumentList 'ToString',{$this.DisplayName}
-                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Remove('ToString')
-                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Add($scriptMethod)
-            }
-        }
-    } catch {
-        Write-Warning -Message 'Updating the ToString method for Management Pack enumerations failed.'
-    }
-}
+Update-TypeData -TypeName Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration -MemberName ToString -MemberType ScriptMethod -Value {$this.DisplayName} -Force
 
 #endregion
 
 #region Add a Name parameter to the Workflow type.
 
-if ($PSVersionTable.PSVersion -ge '3.0') {
-    Update-TypeData -TypeName Microsoft.EnterpriseManagement.ServiceManager.Sdk.Workflows.Workflow -MemberName Name -MemberType ScriptProperty -Value {$this.WorkflowSubscription.Name} -Force
-} else {
-    # Update-TypeData requires PowerShell 3.0 or later. To support extensions like this in 2.0 without
-    # requiring a ps1xml file, we need to use some internal methods. These methods won't change at
-    # this point though, so this should be a safe workaround for PowerShell 2.0. If it were to fail
-    # though, we don't want to raise a fuss, so continue loading the module.
-    try {
-        $runspaceConfiguration = $Host.Runspace.RunspaceConfiguration
-        if (($typeTableProperty = $runspaceConfiguration.GetType().GetProperty('TypeTable',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
-            ($typeTable = $typeTableProperty.GetValue($runspaceConfiguration,$null)) -and
-            ($membersField = $typeTable.GetType().GetField('members',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
-            ($members = $membersField.GetValue($typeTable))) {
-            if ((-not $members.ContainsKey('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration')) -and
-                ($psMemberInfoInternalCollectionType = [System.Management.Automation.PSObject].Assembly.GetType('System.Management.Automation.PSMemberInfoInternalCollection`1',$true,$true)) -and
-                ($psMemberInfoGenericCollection = $psMemberInfoInternalCollectionType.MakeGenericType([System.Management.Automation.PSMemberInfo])) -and
-                ($genericCollectionConstructor = $psMemberInfoGenericCollection.GetConstructor('NonPublic,Instance',$null,@(),@()))) {
-                $genericCollection = $genericCollectionConstructor.Invoke(@())
-                $scriptProperty = New-Object -TypeName System.Management.Automation.PSScriptProperty -ArgumentList 'Name',{$this.WorkflowSubscription.Name}
-                $genericCollection.Add($scripProperty)
-                $members.Add('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration',$genericCollection)
-            } else {
-                $scriptProperty = New-Object -TypeName System.Management.Automation.PSScriptProperty -ArgumentList 'Name',{$this.WorkflowSubscription.Name}
-                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Remove('Name')
-                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Add($this.WorkflowSubscription.Name)
-            }
-        }
-    } catch {
-        Write-Warning -Message 'Updating the Name property for Management Pack workflows failed.'
-    }
-}
-
+Update-TypeData -TypeName Microsoft.EnterpriseManagement.ServiceManager.Sdk.Workflows.Workflow -MemberName Name -MemberType ScriptProperty -Value {$this.WorkflowSubscription.Name} -Force
 
 #endregion
 
@@ -399,22 +338,20 @@ $nounMap = @{
 }
 
 foreach ($noun in $nounMap.Keys) {
-    foreach ($verb in 'New','Get','Set','Rename','Remove','Restore') {
-        if ($nounMap.$noun.Verbs -contains $verb) {
-            $newProxyFunctionDefinitionParameters = @{
-                      Verb = $verb
-                      Noun = $noun
-                NounPrefix = 'ScsmPx'
-                 ClassName = $nounMap.$noun.Class
-            }
-            if ($nounMap.$noun.ConfigItem) {
-                $newProxyFunctionDefinitionParameters['ConfigItem'] = $true
-            }
-            if ($viewMap.ContainsKey($nounMap.$noun.Class)) {
-                $newProxyFunctionDefinitionParameters['Views'] = $viewMap[$nounMap.$noun.Class]
-            }
-            . (New-ScsmPxProxyFunctionDefinition @newProxyFunctionDefinitionParameters)
+    foreach ($verb in $nounMap.$noun.Verbs) {
+        $newProxyFunctionDefinitionParameters = @{
+                    Verb = $verb
+                    Noun = $noun
+            NounPrefix = 'ScsmPx'
+                ClassName = $nounMap.$noun.Class
         }
+        if ($nounMap.$noun.ConfigItem) {
+            $newProxyFunctionDefinitionParameters['ConfigItem'] = $true
+        }
+        if ($viewMap.ContainsKey($nounMap.$noun.Class)) {
+            $newProxyFunctionDefinitionParameters['Views'] = $viewMap[$nounMap.$noun.Class]
+        }
+        . (New-ScsmPxProxyFunctionDefinition @newProxyFunctionDefinitionParameters)
     }
 }
 
