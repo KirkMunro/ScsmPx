@@ -38,6 +38,10 @@ limitations under the License.
 
     PowerShellVersion = '3.0'
 
+        NestedModules = @(
+                        'SnippetPx'
+                        )
+
      ScriptsToProcess = @(
                         'scripts\Initialize-NativeScsmEnvironment.ps1'
                         )

@@ -21,9 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 #############################################################################>
 
-Set-StrictMode -Version Latest
-Export-ModuleMember
-$PSModuleRoot = $PSScriptRoot
+#region Initialize the module.
+
+Invoke-Snippet -Name Module.Initialize
+
+#endregion
 
 #region If PowerShell erroneously created an Initialize-NativeScsmEnvironment module, remove it.
 
@@ -85,37 +87,17 @@ if ($initializeNativeScsmEnvironmentException = Get-Variable -Scope Global -Name
 
 #region Import helper (private) function definitions.
 
-. $PSScriptRoot\helpers\Add-ClassHierarchyToTypeNameList.ps1
-. $PSScriptRoot\helpers\ConvertTo-TypeProjectionCriteriaXml.ps1
-. $PSScriptRoot\helpers\Join-CriteriaXml.ps1
+Invoke-Snippet -Name ScriptFile.Import -Parameters @{
+    Path = Join-Path -Path $PSModuleRoot -ChildPath helpers
+}
 
 #endregion
 
 #region Import public function definitions.
 
-. $PSScriptRoot\functions\Add-ScsmPxFileAttachment.ps1
-. $PSScriptRoot\functions\Add-ScsmPxTroubleTicketComment.ps1
-. $PSScriptRoot\functions\Get-ScsmPxCommand.ps1
-. $PSScriptRoot\functions\Get-ScsmPxConnectedUser.ps1
-. $PSScriptRoot\functions\Get-ScsmPxDwName.ps1
-. $PSScriptRoot\functions\Get-ScsmPxEnterpriseManagementGroup.ps1
-. $PSScriptRoot\functions\Get-ScsmPxInstallDirectory.ps1
-. $PSScriptRoot\functions\Get-ScsmPxList.ps1
-. $PSScriptRoot\functions\Get-ScsmPxListItem.ps1
-. $PSScriptRoot\functions\Get-ScsmPxObject.ps1
-. $PSScriptRoot\functions\Get-ScsmPxObjectHistory.ps1
-. $PSScriptRoot\functions\Get-ScsmPxPrimaryManagementServer.ps1
-. $PSScriptRoot\functions\Get-ScsmPxRelatedObject.ps1
-. $PSScriptRoot\functions\Get-ScsmPxViewData.ps1
-. $PSScriptRoot\functions\New-ScsmPxManagementPackBundle.ps1
-. $PSScriptRoot\functions\New-ScsmPxObject.ps1
-. $PSScriptRoot\functions\New-ScsmPxObjectSearchCriteria.ps1
-. $PSScriptRoot\functions\New-ScsmPxProxyFunctionDefinition.ps1
-. $PSScriptRoot\functions\Remove-ScsmPxObject.ps1
-. $PSScriptRoot\functions\Rename-ScsmPxObject.ps1
-. $PSScriptRoot\functions\Reset-ScsmPxCommandCache.ps1
-. $PSScriptRoot\functions\Restore-ScsmPxObject.ps1
-. $PSScriptRoot\functions\Set-ScsmPxObject.ps1
+Invoke-Snippet -Name ScriptFile.Import -Parameters @{
+    Path = Join-Path -Path $PSModuleRoot -ChildPath functions
+}
 
 #endregion
 
@@ -340,10 +322,10 @@ $nounMap = @{
 foreach ($noun in $nounMap.Keys) {
     foreach ($verb in $nounMap.$noun.Verbs) {
         $newProxyFunctionDefinitionParameters = @{
-                    Verb = $verb
-                    Noun = $noun
+                  Verb = $verb
+                  Noun = $noun
             NounPrefix = 'ScsmPx'
-                ClassName = $nounMap.$noun.Class
+             ClassName = $nounMap.$noun.Class
         }
         if ($nounMap.$noun.ConfigItem) {
             $newProxyFunctionDefinitionParameters['ConfigItem'] = $true
