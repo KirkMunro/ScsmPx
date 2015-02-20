@@ -23,41 +23,62 @@ limitations under the License.
 
 # .ExternalHelp ScsmPx-help.xml
 function Get-ScsmPxRelatedObject {
-    [CmdletBinding(DefaultParameterSetName='RelatedToSourceFromManagementGroupConnection')]
+    [CmdletBinding(DefaultParameterSetName='RelationshipClassNameToSourceFromManagementGroupConnection')]
     [OutputType('Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance#RelatedObject')]
     param(
-        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToSourceFromManagementGroupConnection')]
-        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToSourceFromComputerName')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassNameToSourceFromManagementGroupConnection')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassToSourceFromManagementGroupConnection')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassNameToSourceFromComputerName')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassToSourceFromComputerName')]
         [ValidateNotNullOrEmpty()]
         [Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance[]]
         $Source,
 
-        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToTargetFromManagementGroupConnection')]
-        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToTargetFromComputerName')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassNameToTargetFromManagementGroupConnection')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassToTargetFromManagementGroupConnection')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassNameToTargetFromComputerName')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassToTargetFromComputerName')]
         [ValidateNotNullOrEmpty()]
         [Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance[]]
         $Target,
 
-        [Parameter(Position=1)]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassNameToSourceFromManagementGroupConnection')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassNameToTargetFromManagementGroupConnection')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassNameToSourceFromComputerName')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassNameToTargetFromComputerName')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $RelationshipClassName,
 
-        [Parameter(Mandatory=$true, ParameterSetName='RelatedToSourceFromComputerName')]
-        [Parameter(Mandatory=$true, ParameterSetName='RelatedToTargetFromComputerName')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassToSourceFromManagementGroupConnection')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassToTargetFromManagementGroupConnection')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassToSourceFromComputerName')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassToTargetFromComputerName')]
+        [ValidateNotNullOrEmpty()]
+        [Microsoft.EnterpriseManagement.Configuration.ManagementPackRelationship]
+        $RelationshipClass,
+
+        [Parameter(Mandatory=$true, ParameterSetName='RelationshipClassNameToSourceFromComputerName')]
+        [Parameter(Mandatory=$true, ParameterSetName='RelationshipClassToSourceFromComputerName')]
+        [Parameter(Mandatory=$true, ParameterSetName='RelationshipClassNameToTargetFromComputerName')]
+        [Parameter(Mandatory=$true, ParameterSetName='RelationshipClassToTargetFromComputerName')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ComputerName,
 
-        [Parameter(ParameterSetName='RelatedToSourceFromComputerName')]
-        [Parameter(ParameterSetName='RelatedToTargetFromComputerName')]
+        [Parameter(ParameterSetName='RelationshipClassNameToSourceFromComputerName')]
+        [Parameter(ParameterSetName='RelationshipClassToSourceFromComputerName')]
+        [Parameter(ParameterSetName='RelationshipClassNameToTargetFromComputerName')]
+        [Parameter(ParameterSetName='RelationshipClassToTargetFromComputerName')]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential = [System.Management.Automation.PSCredential]::Empty,
 
-        [Parameter(ParameterSetName='RelatedToSourceFromManagementGroupConnection')]
-        [Parameter(ParameterSetName='RelatedToTargetFromManagementGroupConnection')]
+        [Parameter(ParameterSetName='RelationshipClassNameToSourceFromManagementGroupConnection')]
+        [Parameter(ParameterSetName='RelationshipClassToSourceFromManagementGroupConnection')]
+        [Parameter(ParameterSetName='RelationshipClassNameToTargetFromManagementGroupConnection')]
+        [Parameter(ParameterSetName='RelationshipClassToTargetFromManagementGroupConnection')]
         [ValidateNotNull()]
         [Microsoft.SystemCenter.Core.Connection.Connection]
         $SCSession
@@ -78,13 +99,13 @@ function Get-ScsmPxRelatedObject {
             #region Determine the search parameter and related item property name based on the parameter set.
 
             switch -regex ($PSCmdlet.ParameterSetName) {
-                '^RelatedToSource' {
+                '^RelationshipClass(Name)?ToSource' {
                     $searchParameter = 'Source'
                     $searchMethod = 'GetRelationshipObjectsWhereSource'
                     $relatedItemPropertyName = 'TargetObject'
                     break
                 }
-                '^RelatedToTarget' {
+                '^RelationshipClass(Name)?ToTarget' {
                     $searchParameter = 'Target'
                     $searchMethod = 'GetRelationshipObjectsWhereTarget'
                     $relatedItemPropertyName = 'SourceObject'
@@ -100,12 +121,17 @@ function Get-ScsmPxRelatedObject {
     process {
         try {
             foreach ($item in Get-Variable -Name $searchParameter -ValueOnly) {
-                if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName')) {
+                if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName') -or
+                    $PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClass')) {
                     #region Get the related items when we have a relationship class name to work with.
 
                     # You must use this generic method and not the GetRelatedObjectsWhereSource/Target methods
                     # because those methods return more objects that you ask for.
-                    $relationship = [Microsoft.EnterpriseManagement.Configuration.ManagementPackRelationship](Get-SCRelationship -Name $RelationshipClassName @remotingParameters)
+                    if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName')) {
+                        $relationship = [Microsoft.EnterpriseManagement.Configuration.ManagementPackRelationship](Get-SCRelationship -Name $RelationshipClassName @remotingParameters)
+                    } else {
+                        $relationship = $RelationshipClass
+                    }
                     $emg = $relationship.ManagementGroup
                     [Type[]]$getRelationshipObjectsMethodType = @(
                         [System.Guid]
