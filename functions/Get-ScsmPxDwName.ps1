@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # .ExternalHelp ScsmPx-help.xml
@@ -78,9 +77,8 @@ function Get-ScsmPxDwName {
 
             #region Get the enterprise management group object to look up the DW name.
 
-            if (-not ($emg = Get-ScsmPxEnterpriseManagementGroup @remotingParameters)) {
-                throw "Failed to create an Enterprise Management Group object for $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ComputerName')) {$ComputerName} else {'localhost'})."
-            }
+            # This will throw an exception if it fails, so we can count on $emg being set if it succeeds.
+            $emg = Get-ScsmPxEnterpriseManagementGroup @remotingParameters
 
             #endregion
 
@@ -88,7 +86,10 @@ function Get-ScsmPxDwName {
 
             if ((-not $emg.DataWarehouse) -or
                 (-not ($dwConfiguration = $emg.DataWarehouse.GetDataWarehouseConfiguration()))) {
-                throw "Unable to retrieve the Data Warehouse configuration for $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ComputerName')) {$ComputerName} else {'localhost'})."
+                [System.String]$message = "Unable to retrieve the Data Warehouse configuration for $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ComputerName')) {$ComputerName} else {'localhost'})."
+                [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
+                [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,$exception.GetType().Name,([System.Management.Automation.ErrorCategory]::ObjectNotFound),$emg
+                throw $errorRecord
             }
 
             #endregion
@@ -102,7 +103,7 @@ function Get-ScsmPxDwName {
 
         #endregion
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 
@@ -110,8 +111,8 @@ Export-ModuleMember -Function Get-ScsmPxDwName
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUojlw+/v3L0XXFh/aXBY0gi6t
-# c7agghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUAui8XFVA6BAmNPPOlOeZ/I9V
+# zt2gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -225,22 +226,22 @@ Export-ModuleMember -Function Get-ScsmPxDwName
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFHi0RV5eNAg2m/LNtJq4WD4pFjbiMA0GCSqGSIb3DQEBAQUABIIBAIQR
-# +wUM9C5GP2oIgCSzcWt0EPPQEixogPGwwI4DOigYgIL0K4HM0hMCkaW19RFOXtuB
-# OftIGuJFc4xpbKGUdm8zPFP4PlaSjEryMXko8CeFPWkXylZwrOMD1K6No4G3oLph
-# iQ9UfSM97xyzqafgOSL/rFx4+NdzIxeFJH2gsu/UfZFK1yVyZiCN6D+Rq8MGQant
-# Q5YOpyLIzqbVSNXAmHTCK31PgJbOWHo1Z21jAtIWWAWuLF3Rfj9N+s0nfZksmg0V
-# EtUptGytvJh7ZNBXJQ/z2JJJvKmvvIt/RkwxJTafLuZ9N8yn8dULs3dYGgf5WT8R
-# /PD9rlL/m3ksMjzIJJ6hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFOK4Hdy1HbhHZDZnnWa8vjvjDnL0MA0GCSqGSIb3DQEBAQUABIIBACyj
+# kxY0hu3piISbDBo+7mqLPJmoew9o5yrCtK5BfKsys+mlrGRP4dx17MKc6P6q8qiE
+# HjiGSn8goKD9VipqVnd22L1Q0GzJH+6q8Ai4p9pirZI+uBzLGlZljauAfpwhcRFt
+# fxxtaZcLdx5+P34Vm4fIVxcXCeR0Wd+xQVMT6GufCFZe6QP3hQGU0ZX06xD6EMyW
+# 7r9lBpW9cfCvSBj5aOD+Etvhoj5ZT2LiVyEzYU6vYzf4+Vk7RA7yPzqTmFRR8Til
+# rtXRSva9HCEQ8zAQtjQM31fGRBVxWgqd/fPRYn79sCz/9ODaFNLGak0wIOn1QDd7
+# QJTyFDSRQdp5Jgt5i36hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM3WjAjBgkqhkiG9w0B
-# CQQxFgQUOg7HhSGDht3xO6N5EqzVem2HxEwwDQYJKoZIhvcNAQEBBQAEggEAUPOv
-# WKrrabx2jFsGdDZQ24Ab+iFwSZhw9kp0J7OkGtu6mdr+bET/QSTGYbQ1wpAijOnr
-# gZ28DAzZKfOkqADQ04X2APa/qYaw9xA1jdd6f57xVDXSLdgaQl3O7M9ytboMgTFT
-# zEY4LK7FZTmQ9wWIGWiZ4nDyxFlCB3QzSggecZ13QZJ6NgjQgt3B7SLQ8JSuuIr5
-# v4E2NDdnfJriMdpDZLS+7UugH9wJPBdw2/hXHVCng2T3RFPF9D6mEIbG2b5JJ7TY
-# oYjBy1I0yx5BfK2iu61W9EEIzJ0MzgqhgZeDV9oSVkTlUvFpdPPDKvlKGcwDojY/
-# Mk6nGiRBHxyhfzmOVg==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NjA1WjAjBgkqhkiG9w0B
+# CQQxFgQUi1m9abJgLkPKv8T0K9Pv9axfAtIwDQYJKoZIhvcNAQEBBQAEggEAnYWs
+# 5no8zF1uhwkyCUuRttUmTwa7I8uUAEwdMuJy56uYaL2Cgbh9z0TxdVOWXgT46Hxp
+# cyxQE/Av8hh9KyK7WVPSv+nlu6vUk70rdQHHAAukYizR1zXzdATrtT1zNiZTOMm1
+# IrHHpSrEqK8O8yAgqDDs2lmvvYeaxkHXMeL+0Yr17IvVotT4bYIwm86obWj6k+6h
+# cFM3qM4PK2/5r3AYAYXbtKH//8XtiCUDcvLwDFCNtjOqPeA9lLwTLXHacKubP+h/
+# eT2Ky6Zq6TsnfvS7PLCUf1rSj53z9GbO/EE1ItsDZYzXAw7UDv6xmU2iBIxrCqc+
+# Z8OqPB86o7maTrivcw==
 # SIG # End signature block

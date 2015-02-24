@@ -6,59 +6,79 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # .ExternalHelp ScsmPx-help.xml
 function Get-ScsmPxRelatedObject {
-    [CmdletBinding(DefaultParameterSetName='RelatedToSourceFromManagementGroupConnection')]
+    [CmdletBinding(DefaultParameterSetName='RelationshipClassNameToSourceFromManagementGroupConnection')]
     [OutputType('Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance#RelatedObject')]
     param(
-        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToSourceFromManagementGroupConnection')]
-        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToSourceFromComputerName')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassNameToSourceFromManagementGroupConnection')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassToSourceFromManagementGroupConnection')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassNameToSourceFromComputerName')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassToSourceFromComputerName')]
         [ValidateNotNullOrEmpty()]
         [Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance[]]
         $Source,
 
-        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToTargetFromManagementGroupConnection')]
-        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelatedToTargetFromComputerName')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassNameToTargetFromManagementGroupConnection')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassToTargetFromManagementGroupConnection')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassNameToTargetFromComputerName')]
+        [Parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, ParameterSetName='RelationshipClassToTargetFromComputerName')]
         [ValidateNotNullOrEmpty()]
         [Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance[]]
         $Target,
 
-        [Parameter(Position=1)]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassNameToSourceFromManagementGroupConnection')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassNameToTargetFromManagementGroupConnection')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassNameToSourceFromComputerName')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassNameToTargetFromComputerName')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $RelationshipClassName,
 
-        [Parameter(Mandatory=$true, ParameterSetName='RelatedToSourceFromComputerName')]
-        [Parameter(Mandatory=$true, ParameterSetName='RelatedToTargetFromComputerName')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassToSourceFromManagementGroupConnection')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassToTargetFromManagementGroupConnection')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassToSourceFromComputerName')]
+        [Parameter(Position=1, ParameterSetName='RelationshipClassToTargetFromComputerName')]
+        [ValidateNotNullOrEmpty()]
+        [Microsoft.EnterpriseManagement.Configuration.ManagementPackRelationship]
+        $RelationshipClass,
+
+        [Parameter(Mandatory=$true, ParameterSetName='RelationshipClassNameToSourceFromComputerName')]
+        [Parameter(Mandatory=$true, ParameterSetName='RelationshipClassToSourceFromComputerName')]
+        [Parameter(Mandatory=$true, ParameterSetName='RelationshipClassNameToTargetFromComputerName')]
+        [Parameter(Mandatory=$true, ParameterSetName='RelationshipClassToTargetFromComputerName')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ComputerName,
 
-        [Parameter(ParameterSetName='RelatedToSourceFromComputerName')]
-        [Parameter(ParameterSetName='RelatedToTargetFromComputerName')]
+        [Parameter(ParameterSetName='RelationshipClassNameToSourceFromComputerName')]
+        [Parameter(ParameterSetName='RelationshipClassToSourceFromComputerName')]
+        [Parameter(ParameterSetName='RelationshipClassNameToTargetFromComputerName')]
+        [Parameter(ParameterSetName='RelationshipClassToTargetFromComputerName')]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential = [System.Management.Automation.PSCredential]::Empty,
 
-        [Parameter(ParameterSetName='RelatedToSourceFromManagementGroupConnection')]
-        [Parameter(ParameterSetName='RelatedToTargetFromManagementGroupConnection')]
+        [Parameter(ParameterSetName='RelationshipClassNameToSourceFromManagementGroupConnection')]
+        [Parameter(ParameterSetName='RelationshipClassToSourceFromManagementGroupConnection')]
+        [Parameter(ParameterSetName='RelationshipClassNameToTargetFromManagementGroupConnection')]
+        [Parameter(ParameterSetName='RelationshipClassToTargetFromManagementGroupConnection')]
         [ValidateNotNull()]
         [Microsoft.SystemCenter.Core.Connection.Connection]
         $SCSession
@@ -79,13 +99,13 @@ function Get-ScsmPxRelatedObject {
             #region Determine the search parameter and related item property name based on the parameter set.
 
             switch -regex ($PSCmdlet.ParameterSetName) {
-                '^RelatedToSource' {
+                '^RelationshipClass(Name)?ToSource' {
                     $searchParameter = 'Source'
                     $searchMethod = 'GetRelationshipObjectsWhereSource'
                     $relatedItemPropertyName = 'TargetObject'
                     break
                 }
-                '^RelatedToTarget' {
+                '^RelationshipClass(Name)?ToTarget' {
                     $searchParameter = 'Target'
                     $searchMethod = 'GetRelationshipObjectsWhereTarget'
                     $relatedItemPropertyName = 'SourceObject'
@@ -95,18 +115,23 @@ function Get-ScsmPxRelatedObject {
 
             #endregion
         } catch {
-            throw
+            $PSCmdlet.ThrowTerminatingError($_)
         }
     }
     process {
         try {
             foreach ($item in Get-Variable -Name $searchParameter -ValueOnly) {
-                if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName')) {
+                if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName') -or
+                    $PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClass')) {
                     #region Get the related items when we have a relationship class name to work with.
 
                     # You must use this generic method and not the GetRelatedObjectsWhereSource/Target methods
                     # because those methods return more objects that you ask for.
-                    $relationship = [Microsoft.EnterpriseManagement.Configuration.ManagementPackRelationship](Get-SCRelationship -Name $RelationshipClassName @remotingParameters)
+                    if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName')) {
+                        $relationship = [Microsoft.EnterpriseManagement.Configuration.ManagementPackRelationship](Get-SCRelationship -Name $RelationshipClassName @remotingParameters)
+                    } else {
+                        $relationship = $RelationshipClass
+                    }
                     $emg = $relationship.ManagementGroup
                     [Type[]]$getRelationshipObjectsMethodType = @(
                         [System.Guid]
@@ -129,6 +154,11 @@ function Get-ScsmPxRelatedObject {
                         $psObject = $rawEmi.ToPSObject()
                         Add-Member -InputObject $psObject -MemberType NoteProperty -Name "RelatedTo${searchParameter}" -Value $item
                         Add-Member -InputObject $psObject -MemberType NoteProperty -Name RelationshipClass -Value $relationship
+                        $psObject = $psObject | Add-ClassHierarchyToTypeNameList
+                        if ($psObject.PSTypeNames -notcontains 'Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance#RelatedObject') {
+                            $insertIndex = $psObject.PSTypeNames.IndexOf('Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance')
+                            $psObject.PSTypeNames.Insert($insertIndex, 'Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance#RelatedObject')
+                        }
                         $psObject
                     }
 
@@ -170,6 +200,11 @@ function Get-ScsmPxRelatedObject {
                             }
                             Add-Member -InputObject $psObject -MemberType NoteProperty -Name "RelatedTo${searchParameter}" -Value $item
                             Add-Member -InputObject $psObject -MemberType NoteProperty -Name RelationshipClass -Value ($relationshipInstance.ManagementGroup.EntityTypes.GetRelationshipClass($relationshipInstance.RelationshipId))
+                            $psObject = $psObject | Add-ClassHierarchyToTypeNameList
+                            if ($psObject.PSTypeNames -notcontains 'Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance#RelatedObject') {
+                                $insertIndex = $psObject.PSTypeNames.IndexOf('Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance')
+                                $psObject.PSTypeNames.Insert($insertIndex, 'Microsoft.EnterpriseManagement.Core.Cmdlets.Instances.EnterpriseManagementInstance#RelatedObject')
+                            }
                             $psObject
                         }
 
@@ -178,7 +213,7 @@ function Get-ScsmPxRelatedObject {
                 }
             }
         } catch {
-            throw
+            $PSCmdlet.ThrowTerminatingError($_)
         }
     }
 }
@@ -187,8 +222,8 @@ Export-ModuleMember -Function Get-ScsmPxRelatedObject
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQURYGFfzvCOPhz3ub9sgxX7Xc3
-# jGGgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxHsp58Sgb95YFCA9Zr8RUust
+# 2P2gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -302,22 +337,22 @@ Export-ModuleMember -Function Get-ScsmPxRelatedObject
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFLyYq8i8fDkQ2ThtE+3zKbjDgAs7MA0GCSqGSIb3DQEBAQUABIIBAMEQ
-# QbcV2/9UqAHsr9dw3phjWXALY2Q1+BJ7gWVQ9EbmLWTJ0nokVhaGRScTmYMGxyFx
-# FAS/wrLtjIoeRlcBh3+Asn0FJkSOEKHU9CHByjKqvcI7Zusb3iFDTrmAe+hqKVFJ
-# 3hhJb67K7zHokIGq/eGMYMSYex86nu3acCky2sGLOU5guKLcysOy9ctY4zWivz6r
-# KmWphnFVRXDnMHESMCn9fl3srJ/CaTDqfj+ENcakFVSW1CU1dbUgPrVYVD+zgjOn
-# y6Ge2eiJvGCfvBvqMhHssNXJkPiOi9zO52bmjfer1nfNgSX7DbsHDnMg6yeY7QWY
-# 74Z1pEdJfhEd0ERrU6+hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFKOaJB9SPvPuscZQIYHHMT/FalDWMA0GCSqGSIb3DQEBAQUABIIBAIgf
+# b0tTPNXZrql1d/IudlPfLxCc+nXBGAowoNn6EBKof8xHL43WG1b3UIUv58Tpn1O5
+# YNWf3o3olrRmESOXjQ+o3yERAl7N16Kne0itv896dLuCeaGNWbTYtuEM9PLQ1E9d
+# WMTTp5NalVL6c23MLE4Vn22vueZuD9UrjxTDa/ZUNUzewn6dRlaohjmE6kFaw3g2
+# 2+JikhGGzt9CjYscxX3pShsI8NMPG2RG/5rxLPKKZGdBICgxNa9IFzqDyPlkShMe
+# qd2fH6YUThWUQKNd+CSFfBT0UKcukaT21WXWAFkGN2GJOdJLmhNBxsS4yJyHTNuw
+# 35cKths/CFCSPdH/QY2hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM3WjAjBgkqhkiG9w0B
-# CQQxFgQU5icd6je9gWXRiMmnnNrXf10/htEwDQYJKoZIhvcNAQEBBQAEggEAJMN1
-# de2kugJfMxOa4na4it6ug8juISJUbjM9gwv6DWYILHwZ6rcMiZhG6Aa5lVNe2vWe
-# 0Ma3kgwaQEhlV1UIyZFOhPkjyV8jiWvFFTueudLHnGlzuvl1fXAs5fJtYUK9H/el
-# iiR/QSmkr+hJSK8KKvrqt2YnF2hk+myOP6Xi2lxIwbSXKGoFEU6/08/q2vkHeRkW
-# BxMlTCfzvBFviqdfKGzPldXcYJs+KRh9m936rEtPF0fU5CND09GXqfYv7a1nu0WF
-# FwhURDxEKfVYS79ooV9QG2EntfKOQs5uSejLkRZgLWsaZ0IUAO+6acPTVbnNjp4/
-# ZJoW6O6wrRQGVvgVlg==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NTU1WjAjBgkqhkiG9w0B
+# CQQxFgQUJ5bdFM3c+OEcd0NKisHa+cu1YEcwDQYJKoZIhvcNAQEBBQAEggEAndJD
+# /0fbY+KucF46VC8TOzZA/qdX3dZONSCxTwbdSatWfkBTsXh+V07JaH/zhsv8jFJP
+# cK1YcCV6o0LNcru7tjbUekzVXz2KTVt2JAH3n2P/CRIyp3+f7l91MxTSEQEJWvZO
+# Ze036FGk/YD7lj1T1iZmq96YpjyQbLXs/FJPUEBdRtFu+/cANFHEuZQuf7CCnPWO
+# OKVyBZ1Cvi22fPALhRkjg1HvWss577JxWSoZF9DGIs1Qd4Jur6gNMOm6JJSvOHWG
+# Y1sLu3U4V7aNqNkLWr3oQRd9RyfW4MwfrgqXa/oawPD/2jiTxnVuKDiyEzpdUVei
+# 9i6D8EICxNgxIjsEFA==
 # SIG # End signature block

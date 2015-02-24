@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # .ExternalHelp ScsmPx-help.xml
@@ -87,7 +86,7 @@ function Get-ScsmPxViewData {
                         $rawEmi.ToPSObject()
                     }
                 } catch {
-                    throw
+                    $PSCmdlet.ThrowTerminatingError($_)
                 }
             }
 
@@ -167,14 +166,14 @@ function Get-ScsmPxViewData {
                         $viewRecord.PSTypeNames.Insert(0, $extendedTypeName)
                         $viewRecord
                     } catch {
-                        throw
+                        $PSCmdlet.ThrowTerminatingError($_)
                     }
                 }
             }
 
             #endregion
         } catch {
-            throw
+            $PSCmdlet.ThrowTerminatingError($_)
         }
     }
     process {
@@ -568,7 +567,7 @@ function Get-ScsmPxViewData {
 
             #endregion
         } catch {
-            throw
+            $PSCmdlet.ThrowTerminatingError($_)
         }
     }
 }
@@ -577,8 +576,8 @@ Export-ModuleMember -Function Get-ScsmPxViewData
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUcfP7ceyWh+U9ucCk4iepZsxI
-# 7wSgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+68x+YcEOYQSMvDIWLHpSnO+
+# yxugghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -692,22 +691,22 @@ Export-ModuleMember -Function Get-ScsmPxViewData
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFHcFmsdjLZm41+AqzhaoT+3enHNDMA0GCSqGSIb3DQEBAQUABIIBAF4L
-# Jbkoi7aVSdpf5AToJFLZgWwvAPlAcjGd30Osb2hRuy1SUOa38CMIxUqixeHLXsfa
-# ZPTUSoICsInRtkKkrqiIyHwtcv+qtJ1dRV+lD5jHrasVpaC6ilY/QgixXq9ft5y4
-# f2d+blnLslbqExwdaK06zhQflh1o0qzyZY9gk6coolyug9VG5LN/YCWHgE3bCGEg
-# 6BGtEPRNE0Xr0dihSsrQlcV2x/eQCgwFtaO/CEAe3hzLuRinmjjoEcNuT4l3ruQF
-# ta1lXkihd+BDNna/r0c0Iq3qafYs6nYQ/lT61hSXccNocWp/z5cqPw7SKeRyD173
-# AidWMszidl+bzIMDs6ehggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFNOFcLu/gDdUoBA/nbYjT5TJ6pe7MA0GCSqGSIb3DQEBAQUABIIBAJvJ
+# oHVeO5Ow9uAG5EA88/rD7cr5ymtpSBsK9TvtXt9iOcf7pfz0BH2HnGJjrnSlVXgi
+# 98lKEVnKDsKd1Pi71p5Ml+Ndchr+2D03BS42SVlRSE0L0wXuo/Ff+r4Wu5f7i6sc
+# yc3lwoevJx7bzKPFFhc/soIrGaaeb6bFMXh7CWmVPeUv2M32Lsa5ggP8V0fqmCdg
+# tBFYqfWGp8N1WSZR3CE+Icqs2siKn4/88FHoMRy3sDWqkAYBfeet3Hje/lOiX7/c
+# jNeRBMMwUtOL9ldWEmNSMEKECWsKmtSpFRjFf+wWX6dATaAhyDxkrleMge/JJt1f
+# RTTMt0v17CsAmmy4JG+hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM3WjAjBgkqhkiG9w0B
-# CQQxFgQU9m9SLW7RbxRsL5CxDqYwmgkZcfIwDQYJKoZIhvcNAQEBBQAEggEABAOK
-# 1Yg51MwMv3bfcxXVOjeLkrLQuf0enuIa9ObFYf28/5PF6Patu4dYEYs8wbow38bi
-# DP+1r6KRGoUY5A9J6mpwLpOAslOimqLb4uMSncyq/zq8vfuFkd7InaXgLtoXDoWZ
-# 0n0nVazBrac5RhcKgt5rfKLtJqzjCbQrDch0Bji7+4sQpZHMr4NKXSEH1dKJru54
-# zTm2QXMmAMrtJhcXsza8WwV/7UNwCh2KtwNyq4R85XTYFz+/aBTxJ9bY7iZIuIHF
-# Zf9pxIFGDa1XIczajE6/k3h1GcbCL/c9kGnIkgbNT1EfBTfb5Dufitxp9VeiN+VI
-# yUetuPq59vLiSTslDg==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NjA1WjAjBgkqhkiG9w0B
+# CQQxFgQUbmt8KpNETMbls/vunGs9xmf4L/gwDQYJKoZIhvcNAQEBBQAEggEAGgKn
+# uavC0fjiu+bZpCch7CqXIzItF6rMGMa8LV94gaWT/j/r1xsUydCU4GdbG6iIEnKA
+# qOlVkABXCEvQpzq7aJNr2Oqp0DpqnDvck4krCWAycCD6yA578hab/NQH/LCXg4d/
+# GoEvZxTQjEUEPi+TSTFqnFN1TtaeBfmvD4hzrzetTxm3DH+EOSF+y8CDRDBoXH3W
+# u/cvA/pgTybUmseiJ/Wpbm7mrktNaZueCvcycvjkXM3kduWKC2l5lAvWzvCWjPi/
+# qLNJunA90ehzrXtiWbAWH+a/kiwK5AY514GV1ticghDBbOZYK3UH5h2gcnyOccuD
+# cuDg4dGtpT6cUkZbUQ==
 # SIG # End signature block

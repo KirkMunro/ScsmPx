@@ -6,25 +6,26 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
-Set-StrictMode -Version Latest
-Export-ModuleMember
-$PSModuleRoot = $PSScriptRoot
+#region Initialize the module.
+
+Invoke-Snippet -Name Module.Initialize
+
+#endregion
 
 #region If PowerShell erroneously created an Initialize-NativeScsmEnvironment module, remove it.
 
@@ -86,109 +87,29 @@ if ($initializeNativeScsmEnvironmentException = Get-Variable -Scope Global -Name
 
 #region Import helper (private) function definitions.
 
-. $PSScriptRoot\helpers\ConvertTo-TypeProjectionCriteriaXml.ps1
-. $PSScriptRoot\helpers\Join-CriteriaXml.ps1
+Invoke-Snippet -Name ScriptFile.Import -Parameters @{
+    Path = Join-Path -Path $PSModuleRoot -ChildPath helpers
+}
 
 #endregion
 
 #region Import public function definitions.
 
-. $PSScriptRoot\functions\Add-ScsmPxFileAttachment.ps1
-. $PSScriptRoot\functions\Add-ScsmPxTroubleTicketComment.ps1
-. $PSScriptRoot\functions\Get-ScsmPxCommand.ps1
-. $PSScriptRoot\functions\Get-ScsmPxConnectedUser.ps1
-. $PSScriptRoot\functions\Get-ScsmPxDwName.ps1
-. $PSScriptRoot\functions\Get-ScsmPxEnterpriseManagementGroup.ps1
-. $PSScriptRoot\functions\Get-ScsmPxInstallDirectory.ps1
-. $PSScriptRoot\functions\Get-ScsmPxList.ps1
-. $PSScriptRoot\functions\Get-ScsmPxListItem.ps1
-. $PSScriptRoot\functions\Get-ScsmPxObject.ps1
-. $PSScriptRoot\functions\Get-ScsmPxObjectHistory.ps1
-. $PSScriptRoot\functions\Get-ScsmPxPrimaryManagementServer.ps1
-. $PSScriptRoot\functions\Get-ScsmPxRelatedObject.ps1
-. $PSScriptRoot\functions\Get-ScsmPxViewData.ps1
-. $PSScriptRoot\functions\New-ScsmPxManagementPackBundle.ps1
-. $PSScriptRoot\functions\New-ScsmPxObject.ps1
-. $PSScriptRoot\functions\New-ScsmPxObjectSearchCriteria.ps1
-. $PSScriptRoot\functions\New-ScsmPxProxyFunctionDefinition.ps1
-. $PSScriptRoot\functions\Remove-ScsmPxObject.ps1
-. $PSScriptRoot\functions\Rename-ScsmPxObject.ps1
-. $PSScriptRoot\functions\Reset-ScsmPxCommandCache.ps1
-. $PSScriptRoot\functions\Restore-ScsmPxObject.ps1
-. $PSScriptRoot\functions\Set-ScsmPxObject.ps1
+Invoke-Snippet -Name ScriptFile.Import -Parameters @{
+    Path = Join-Path -Path $PSModuleRoot -ChildPath functions
+}
 
 #endregion
 
 #region Add a custom ToString method to the ManagementPackEnumeration type.
 
-if ($PSVersionTable.PSVersion -ge '3.0') {
-    Update-TypeData -TypeName Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration -MemberName ToString -MemberType ScriptMethod -Value {$this.DisplayName} -Force
-} else {
-    # Update-TypeData requires PowerShell 3.0 or later. To support extensions like this in 2.0 without
-    # requiring a ps1xml file, we need to use some internal methods. These methods won't change at
-    # this point though, so this should be a safe workaround for PowerShell 2.0. If it were to fail
-    # though, we don't want to raise a fuss, so continue loading the module.
-    try {
-        $runspaceConfiguration = $Host.Runspace.RunspaceConfiguration
-        if (($typeTableProperty = $runspaceConfiguration.GetType().GetProperty('TypeTable',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
-            ($typeTable = $typeTableProperty.GetValue($runspaceConfiguration,$null)) -and
-            ($membersField = $typeTable.GetType().GetField('members',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
-            ($members = $membersField.GetValue($typeTable))) {
-            if ((-not $members.ContainsKey('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration')) -and
-                ($psMemberInfoInternalCollectionType = [System.Management.Automation.PSObject].Assembly.GetType('System.Management.Automation.PSMemberInfoInternalCollection`1',$true,$true)) -and
-                ($psMemberInfoGenericCollection = $psMemberInfoInternalCollectionType.MakeGenericType([System.Management.Automation.PSMemberInfo])) -and
-                ($genericCollectionConstructor = $psMemberInfoGenericCollection.GetConstructor('NonPublic,Instance',$null,@(),@()))) {
-                $genericCollection = $genericCollectionConstructor.Invoke(@())
-                $scriptMethod = New-Object -TypeName System.Management.Automation.PSScriptMethod -ArgumentList 'ToString',{$this.DisplayName}
-                $genericCollection.Add($scriptMethod)
-                $members.Add('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration',$genericCollection)
-            } else {
-                $scriptMethod = New-Object -TypeName System.Management.Automation.PSScriptMethod -ArgumentList 'ToString',{$this.DisplayName}
-                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Remove('ToString')
-                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Add($scriptMethod)
-            }
-        }
-    } catch {
-        Write-Warning -Message 'Updating the ToString method for Management Pack enumerations failed.'
-    }
-}
+Update-TypeData -TypeName Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration -MemberName ToString -MemberType ScriptMethod -Value {$this.DisplayName} -Force
 
 #endregion
 
 #region Add a Name parameter to the Workflow type.
 
-if ($PSVersionTable.PSVersion -ge '3.0') {
-    Update-TypeData -TypeName Microsoft.EnterpriseManagement.ServiceManager.Sdk.Workflows.Workflow -MemberName Name -MemberType ScriptProperty -Value {$this.WorkflowSubscription.Name} -Force
-} else {
-    # Update-TypeData requires PowerShell 3.0 or later. To support extensions like this in 2.0 without
-    # requiring a ps1xml file, we need to use some internal methods. These methods won't change at
-    # this point though, so this should be a safe workaround for PowerShell 2.0. If it were to fail
-    # though, we don't want to raise a fuss, so continue loading the module.
-    try {
-        $runspaceConfiguration = $Host.Runspace.RunspaceConfiguration
-        if (($typeTableProperty = $runspaceConfiguration.GetType().GetProperty('TypeTable',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
-            ($typeTable = $typeTableProperty.GetValue($runspaceConfiguration,$null)) -and
-            ($membersField = $typeTable.GetType().GetField('members',[System.Reflection.BindingFlags]'NonPublic,Instance')) -and
-            ($members = $membersField.GetValue($typeTable))) {
-            if ((-not $members.ContainsKey('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration')) -and
-                ($psMemberInfoInternalCollectionType = [System.Management.Automation.PSObject].Assembly.GetType('System.Management.Automation.PSMemberInfoInternalCollection`1',$true,$true)) -and
-                ($psMemberInfoGenericCollection = $psMemberInfoInternalCollectionType.MakeGenericType([System.Management.Automation.PSMemberInfo])) -and
-                ($genericCollectionConstructor = $psMemberInfoGenericCollection.GetConstructor('NonPublic,Instance',$null,@(),@()))) {
-                $genericCollection = $genericCollectionConstructor.Invoke(@())
-                $scriptProperty = New-Object -TypeName System.Management.Automation.PSScriptProperty -ArgumentList 'Name',{$this.WorkflowSubscription.Name}
-                $genericCollection.Add($scripProperty)
-                $members.Add('Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration',$genericCollection)
-            } else {
-                $scriptProperty = New-Object -TypeName System.Management.Automation.PSScriptProperty -ArgumentList 'Name',{$this.WorkflowSubscription.Name}
-                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Remove('Name')
-                $members['Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration'].Add($this.WorkflowSubscription.Name)
-            }
-        }
-    } catch {
-        Write-Warning -Message 'Updating the Name property for Management Pack workflows failed.'
-    }
-}
-
+Update-TypeData -TypeName Microsoft.EnterpriseManagement.ServiceManager.Sdk.Workflows.Workflow -MemberName Name -MemberType ScriptProperty -Value {$this.WorkflowSubscription.Name} -Force
 
 #endregion
 
@@ -399,22 +320,20 @@ $nounMap = @{
 }
 
 foreach ($noun in $nounMap.Keys) {
-    foreach ($verb in 'New','Get','Set','Rename','Remove','Restore') {
-        if ($nounMap.$noun.Verbs -contains $verb) {
-            $newProxyFunctionDefinitionParameters = @{
-                      Verb = $verb
-                      Noun = $noun
-                NounPrefix = 'ScsmPx'
-                 ClassName = $nounMap.$noun.Class
-            }
-            if ($nounMap.$noun.ConfigItem) {
-                $newProxyFunctionDefinitionParameters['ConfigItem'] = $true
-            }
-            if ($viewMap.ContainsKey($nounMap.$noun.Class)) {
-                $newProxyFunctionDefinitionParameters['Views'] = $viewMap[$nounMap.$noun.Class]
-            }
-            . (New-ScsmPxProxyFunctionDefinition @newProxyFunctionDefinitionParameters)
+    foreach ($verb in $nounMap.$noun.Verbs) {
+        $newProxyFunctionDefinitionParameters = @{
+                  Verb = $verb
+                  Noun = $noun
+            NounPrefix = 'ScsmPx'
+             ClassName = $nounMap.$noun.Class
         }
+        if ($nounMap.$noun.ConfigItem) {
+            $newProxyFunctionDefinitionParameters['ConfigItem'] = $true
+        }
+        if ($viewMap.ContainsKey($nounMap.$noun.Class)) {
+            $newProxyFunctionDefinitionParameters['Views'] = $viewMap[$nounMap.$noun.Class]
+        }
+        . (New-ScsmPxProxyFunctionDefinition @newProxyFunctionDefinitionParameters)
     }
 }
 
@@ -422,8 +341,8 @@ foreach ($noun in $nounMap.Keys) {
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUatVcQN791o4WQL7w5omhJR6X
-# Y+igghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUc/9JeuZOQJZm+MQM5uvoedFN
+# 446gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -537,22 +456,22 @@ foreach ($noun in $nounMap.Keys) {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFAj7GeXkgQfGTQibkxuZyWwC4TKpMA0GCSqGSIb3DQEBAQUABIIBAKki
-# xHWq6pIdQxyF2opN/y08F4rFP51VP7Mn9x8XcnBas0JB811n1H9e1RCcWDm8qQar
-# 5hg7n8eOlj4+ChdY8pS7FIsf/3JSXlwHVJ+D9k98LALEZuO7EgB3FiJBJMDT5jQw
-# iXUZF6xOHYEcqLLeay6QswEykOQ5YhwB3dWyyYQSJ7FS904vY4UVdFsU2gGi2GwL
-# HXLb3YItzTPwRPQ++hBhbwvt77zLYNjhySkqXiKFYqzn9Rm+1SWl8iTBkgbPpXsO
-# lqY69kGlDITTLfi8qQTPXmkvKEDQTfdl0cORBNiIevdAfcZOYmwHTOm/xhkLvSKu
-# ZyB4h6ZndGsXGVGxMBChggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFGr//2mfZ07PAKcgOocRUdVJ2XaoMA0GCSqGSIb3DQEBAQUABIIBACst
+# KU5OHNLR4TjlYwU6Gauhh5dw9vZV+qX6KOosGCanKlZrS2nsQDeg2euBeHl9xZSc
+# rZpuqPbtMBLK/7yGIq2wNR0CDqGlqHWSgT155M2OfKTC9L2WZQK+ZQCk/WGDd8vC
+# Oi8/A86Hr+uBcwNxPw1qhxF8Jf+xpqgQse7H7tyPNiepn6NbiFNQWXkHTCi4n7+d
+# A1rgXLB7PoHjzhQasdiyvSlov0TSQ2T3KfdmMFxrQkKLbeJkpMVaelqqtRYI4Rxd
+# Q+64klJSmrZzMoS7UT3LdNogQLIdPZoCVgcpKi/NMl+IJhPgK1yT4fDUV0DCE/Nl
+# kthJF/FyFWCO6GWT68ehggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM2WjAjBgkqhkiG9w0B
-# CQQxFgQUMHoFTshX0T13BsDQxAfVGFGBJMcwDQYJKoZIhvcNAQEBBQAEggEAavFR
-# x+bRsFnTK2hcn1MfyFQPUAJlNusfmXzISxnclUpgA/mKWJodajHbD+FfExie9aCz
-# FrEJOwLYOtCIlGKuEsgzzOMcVI6DVSSgEDekb926YN/tiMic0MbcevKYWKNLQMYp
-# fyh3CRP7wvHWsOjt/KFJ6j/H3TDZe1+7Wk/A9Cns2i7VjLXm2cTr6nmHhdGmpvL0
-# pVI+2NL0luvYcISX0icuz5Lw5VopyN6QGXH8kPIx6Oyni8p+QOdUNgIOBijIfHyw
-# CCDxAs2rUPEjcIXr0XIUZmp7enQgJ5dZFmK23fX31sYmjUxslGe1UKT5mYh5M9cY
-# ey7QPn5isXCeoTq7uw==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NTU0WjAjBgkqhkiG9w0B
+# CQQxFgQUCgArsQ2B6jjCzi+ZtvjwIwefB4AwDQYJKoZIhvcNAQEBBQAEggEAiif4
+# VcZ3uLR4yQLYPKgaOgTogVzzCtnZRhdTsTisF4Bcume0GxYjNTnuRUh6aIEEDDBh
+# uNMUZzDY950kaSLFr/0cKpuKUS9/cSKU716zPVv5bs5bqHympWqtDxw4diQM5KSW
+# cs+FL/VRE3zmEayo3rkRIqW+rtzGs/fL4LYMqSo/MDcwn2OkTrDtJQt/pSkkjAQr
+# ihzygFsRwE0d97MRL2mF8gfUuSd+9dl/f6G7sIoIc48f2XAAq8/gewG7qzjaaHSu
+# ERruvsOi5fc1GYxs5HRIke7v57oKu8BIHIXuA5jZQfgjHg/dlQscUkyCgkDWsPhA
+# 8VPfRgvlqyD3ByLAHg==
 # SIG # End signature block

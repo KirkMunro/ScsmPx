@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 function Initialize-NativeScsmEnvironment {
@@ -37,11 +36,11 @@ function Initialize-NativeScsmEnvironment {
 
         #region Raise an error if the SMLets module is loaded (compatibility issues).
 
-        if (Get-Module -Name SMLets) {
+        if ($smlets = Get-Module -Name SMLets) {
             [System.String]$message = 'You cannot load the native SCSM cmdlets into a session where the SMLets module is loaded. The SMLets module defines a type extension that is not compatible with the native SCSM cmdlets. Unload the SMLets module and then try again.'
             [System.Management.Automation.SessionStateException]$exception = New-Object -TypeName System.Management.Automation.SessionStateException -ArgumentList $message
-            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'IncompatibilityException',([System.Management.Automation.ErrorCategory]::InvalidOperation),'Initialize-NativeScsmEnvironment'
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'IncompatibilityException',([System.Management.Automation.ErrorCategory]::InvalidOperation),$smlets
+            throw $errorRecord
         }
 
         #endregion
@@ -84,9 +83,8 @@ function Initialize-NativeScsmEnvironment {
             (-not ($scsmDwModuleManifest = Get-Item -LiteralPath "$($scsmSetupKeyProperties.InstallDirectory)\Microsoft.EnterpriseManagement.Warehouse.Cmdlets.psd1" -ErrorAction SilentlyContinue))) {
             [System.String]$message = 'The Service Manager cmdlets do not appear to be properly installed on this system.'
             [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
-            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'FileNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Initialize-NativeScsmEnvironment'
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
-            throw 
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'FileNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),$scsmSetupKeyPath
+            throw $errorRecord
         }
 
         #endregion
@@ -137,7 +135,7 @@ function Initialize-NativeScsmEnvironment {
 
         #endregion
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 
@@ -194,8 +192,8 @@ try {
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfCUZko2cAeJ3qkVXoSOIX8QG
-# 72mgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU8d24UOwt9jOsUdSOOZfVlFrH
+# DrKgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -309,22 +307,22 @@ try {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFFHiAz21+s9qksdZIEIIN68ztUBHMA0GCSqGSIb3DQEBAQUABIIBADRt
-# cuK6TkwGAi8CH0dFE2+2qxTg4yN6yt5f5aTcBXd7Gf2j18xZvnUE2/VEAvJOIfcN
-# 4m4+xBlbWGshAvg7GvsDdhwu/Xk6Kmns6cJRXZ4QMzydfpv+fI/0WI8KZ0L0eikU
-# IyXouy++m9M6qDhKkfPkJqGzXSu+1B2xIM5ILQLXaBQKN4TnmvS0xD4BHmhl9g63
-# ZI3g8udcb1msO4HrglkxKJKlLlbIfclrLmBm+i3u+ILHQ3I16vZN7SuvAo8++9oK
-# B+5OQzbgPKRsvri/aHzpxh9dmUCrhfZjV79nkDclRG7vvGspyiMX0EzY6MMbbUZp
-# 7M/ygCRYVPY8RMkS6mehggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFMpljZgvdMIr6RtdQUMLjkwM9FDEMA0GCSqGSIb3DQEBAQUABIIBAHlC
+# vB07JTcBHyTpMVYy1/wgSPyIPMqDFuzidrzzCfUKglHY5/R4hFGscB5nT1iA8S07
+# Xf2BfKdUn8vvEgbw0SyWpPgLAXgfyvFzoyL5B6U9a9Vx1adZabuTyGdlUOMYG+GI
+# 35UXwg46Q+o4aAtjMrGXCR2692FdiX6hvajD3cti6uznqynVdIMw/XNPwmSWvuNN
+# 9hNLVW+X/8YtJHWD8fLMYsiQgVHYAJ0p1FzJpO/P3NA0dNbvFu9YVeKlFeBH5YSE
+# zgluZQ8tms327nKcXWSHgMLaz/2z2KB3mJRU+x5yjdqQacbfpolVakmtZJYD7B24
+# bBlBTAIWIRy3rQCE1i6hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM4WjAjBgkqhkiG9w0B
-# CQQxFgQUSXr8Kgjd5BV2kwz0U2I24W9N7vowDQYJKoZIhvcNAQEBBQAEggEAKo1p
-# OL0HwGKKx0NGucVPdqlUTvpUpZqpemAANvhnryjkDcDaUmdAmZ83G1Cs6+tyuQ0n
-# gfkgAG0eNt7WVvJnUQ8AsUB5osrP3If0Sfl2amdnDI8lTHl6dB6cUbNIWS9XV/wF
-# E4S4irhpfICtKbzthe1OX5nNv90/We+6U/yC3O9d2E6rTRFBl6mGr0azkr64pgZA
-# bNRmLrzMAHBzNUbBIko87TmA/lt4CL60oOpD3wBkXgrDgoCqLhYmIsHO/lipWfZ7
-# YlIZpWJkveKambTXiyYLL4WYb1YQYt+BPmxEVA44fZ0SRLJBEo4jSo8Hj3mJaQYK
-# 9dsQJ6PMLKcJfAUUSw==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NTU2WjAjBgkqhkiG9w0B
+# CQQxFgQUP6TV6N+XHbO0hIO7AFJSV4PwAeYwDQYJKoZIhvcNAQEBBQAEggEALJW/
+# WoeKp5zPLoY3pRAYvXwnCWoJIb+rTLuxKr6QugqFOkEKbZiLwv8tiYm+gAxNcZYa
+# sQQqICJBfxtMCn44uFseiMjkbkIf0jCNUVQcxIecUz1YBk85cz3KbcYAOrWMw6ur
+# 9McHa6p31jjlXnWdnyJD8+tEh9sWhwD70hjjMWPgHHT7aMiVkd6A037+U5aUIYWh
+# Pxh1DKOUyA2a5mmPkpsPps2qEU84C8CA9uxRQKum41HzfzTGehmOYbGyIu73rWho
+# X8rL1eQNc33mqZTDmIV7w+hUR+3+0kupzxdD24T6Q5KatyjfsozapTSYozBfqyRd
+# lbkVJOl9VCcx9jdn4g==
 # SIG # End signature block

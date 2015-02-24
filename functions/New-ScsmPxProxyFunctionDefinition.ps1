@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 function New-ScsmPxProxyFunctionDefinition {
@@ -144,7 +143,7 @@ function ${proxyFunctionName} {
                 [System.Management.Automation.CommandNotFoundException]`$exception = New-Object -TypeName System.Management.Automation.CommandNotFoundException -ArgumentList (`$message -f '${functionToProxy}')
                 `$exception.CommandName = '${functionToProxy}'
                 [System.Management.Automation.ErrorRecord]`$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList `$exception,'DiscoveryExceptions',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'${functionToProxy}'
-                `$PSCmdlet.ThrowTerminatingError(`$errorRecord)
+                throw `$errorRecord
             }
 
             #endregion
@@ -162,7 +161,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     process {
@@ -173,7 +172,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     end {
@@ -184,7 +183,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
 }
@@ -381,7 +380,7 @@ $(@(foreach ($key in $Views.Keys | Sort-Object) {
                 [System.Management.Automation.CommandNotFoundException]`$exception = New-Object -TypeName System.Management.Automation.CommandNotFoundException -ArgumentList (`$message -f `$functionToProxy)
                 `$exception.CommandName = `$functionToProxy
                 [System.Management.Automation.ErrorRecord]`$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList `$exception,'DiscoveryExceptions',([System.Management.Automation.ErrorCategory]::ObjectNotFound),`$functionToProxy
-                `$PSCmdlet.ThrowTerminatingError(`$errorRecord)
+                throw `$errorRecord
             }
 
             #endregion
@@ -399,7 +398,7 @@ $(@(foreach ($key in $Views.Keys | Sort-Object) {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     process {
@@ -410,7 +409,7 @@ $(@(foreach ($key in $Views.Keys | Sort-Object) {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     end {
@@ -421,7 +420,7 @@ $(@(foreach ($key in $Views.Keys | Sort-Object) {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
 }
@@ -565,7 +564,7 @@ $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ConfigItem') -and $Con
                 [System.Management.Automation.CommandNotFoundException]`$exception = New-Object -TypeName System.Management.Automation.CommandNotFoundException -ArgumentList (`$message -f '${functionToProxy}')
                 `$exception.CommandName = '${functionToProxy}'
                 [System.Management.Automation.ErrorRecord]`$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList `$exception,'DiscoveryExceptions',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'${functionToProxy}'
-                `$PSCmdlet.ThrowTerminatingError(`$errorRecord)
+                throw `$errorRecord
             }
 
             #endregion
@@ -583,7 +582,7 @@ $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ConfigItem') -and $Con
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     process {
@@ -594,7 +593,7 @@ $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ConfigItem') -and $Con
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     end {
@@ -605,7 +604,7 @@ $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ConfigItem') -and $Con
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
 }
@@ -629,7 +628,7 @@ function ${proxyFunctionName} {
         [Parameter(Position=0, Mandatory=`$true, ValueFromPipeline=`$true, ValueFromPipelineByPropertyName=`$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({
-            if (`$_.PSTypeNames -notcontains '${ClassName}') {
+            if (@(`$_.EnterpriseManagementObject.GetClasses() | Select-Object -ExpandProperty Name) -notcontains '${ClassName}') {
                 throw "Cannot bind parameter 'InputObject'. Cannot convert ""`$(`$_.DisplayName)"" to type ""${ClassName}"". Error: ""Invalid cast from '`$(`$_.PSTypeNames[0])' to '${ClassName}'""."
             }
             `$true
@@ -686,7 +685,7 @@ function ${proxyFunctionName} {
                 [System.Management.Automation.CommandNotFoundException]`$exception = New-Object -TypeName System.Management.Automation.CommandNotFoundException -ArgumentList (`$message -f '${functionToProxy}')
                 `$exception.CommandName = '${functionToProxy}'
                 [System.Management.Automation.ErrorRecord]`$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList `$exception,'DiscoveryExceptions',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'${functionToProxy}'
-                `$PSCmdlet.ThrowTerminatingError(`$errorRecord)
+                throw `$errorRecord
             }
 
             #endregion
@@ -704,7 +703,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     process {
@@ -717,7 +716,7 @@ function ${proxyFunctionName} {
                 #endregion
             }
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     end {
@@ -728,7 +727,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
 }
@@ -751,7 +750,7 @@ function ${proxyFunctionName} {
         [Parameter(Position=0, Mandatory=`$true, ValueFromPipeline=`$true, ValueFromPipelineByPropertyName=`$true)]
         [ValidateNotNull()]
         [ValidateScript({
-            if (`$_.PSTypeNames -notcontains '${ClassName}') {
+            if (@(`$_.EnterpriseManagementObject.GetClasses() | Select-Object -ExpandProperty Name) -notcontains '${ClassName}') {
                 throw "Cannot bind parameter 'InputObject'. Cannot convert ""`$(`$_.DisplayName)"" to type ""${ClassName}"". Error: ""Invalid cast from '`$(`$_.PSTypeNames[0])' to '${ClassName}'""."
             }
             `$true
@@ -807,7 +806,7 @@ function ${proxyFunctionName} {
                 [System.Management.Automation.CommandNotFoundException]`$exception = New-Object -TypeName System.Management.Automation.CommandNotFoundException -ArgumentList (`$message -f '${functionToProxy}')
                 `$exception.CommandName = '${functionToProxy}'
                 [System.Management.Automation.ErrorRecord]`$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList `$exception,'DiscoveryExceptions',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'${functionToProxy}'
-                `$PSCmdlet.ThrowTerminatingError(`$errorRecord)
+                throw `$errorRecord
             }
 
             #endregion
@@ -825,7 +824,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     process {
@@ -836,7 +835,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     end {
@@ -847,7 +846,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
 }
@@ -870,7 +869,7 @@ function ${proxyFunctionName} {
         [Parameter(Position=0, Mandatory=`$true, ValueFromPipeline=`$true, ValueFromPipelineByPropertyName=`$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({
-            if (`$_.PSTypeNames -notcontains '${ClassName}') {
+            if (@(`$_.EnterpriseManagementObject.GetClasses() | Select-Object -ExpandProperty Name) -notcontains '${ClassName}') {
                 throw "Cannot bind parameter 'InputObject'. Cannot convert ""`$(`$_.DisplayName)"" to type ""${ClassName}"". Error: ""Invalid cast from '`$(`$_.PSTypeNames[0])' to '${ClassName}'""."
             }
             `$true
@@ -921,7 +920,7 @@ function ${proxyFunctionName} {
                 [System.Management.Automation.CommandNotFoundException]`$exception = New-Object -TypeName System.Management.Automation.CommandNotFoundException -ArgumentList (`$message -f '${functionToProxy}')
                 `$exception.CommandName = '${functionToProxy}'
                 [System.Management.Automation.ErrorRecord]`$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList `$exception,'DiscoveryExceptions',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'${functionToProxy}'
-                `$PSCmdlet.ThrowTerminatingError(`$errorRecord)
+                throw `$errorRecord
             }
 
             #endregion
@@ -939,7 +938,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     process {
@@ -952,7 +951,7 @@ function ${proxyFunctionName} {
                 #endregion
             }
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     end {
@@ -963,7 +962,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
 }
@@ -986,7 +985,7 @@ function ${proxyFunctionName} {
         [Parameter(Position=0, Mandatory=`$true, ValueFromPipeline=`$true, ValueFromPipelineByPropertyName=`$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({
-            if (`$_.PSTypeNames -notcontains '${ClassName}') {
+            if (@(`$_.EnterpriseManagementObject.GetClasses() | Select-Object -ExpandProperty Name) -notcontains '${ClassName}') {
                 throw "Cannot bind parameter 'InputObject'. Cannot convert ""`$(`$_.DisplayName)"" to type ""${ClassName}"". Error: ""Invalid cast from '`$(`$_.PSTypeNames[0])' to '${ClassName}'""."
             }
             `$true
@@ -1037,7 +1036,7 @@ function ${proxyFunctionName} {
                 [System.Management.Automation.CommandNotFoundException]`$exception = New-Object -TypeName System.Management.Automation.CommandNotFoundException -ArgumentList (`$message -f '${functionToProxy}')
                 `$exception.CommandName = '${functionToProxy}'
                 [System.Management.Automation.ErrorRecord]`$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList `$exception,'DiscoveryExceptions',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'${functionToProxy}'
-                `$PSCmdlet.ThrowTerminatingError(`$errorRecord)
+                throw `$errorRecord
             }
 
             #endregion
@@ -1055,7 +1054,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     process {
@@ -1068,7 +1067,7 @@ function ${proxyFunctionName} {
                 #endregion
             }
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
     end {
@@ -1079,7 +1078,7 @@ function ${proxyFunctionName} {
 
             #endregion
         } catch {
-            throw
+            `$PSCmdlet.ThrowTerminatingError(`$_)
         }
     }
 }
@@ -1092,12 +1091,12 @@ Export-ModuleMember -Function ${proxyFunctionName}
             default {
                 [System.String]$message = "There is no support for proxying ${_} at this time."
                 [System.Management.Automation.PSNotSupportedException]$exception = New-Object -TypeName System.Management.Automation.PSNotSupportedException -ArgumentList $message
-                [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'NotSupportedException',([System.Management.Automation.ErrorCategory]::InvalidOperation),'New-ScsmPxProxyFunctionDefinition'
-                $PSCmdlet.ThrowTerminatingError($errorRecord)
+                [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'NotSupportedException',([System.Management.Automation.ErrorCategory]::InvalidOperation),$_
+                throw $errorRecord
             }
         }
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 
@@ -1105,8 +1104,8 @@ Export-ModuleMember -Function New-ScsmPxProxyFunctionDefinition
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUk+YsRKqUQU5hxzCF5TiM77qR
-# PcmgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3RNkzAwMd6+wi6mI7CPuFZSw
+# wUigghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -1220,22 +1219,22 @@ Export-ModuleMember -Function New-ScsmPxProxyFunctionDefinition
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFPiCBzhLeMQmHhhHvuTWP0mOfW8YMA0GCSqGSIb3DQEBAQUABIIBALy+
-# 3ti0jwbJX3xUght0LZ2PDHmfeUOxKREackUXOt5Z9PYFplVwnEr0NV7ma7OyryFw
-# uljgtZ5JhCGsglEVGDbMdeJQcM+hnXBIpa/ItSKaMu8jYqili3oLJEEJOFh094Wi
-# 7zqbgwvNHMDa9ut6ae/hpmjh90d5CpZnfSGC7EXzAcQNNz38QjYgOhLTPC4AQ61t
-# jJC7c8Cg549KHj3z+nn1w9pf12y/xegIJkF3GKq1gZfEo1mQhJBR1/Avb7Lx16J0
-# aIKr5zG4iAVFuO+FoquWh5vYTeLwIOcgy/mc8QR/CB3xWL+yhodQwaclWoebAz2V
-# LRNdNX7ZLC3zq5Ugd7yhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFGQQD+g2oVvfCNvxxT9ye/h06HRRMA0GCSqGSIb3DQEBAQUABIIBAEjT
+# CgjXoy63jHjZAwdoLP/8QNcBDOCT7PqE2IAfXMs5XTbLiVWfp4DlU/oXxM2d6vNj
+# fnHxDCvnnVnG1BnryOyVExHdTS1lKkUS1yNZVlTbNIDEl5noPKaLQwEk9NvbS/3H
+# kW+Tpa/IMflsNIVO1N3i7L0iLhNUkqEv6nZPJYmL2q2HB3f4eWcz5DrBPPlMIWEw
+# gzRLQBNq96ttkK/syYcsnh9EZoecvBlJv0KrYe3ptsbOdDjuHMPZUuOt58+Mq2TP
+# CsDIlsBD+1dF9u/ZO5eFbzlf6LDggBXC+fP6kn2HrvwPYvgYfwKBr5Jwr2Lw7ROp
+# uUpvXdb8jnuJ7wdEePShggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM4WjAjBgkqhkiG9w0B
-# CQQxFgQUphIfyfKSAjupQxfHkxyFQVX5PnQwDQYJKoZIhvcNAQEBBQAEggEAPwI/
-# WXJ+DQ9eXUFqoCRaDNRC2M+fx+9f+4+35aZ7LuS+66CYs9vhrzh6mLcLbKXltI+I
-# 23VDD9eWXJMOa/9jQAQ4M4OaCZ5z/G4JRX2q0CHGKmtke6AX2Hrg7hUdLBt1Kpa2
-# 1pvGGcv+2fLa6BbuNICxx5pf+PbDKhKkZBHQz5n7r97UFm6n84OWJvu3P6EOh9Cx
-# 7BqYxsky1Qq6rdpdtrcrXjLO4/EPd6M0sMJuhzo8tE8ADEl4UlH7wJJ0taUaG7XZ
-# jUV/cLj3xkw+Jd1IY8HnW01IipuRd/5a4gtm1JYvI+YNg8wD9LeKcI0hKSyeB6XU
-# KP9D+viZaY+iKrQT/w==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NTU1WjAjBgkqhkiG9w0B
+# CQQxFgQUOlhj5u2wzrflJY5iSOM4Et+eQxAwDQYJKoZIhvcNAQEBBQAEggEAHquU
+# /bCesJKH4ZDfp9Cx86eCH/kYTEFv+K1OTdIP7qUAgmTkM9XJ1R5y6EyEEg0mI0By
+# VEJl5Pps4zFVmzxFCssxA4S9NTp30NgK8PpdhwsR+eRxtNDfXFBtLKK9HFQhnL2q
+# jxonjeqaE5hOlX+LTUL2AhMZSqzr4/oCUMMNp8Y99vAOBnltibjxyilgi8RilC6a
+# KubO0QY0amjS0aequAxSlOc9IZuYRyXp/PZnPDMt4pNlBd8+Xtzz4oJEEInj7JGA
+# 1B9bqnpe3MQ6cj1TR36T3Tf5PZyfA6iSJ/oPIPUhI0jj2lpAlbYJFCWtYRF0p0Zn
+# lPxAn7nmkDqPXx2iuQ==
 # SIG # End signature block

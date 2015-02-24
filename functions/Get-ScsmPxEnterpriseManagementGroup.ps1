@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # .ExternalHelp ScsmPx-help.xml
@@ -94,12 +93,12 @@ function Get-ScsmPxEnterpriseManagementGroup {
         #region Retrieve the Enterprise Management Group object for the chosen connection(s).
 
         foreach ($item in $managementGroupConnectionSettings) {
-            New-Object -TypeName Microsoft.EnterpriseManagement.EnterpriseManagementGroup -ArgumentList $item
+            New-Object -TypeName Microsoft.EnterpriseManagement.EnterpriseManagementGroup -ArgumentList $item -ErrorAction Stop
         }
 
         #endregion
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 
@@ -107,8 +106,8 @@ Export-ModuleMember -Function Get-ScsmPxEnterpriseManagementGroup
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUCrvRqv4Ymo4FesNjQlWpAwk/
-# 5+SgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUQA9KJG3Y7NOFySDmQTJ66JDi
+# poSgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -222,22 +221,22 @@ Export-ModuleMember -Function Get-ScsmPxEnterpriseManagementGroup
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFM5JyHyIR3NY1fubPCFNKBq68rpGMA0GCSqGSIb3DQEBAQUABIIBADe+
-# yKhroCA6Mwh/Viip4zL/N4UyNXv1+/oZsFJl1WK+8O+d/MXWAp3je/Fwa0nUDUwN
-# YkyJ+4CFBgb89iF8LER+PRZ+H3rlmRmCodfjZieLGt6NepJlKhwJ7M2bwXDAX+8V
-# fgLpGvCsMofDSr70sGGo8T71hDhcVDPZbTgxxrudXJq95HBncF7lJJIpK0da8JWO
-# qXR97Kg4qUdXbkcPUhtfLj9bnqpRtKEYDE1sn5uZKhKagl8NiS2IRFymt5IWdfFI
-# qYUt+pM9/saOL/ZGxeEwbWJEIaAIIiQn2zB9/Rt/c8qXMQwsAsMfSHi8u/+VHf9X
-# EGsUH8bdsBaFe04mtYahggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFBiaJ+ctDonu1W6gHHxo91WkJG4/MA0GCSqGSIb3DQEBAQUABIIBAHRi
+# zp4SobPnOgGBzDGTX2YwAjOKU79dkPAtrDSKesXmStc2rjoBrkR5bfv8OM/kOcJB
+# TEKamx4ET5gW5GSxiEUXLFzqbicoluplwPNCfhM344c8EDFQubSoxZ+0ge93ippH
+# 5rnce7egJrHLJqLzp4kAq9XKUPGpvht9IQjzfIP9J5eH/fjkyF20ZB24GDlpw1cN
+# vzVusddYWUKGGP4cBRJ0OJ1Wb0l+1y6oROVo1amItSxqhua/E+wdQfB1iLVfWmEv
+# Yrhw5kDa0HHgq9Y9cfKI9qBY1QwlRadrWuvU/Mv8s0Sx8S3B7U61prVzk502ho2N
+# 5t4c8pEMpYsAeYegn5GhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM3WjAjBgkqhkiG9w0B
-# CQQxFgQUVPME1V6m57Jssy4zR09vliN2COQwDQYJKoZIhvcNAQEBBQAEggEAkbXN
-# MxPTgujxlfGM1loIg+64aSIdMNJzoZvpzAN6PJD3qioRKDkaULEhgjssZk6NQ/9Q
-# ngDjFzrax0yq5d3MgyMa1gmpJEoXSr8sTH8/jzubvJbhFu5ZaypTyxN5P/70B7Ny
-# ktMuNY27nFaiwQrGdbjV8FAtlCSkHgYnFBGMYVjXWWri4DvGe24Cb4uYhBq5R1WD
-# LNN6thWWr/l2KIlX2oWRX9IyGX7PAXO82XVAq/IinWFubUvEVD8wKmDKjOoLMz2P
-# 0pVaEH0o4I9WvI7l995V4uGw+nkmdY3bZJdQbbA/WrJElreMgmku9arHN3N0rm5e
-# ZFn/0E8aTc0dpizR3A==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NjA1WjAjBgkqhkiG9w0B
+# CQQxFgQU/4cL7OGeI5Zdp/aYVE18K2yMyB4wDQYJKoZIhvcNAQEBBQAEggEAinBk
+# 8rmHUwq8kYDOeUEIykZ/y0aygOpNDeWJOaUOAM8JJ4bhjUCAGZ4xgrJEAi76C+SS
+# bC0FB73vCCF7MAHnFruSoXPkyRNL62Fx1sVAbz7Eil32aCE0LihW13JYCa8tnFZ+
+# kB2+FPyRxWt+mZmLawsXjtb56YdYSlJkMt0PDKz/UGCm2ZCAnVqoL/0VAUCbhZki
+# Nk4oJrWa8OC8ZU6HiKOdSZeMqI6pLq/9C5chNvrh5uFEs1ZYfmB+mPK7xKgeifVV
+# eoH+C04UCXASWQ3qQ1FztnfvBHLyViLgas2KJWSz6HmQXNqf/Y2n/ekdmAiPa7fh
+# oONS1A4Ug7t89xs5Qg==
 # SIG # End signature block

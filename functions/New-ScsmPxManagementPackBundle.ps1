@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # .ExternalHelp ScsmPx-help.xml
@@ -89,7 +88,7 @@ function New-ScsmPxManagementPackBundle {
 
             #endregion
         } catch {
-            throw
+            $PSCmdlet.ThrowTerminatingError($_)
         }
     }
     process {
@@ -100,7 +99,7 @@ function New-ScsmPxManagementPackBundle {
 
             #endregion
         } catch {
-            throw
+            $PSCmdlet.ThrowTerminatingError($_)
         }
     }
     end {
@@ -216,7 +215,7 @@ function New-ScsmPxManagementPackBundle {
 
             #endregion
         } catch {
-            throw
+            $PSCmdlet.ThrowTerminatingError($_)
         } finally {
             #region Close the streams to the resource files we opened and dispose of them.
 
@@ -234,8 +233,8 @@ Export-ModuleMember -Function New-ScsmPxManagementPackBundle
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUj3XES6u9bvm6sqFBnImDvKDw
-# maugghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUKFTGiROwDtmDrERvHly4D/lU
+# 5O+gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -349,22 +348,22 @@ Export-ModuleMember -Function New-ScsmPxManagementPackBundle
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFE2duWP8+RfmuvMK4TUTBvPIP0goMA0GCSqGSIb3DQEBAQUABIIBAErb
-# znhOzNvjnAiWDs1GXcOpsW8ybKSauxOUZWFIMe2vf7y/OuvrxkUjm4rFQlyBGWSG
-# 4QIANup6z5q7hmHv675724l3gcSIcmO1pCY7R+OSsAJXkThhaU8wtxU4aAA7UtyD
-# xMb4BoD6n2yNcAk8AUAak9fQvfsM5C9UHxQcaOhKNL4aIkeCTa5Il5f01e656ESt
-# SWQK39FOhWiBO2rrtwQxOL+poYAuOVfDiwBCMupx2JJhB5jI+SdN7vGBv4c1n2ai
-# sZ1coQKFAVGsWSDZhfYQCCd6/5MGo57kcgW/gom0rJ3jnkObvuis8AHCkBJ3MW4d
-# 7VT70GbYAx9TTloGuz2hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFIArnN6oXEkOSsEUspqq4fCd51eMMA0GCSqGSIb3DQEBAQUABIIBAI20
+# xA2kA0YhyEfHlZEDWkGD6JCfHM7IxNrfJRGw05+awREAcUivEDCGS/aMQ5f0Zt3F
+# 8l1hvez3RM+ggcz/dfugL1SyUbBMTL7qgu5zSrDWAWN7JoEAJsvjeihbWirxSdMF
+# +zYXOXM4i1dEpMD3PIJIe1NY9fqP4zcJWMIKLsHtiV4faEMRd5pzX+Rpk3YLQvQR
+# 20mg5YJu1dYcsL/LcSdeqi8JSiHWhAs7XR04pwTRl89jkW31BeOQLDBsFrTuQAw1
+# aHAvXx7TKgwSkx8UrVJRE9vfYkzMQbzEC/ecD9gJXaxjwhsAMj03Ih0zx84b6Dsp
+# XVASCFABkO5CxVQHKuKhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM3WjAjBgkqhkiG9w0B
-# CQQxFgQU3T8MttVLyHgiGFDiDPl7KJUv4xkwDQYJKoZIhvcNAQEBBQAEggEAOPFN
-# IpFZZ7pPc5dIaSHSgOTKZpEmZfrkSrglPlTG6XZt4HU5wTR4xjEwvX82ycR6twg/
-# ZYSgdT9jKwM6wPzlKIjXmCXvhFV3hbYjzaHb/9j6mTY+oUERiCUYWJh3RFnlIlEd
-# 9tSUpvrycLhdJVAxcVQXrDqe/rr5HJ9Mb8vOC/qPIhxMt4uGmBW6SY09MdrNOlz1
-# cKxyGn2+yez+TGtstW/jwhk4LpEdsEw4EBV6ZwvRx/9Rpx41wcLdIaUKjAFSXt9M
-# uBtmkasEDqGriVznM4LqwFUWWCuRBLuM5WZCIlFS2zBBAHOumX11I2nu0oSNsCSU
-# IFvm9pUuKRhDbs1EEg==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NjA1WjAjBgkqhkiG9w0B
+# CQQxFgQUNKn7Nfp75iwK4L4R4CAQy6OHRTYwDQYJKoZIhvcNAQEBBQAEggEAK5Gz
+# 3yBS0h8jXRkMiNlZMjplbbKjiBexKmFf3Xly77eWX/SwcRFCpH8VVMsXuFHtceRW
+# 5talNRYDiOYcac/Lb8pzVnz0q5KhNpkY8JFQteJxvc5OWtBw5BOH81yQPgsxBp7R
+# UkDNElmkF928zMG+FhFXueA9OZRC1bLlxLAgoudoIS+/r+T4U8ytmZ6UuNIHqVPs
+# BXzVcZsxp5wD5HKxe/LVHrNthLtvGjNmA4Z2Axc525XnnejYsG+gBumArZhkxsqN
+# JUYNY+HxK9KOTcdhmqaH+2cHZ7d17faIvELc4y0oOqj/NCTv2xUzlmQW5Md8Lng1
+# BhA1zIdUY+2Pzodvxg==
 # SIG # End signature block

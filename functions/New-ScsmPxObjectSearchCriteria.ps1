@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # .ExternalHelp ScsmPx-help.xml
@@ -115,7 +114,7 @@ function New-ScsmPxObjectSearchCriteria {
 
         #endregion
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 
@@ -123,8 +122,8 @@ Export-ModuleMember -Function New-ScsmPxObjectSearchCriteria
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUniXyoAvu8pd3HTF7TgyennQ2
-# tuqgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU2LO1DxuMR3nBARw7QtNCA8TQ
+# ab6gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -238,22 +237,22 @@ Export-ModuleMember -Function New-ScsmPxObjectSearchCriteria
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFOWD3ChK+t9sNHlljt2p0k+CZvzvMA0GCSqGSIb3DQEBAQUABIIBAL0x
-# Exg5JlZPUrJO+NZ1pHEZqNcHpLlYFBZC0bkWjGIlH14Jw1I195AugP5y4hbgsOwi
-# JKEfL2Aaep1dS1AO8Htnn60+BiO7970CDccirO+gKcQNe8XM5x/0hL7Fph6pJJla
-# w0UWRQ6c+krUqd2I8jWIheKbThwSQMqAFlZXgBB/LEzx0Ho02S4988UbyUVT2FvK
-# AsauQV29NW21SdkxTpv3AUISAgNGv3fFhsooxL98Oiip2h/MhaZ0rZQDG6rZZZdt
-# zH3+dhORCBA0ty/BDKHV0hGgJD7yQK2rIcMFF+7WY6zmNEwoiajv2H7g07yR0SuU
-# mw/nulc90q8pCNnyX+yhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFDglDBtsqjp3D9ASS9jrdMaugLYcMA0GCSqGSIb3DQEBAQUABIIBACMk
+# Hvvcc4MITPcbxbsMVIvQwWHFlI6M0MGXNpC7dJnDiv8H8MzMYt93sQpXv+LUfE0T
+# PHM9vKQdzR3ofPEHg17fyMhP2zh3eIIuTGThBFcTlV3svjGiiBv/otIJ55EY8YwS
+# rKLJOzqizmi6Rp1mmSmUr/BbMV2TrpNDYgQGj+OsGFRiQ+6dw4mcCXqMVo3euzaI
+# 1143NMFg3sOPeWYpn2NmjEiCtR8E93WwMloTUnxburwgje8plfyM6CwSIFUnutA1
+# 9SjPcuIylvmfnHOi/NVaAejR6dYXOLvixDs0Zt0+eawNot/wZlm9ZzXQUjRS+KD8
+# rR/VjkQquhPXFIybNG6hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM4WjAjBgkqhkiG9w0B
-# CQQxFgQUgzyejBhcjj/lb/N4eTn+AWJLxO8wDQYJKoZIhvcNAQEBBQAEggEAHkJZ
-# KQ0ws/I39aCf2qd6FYrX+pGBVxU1x9kznXjIiNM5yNwWHv8LeoGbvTwa2bufhbom
-# csIrVL9m51LOcPEa2zu1XnQc+/dWCbdw9mOOUbU+ULjb/2CJWgIL45hZnUjDN2Gd
-# +7hGco1mfrclef67o1gkAFnqp+2acCLQFmcZ3IIOlDn2G3DptRJISTVCEirEkDj0
-# s7zGt9MQp23xq76O7MjEHNffH4f++g8R14TSwTmSkF1XML6EfgeWEO/sCar+IKod
-# ZJ/j3s1dj9uRJvURIu8or/kTQLNxf1KLIOQ+tWZyLp/9wcWnncokCQ/3RhaqXxcD
-# 4uW5s9S5ZmDena4SJw==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NTU1WjAjBgkqhkiG9w0B
+# CQQxFgQUQFsuxDrFkywgmI5jpJ7TB3ifuA8wDQYJKoZIhvcNAQEBBQAEggEAYRcm
+# /iR9ZSyJDcef8iRJrT7+DfTErleMc8XiA2V4sdCl0B6D8r7W53GsrSjYXVkcN3sA
+# Oy4Qv9vAWDn5JtdJWDourp48EfHseVoMfyJM1tMLso2LXhogBbp6LcdE3Lzw13Sm
+# ZyO0SbI8Y8Qd3uIs7mYwyCurtJ8/ZGZHFUSsZulEfUSVqE4ymsSYHCsYajwnwlIk
+# q5Jaaqrk+WfaHVMquvAB8GaI7GXIMDfzx2K0sLVkLdoFqk34+s71KHi8KEZpjfct
+# uYLlp2kO5oaHx9OC0jgbninWcEYSzqthxUrW4Y9SnteQkwkdXD1kI6beavGes4BV
+# Yj3Df6gr2CnNzumtvg==
 # SIG # End signature block

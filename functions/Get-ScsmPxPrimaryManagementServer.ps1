@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 # .ExternalHelp ScsmPx-help.xml
@@ -70,8 +69,8 @@ function Get-ScsmPxPrimaryManagementServer {
         if (-not $healthService -or $healthService.GetType().IsArray) {
             [System.String]$message = 'Failed to find the health service that manages the WWF target.'
             [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
-            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Get-ScsmPxPrimaryManagementServer'
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),$healthService
+            throw $errorRecord
         }
 
         #endregion
@@ -82,8 +81,8 @@ function Get-ScsmPxPrimaryManagementServer {
         if (-not $computer -or $computer.GetType().IsArray) {
             [System.String]$message = 'Failed to find the computer that hosts the health service application.'
             [System.Management.Automation.ItemNotFoundException]$exception = New-Object -TypeName System.Management.Automation.ItemNotFoundException -ArgumentList $message
-            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),'Get-ScsmPxPrimaryManagementServer'
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
+            [System.Management.Automation.ErrorRecord]$errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception,'ItemNotFoundException',([System.Management.Automation.ErrorCategory]::ObjectNotFound),$computer
+            throw $errorRecord
         }
 
         #endregion
@@ -94,7 +93,7 @@ function Get-ScsmPxPrimaryManagementServer {
 
         #endregion
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 
@@ -102,8 +101,8 @@ Export-ModuleMember -Function Get-ScsmPxPrimaryManagementServer
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUwV1ilXU2yzUoMnkfcOzUqJ08
-# HSOgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOyd4Zmv6Ew3WfCiK3zPgqL8J
+# Z5CgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -217,22 +216,22 @@ Export-ModuleMember -Function Get-ScsmPxPrimaryManagementServer
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFI0/0bqF/W+Z30gtGRr7vXqOnnYsMA0GCSqGSIb3DQEBAQUABIIBAMYS
-# PvJpGJ/h/NTKjNrdSIikYDPvmK6q2MfiQovz0XeKQFtUAKanNARKbnHy1UXGWBco
-# nbxKrt509dt8WySW1PKvRWRjDVuiToofNDzyEzJ5QLljkzSXegbuDzY4fA8gZjuU
-# WZ3dLVQXRBUbAgj+A5bh90hRh5y17cdOjBINX7vGqhCnkUBZOwzSfRZdKj794/lU
-# tBxn3nfKBt46bSFAmdi3zcTgeIb3E2sqzpC5+JT2/HVi5FAHlpmtTBJkNEQZA8EI
-# JlmB7MbK9OOUzfKUW9J0dGDBSJwZYJ1w5IAsgxS6PxHrog/UcRzzX66qUSsj5ina
-# bFEjQvrQ5jTfVADB+QWhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFHjSQVaA37mShOUQEtprOqWGnM96MA0GCSqGSIb3DQEBAQUABIIBAHO5
+# CM/Z3pAmaaGRx0ShobmWwkZvlEpkvRfjsdobZUhcjYIyzw31DpS1b+95BLS715nQ
+# Dchkmvd90xym8LtbaoUY2WkrnnMREmxVBhCkhzSEcrGnzI+c74YEB1YKLwsa8iOM
+# RE16+CtQRL/bRioonjXZyKXpR8cjGEJ81Z5QsrXk3l2YREvWTA6wh6tmLVVrPMHx
+# 0GMcMyjeE8QrBX0QEt/XayWNWUtjKZFjdIST028zJEnSkzo5/PTU5lOOBMaNN1zo
+# +WAPA6w+HGvAMnZLkldLyv92Yva7uMOeS7srOKKwHUNx2ufimmj3ge2Xqhq6pUuO
+# iWizHWsE31UtSYUX69ehggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM3WjAjBgkqhkiG9w0B
-# CQQxFgQUNiyVEdhHL34leIclj9e3oWtFhBEwDQYJKoZIhvcNAQEBBQAEggEAaENC
-# vljGlWkFg2KGc0hD4RIBmza/eTVCAJplbmqxQovICK7f+JKVineZ7oH8j02N4pAR
-# ij4aEJ+5hyAYEWR/NpLArq1Udi/9Kpc11it4CxPPrlI4+bynD3xCCDNGZ73jLYcS
-# bG0PeFsrZoZomYc4D2svL1PGgNPD5eYKPdpeWWfoF4gZjrof7wjlBM6DcU+A7cAF
-# Q5+dPrr/P217MUi0ZLUYErS3r8jLtJSU3xBA/QUWzztdxvdXTpMHnJfjSVB/oWnk
-# UTnsCN5/RhsBuRsxAU6TgyByVcV5191SFqYdre1D/jDWJaZCH5OGvdtSKflb6dt5
-# B1i9EwJmZy0WgrmtpQ==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NjA1WjAjBgkqhkiG9w0B
+# CQQxFgQU9T4wtf4WljH12gp5YPNu5eEN76wwDQYJKoZIhvcNAQEBBQAEggEAQZek
+# Q0OsM37P/Jr4Mrms0sft+8BBTwVQIntXLCNfeR3nh9Lv7t2m5nOcaMuo2+PfeZvJ
+# m5c8ex+uV/KRs9gKT1VX2dz4UIgZdVtV/zl5x0RwSOWz1sL61eJVXgwrf0u+WDol
+# W3vkqbE+vSyOIBWUEfNtQtvhJQmM9BwYvcDrPF0xZznTbf2jr5MuCnsqSlyS+Ubl
+# i37u4OrElWL02dt1qNMJ3Al42vgRMriqDflD+qQ40lAuCMNhJEC1ISEuFnAD24XM
+# RQYVSE9rah84+5lt+xyd5vyhO+RIKRHbZYjd8yDmT0Jy+8WFOcRdyJHCCykhGHwZ
+# lXQ8Zl+3/swQU0jJ6w==
 # SIG # End signature block

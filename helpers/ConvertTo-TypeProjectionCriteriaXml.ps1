@@ -6,20 +6,19 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright (c) 2014 Provance Technologies.
+Copyright 2015 Provance Technologies.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-You should have received a copy of the GNU General Public License in the
-license folder that is included in the ScsmPx module. If not, see
-<https://www.gnu.org/licenses/gpl.html>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 #############################################################################>
 
 function ConvertTo-TypeProjectionCriteriaXml {
@@ -138,7 +137,7 @@ function ConvertTo-TypeProjectionCriteriaXml {
 
         #endregion
     } catch {
-        throw
+        $PSCmdlet.ThrowTerminatingError($_)
     } finally {
         #region Close the output stream reader.
 
@@ -152,8 +151,8 @@ function ConvertTo-TypeProjectionCriteriaXml {
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6KHuSHP6Cr914Chlp6UNg4uY
-# fvGgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUlGyYY+YyIw7QyWsNeAkcdCie
+# GgKgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -267,22 +266,22 @@ function ConvertTo-TypeProjectionCriteriaXml {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFL04G5NkaU7bxkxr7mZANYfWVY37MA0GCSqGSIb3DQEBAQUABIIBABsn
-# CgkysZivgrrXKT06UiPyUbcrBt50jJVeLIeCJs8jGPJ+GVDCMsZB9IdDifXd1FKT
-# 0Yep6WtEyQslrC0oy4PHZHTEvkiYQoFWZzpOyz80tPbzpv9l6L4k3eKtKL2X/zcH
-# r9tZ26AqJm2TVLMOrWop3TyDWoLxRJ/ANE0fzC9drKmGslnWZ+08Uaj00kw6booK
-# rlgEiOvRwAVZ3Lu68/E7t5q9VqVH/3ymZLMkYx8KI1CBDCT38F0W4logXY3EfH4T
-# Ymw3g0Z0UrpB3TAqj2TbkZHSJGyztFms1eHVAo3BPcKzXSqv6kWQ+gmWcrt/mSYN
-# Wv6qeErwJ85LQVa/XoKhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFN76Al621HaHdR/pzVqu7FABXtAFMA0GCSqGSIb3DQEBAQUABIIBAG7O
+# xQ8yGslkAq0eH7Za6e0TNr5p1gi5RNgO8CRBJNQfrQP4pipQkj8n9am6eocmQp9O
+# PudIpfRJUVhdWBtbh7hJRSoZzYiiNuGZ/mp4b2vaKIouHuJpLE04MWPGEtYmTKOK
+# Ylmx1OsgyHcqFWBVXRV/h5CwE92k6OiIuB1hVPJl3cRHtB/x3bKb7BPGzHczAuoY
+# hqQ6oXtgDyI6d/w1bRnEhw33h15ENFrzalpGm6aSuhsZWtpxdWHCApN4KgS7Q3Mx
+# zaEMBhBw0Ac3XM7oW4LZd+vdHxn+1RPFPOZkYpDjCZ/b2LxHPVBvnHkt4feRT//3
+# cAAFcyP1DShw6uRIzeqhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQwNzIyMTUxNDM4WjAjBgkqhkiG9w0B
-# CQQxFgQU88ppsVpq3lu5fVQWF6Gt4kmHQNYwDQYJKoZIhvcNAQEBBQAEggEAEF8W
-# lltZqZ4sj55l0lkRDmafigYCCc1giZVxoVK/HLdW+LcpWBCUDQ8fiiNws3GDfenM
-# jg/xC74EyStmX7QOdGG5dOUhObKwKDffqzcUdh5eYZx2ggFo3nHXLcXLCEStyhAZ
-# pAZKGyZSjpcK3B596F6aEFoKykIOKoQHgCtHzgUZkXDf/oQzsSyXk6mj1iBntg2F
-# AwH5leXyMI/wfae45uoGp1evwF1U163iyl+EoBDK+H+6KSIdKmhhg2CoCJVG9Eq4
-# mFGNe1OplPwB+6zkupIjeUzzpIc9IrMl01Y/ne9Dcm871Tj4wMlM+kMz82RURFya
-# P6+3PewTI4X+pwnrKQ==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NTU2WjAjBgkqhkiG9w0B
+# CQQxFgQUOOneLj+p3SZTKww9qwal+PbGte0wDQYJKoZIhvcNAQEBBQAEggEAJ2pi
+# n0eHiTVqKyKsjuFZTrYYbMzqXoLEgNMQtp4WlOAKv9zBdLh09eEm8GX0fpg4nBhu
+# brZmLUERs/BggNAJyXb/pyfaRbdvibu4BpKF9f4Lu+S1tpmRWjGqD9D+FVdkRrGB
+# 8CNzkjXU2kl8vBPu0QLtw3Hw14gnV/UQglCllVx50SPQBocKqDiXyKoLNYrGC6gM
+# dDm/qJY+dhxnVVk5a882yFREqy6kZSR0zuO4C0FK9jzZKamkR3aD+yNasOc+f4ZM
+# fFgDFbh6fm8/O2OUUKFQe3HtVT+61F2H7VSxDq1C+nbhz9P2tATuAif8XSZZN4Gr
+# 9djsQMagT6XZqk5scQ==
 # SIG # End signature block
