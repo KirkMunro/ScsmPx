@@ -45,66 +45,25 @@
         <h3><a name="install-module" class="anchor" href="#install-module"><span class="octicon octicon-link"></span></a>Installing the ScsmPx Module the Easy Way</h3>
 
         <p>
-        The ScsmPx module is installed in two steps. The first step is to download
-        the installer, and the second step is to invoke that installer (it's a
-        script) with parameters identifying where you want the module installed.
-        Note that you can update the ScsmPx module to the latest version at any time
-        simply by performing these steps again.
+        The ScsmPx module is installed with a single PowerShell command. Note that
+        you can update the ScsmPx module to the latest version at any time simply
+        by running this command again.
         </p>
 
-        <h4><a name="download-installerscript" class="anchor" href="#download-installerscript"><span class="octicon octicon-link"></span></a>Download the ScsmPx Installer</h4>
+        <code>
+        # If you want to install ScsmPx for all users or update a version already installed
+        # (recommended, requires elevation for new install for all users)
+        & ([scriptblock]::Create((iwr -uri http://tinyurl.com/Install-GitHubHostedModule).Content)) -ModuleName ScsmPx,SnippetPx
+        
+        # If you want to install ScsmPx for the current user
+        & ([scriptblock]::Create((iwr -uri http://tinyurl.com/Install-GitHubHostedModule).Content)) -ModuleName ScsmPx,SnippetPx -Scope CurrentUser
+        </code>
 
         <p>
-        To download the installer, copy the following script and paste it into the
-        PowerShell console of your choice:
-        </p>
-
-        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Copy-ScsmPxInstallerScript.ps1"> </script>
-
-        <p>
-        Once you have run that script, your $installerScript variable will contain
-        the path to the ScsmPx installer. You can then proceed with the module
-        installation by running any one of the commands listed below.
-        </p>
-
-        <h4><a name="invoke-installerscript1" class="anchor" href="#invoke-installerscript1"><span class="octicon octicon-link"></span></a>Install ScsmPx for the Current User</h4>
-
-        <p>
-        This command installs the ScsmPx module for the current user.
-        </p>
-
-        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript1.ps1"> </script>
-
-        <h4><a name="invoke-installerscript2" class="anchor" href="#invoke-installerscript2"><span class="octicon octicon-link"></span></a>Install ScsmPx for All Users</h4>
-
-        <p>
-        This command installs the ScsmPx module for all users.
-        </p>
-
-        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript2.ps1"> </script>
-
-        <h4><a name="invoke-installerscript3" class="anchor" href="#invoke-installerscript3"><span class="octicon octicon-link"></span></a>Install or Upgrade ScsmPx Using the Default Installation Path</h4>
-
-        <p>
-        This command upgrades the ScsmPx module in its current location. If it is has not
-        been installed yet, this command will install the ScsmPx module for the current
-        user.
-        </p>
-
-        <script src="https://gist.github.com/KirkMunro/9765959.js?file=Invoke-ScsmPxInstallerScript3.ps1"> </script>
-
-        <h3><a name="manual-install" class="anchor" href="#manual-install"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-        <p>
-        While installation via the installer script is preferred, if your someone who
-        prefers to manually deploy your modules, or if you would like to use the most
-        recent development build of the ScsmPx module, this section is for you. Download
-        the build that you want to install by simply clicking on the folder button at
-        the top of this page that corresponds to the build you are interested in. You
-        should note that the beta release is unsigned, and the official release is
-        signed. Once you have downloaded that file, make sure that it is unblocked by
-        opening its properties and clicking on the Unblock button if it is present. Then
-        extract the contents of that file into any of the following folders:
+        While installation via the online script is preferred, you can also manually
+        install this module if you prefer. Both the ScsmPx module and the SnippetPx
+        module that it is dependent on are hosted on GitHub at github.com/KirkMunro.
+        I strongly recommend using the automated installation method though.
         </p>
 
         <li>your current user's "Documents\WindowsPowerShell\Modules" folder</li>
