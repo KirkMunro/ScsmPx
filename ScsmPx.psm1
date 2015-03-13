@@ -21,328 +21,301 @@ See the License for the specific language governing permissions and
 limitations under the License.
 #############################################################################>
 
-#region Initialize the module.
+try {
+    #region Initialize the module.
 
-Invoke-Snippet -Name Module.Initialize
+    Invoke-Snippet -Name Module.Initialize
 
-#endregion
+    #endregion
 
-#region If PowerShell erroneously created an Initialize-NativeScsmEnvironment module, remove it.
+    #region Import helper (private) function definitions.
 
-# This is a workaround to a bug in PowerShell 3.0 and later.
-if (Get-Module -Name Initialize-NativeScsmEnvironment) {
-    Remove-Module -Name Initialize-NativeScsmEnvironment
-}
+    Invoke-Snippet -Name ScriptFile.Import -Parameters @{
+        Path = Join-Path -Path $PSModuleRoot -ChildPath helpers
+    }
 
-#endregion
+    #endregion
 
-#region If the ScriptToProcess script raised an exception, throw it from here.
+    #region Import public function definitions.
 
-# This is a workaround to a bug in PowerShell 2.0 and later.
-if ($initializeNativeScsmEnvironmentException = Get-Variable -Scope Global -Name InitializeNativeScsmEnvironmentException -ValueOnly -ErrorAction SilentlyContinue) {
-    Remove-Variable -Scope Global -Name InitializeNativeScsmEnvironmentException
-    # The switch block and the command that follows are a workaround to a module error output bug in PowerShell.
-    switch ($Host.Name) {
-        'Windows PowerShell ISE Host' {
-            $writeHostColors = @{}
-            foreach ($position in 'Foreground','Background') {
-                switch ($psISE.Options."Error${position}Color") {
-                    ([System.Windows.Media.Colors]::Transparent) {
-                        break
-                    }
-                    ([System.Windows.Media.Colors]::Olive) {
-                        $writeHostColors["${position}Color"] = [System.ConsoleColor]::DarkYellow
-                        break
-                    }
-                    default {
-                        foreach ($color in 'Black','DarkBlue','DarkGreen','DarkCyan','DarkRed','DarkMagenta','Gray','DarkGray','Blue','Green','Cyan','Red','Magenta','Yellow','White') {
-                            if ($psISE.Options."Error${position}Color" -eq [System.Windows.Media.Colors]::$color) {
-                                $writeHostColors["${position}Color"] = [System.ConsoleColor]::$color
-                                break
-                            }
-                        }
-                        break
-                    }
-                }
+    Invoke-Snippet -Name ScriptFile.Import -Parameters @{
+        Path = Join-Path -Path $PSModuleRoot -ChildPath functions
+    }
+
+    #endregion
+
+    #region Initialize the SCSM environment.
+
+    Initialize-NativeScsmEnvironment
+
+    #endregion
+
+    #region Fix the Get-SCSMCommand command.
+
+    # This is necessary to work around a bug in PowerShell's Get-Command cmdlet. When you invoke
+    # the Get-Command cmdlet from within a script module, and request that it return the commands in
+    # that module, it will not return any commands that belong to nested modules that are loaded by
+    # the script module. The workaround is to explicitly include the nested module names in the list
+    # of modules from which you want to return commands. In addition, we add the data warehouse
+    # module to this so that we get all commands loaded by both of these modules.
+    if (Test-Path -LiteralPath function:Get-SCSMCommand) {
+        Set-Item function:Get-SCSMCommand -Value (
+            # This script block _must_ be defined within the System.Center.Service.Manager module if
+            # we want the command to still belong to that module and if we want the command to also
+            # unload when that module is unloaded.
+            & (Get-Module -Name System.Center.Service.Manager) {
+                {Get-Command -Module System.Center.Service.Manager,Microsoft.EnterpriseManagement.Core.Cmdlets,Microsoft.EnterpriseManagement.ServiceManager.Cmdlets,Microsoft.EnterpriseManagement.Warehouse.Cmdlets}
             }
-            break
+        )
+    }
+
+    #endregion
+
+    #region Add a custom ToString method to the ManagementPackEnumeration type.
+
+    Update-TypeData -TypeName Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration -MemberName ToString -MemberType ScriptMethod -Value {$this.DisplayName} -Force
+
+    #endregion
+
+    #region Add a Name parameter to the Workflow type.
+
+    Update-TypeData -TypeName Microsoft.EnterpriseManagement.ServiceManager.Sdk.Workflows.Workflow -MemberName Name -MemberType ScriptProperty -Value {$this.WorkflowSubscription.Name} -Force
+
+    #endregion
+
+    #region Define proxy functions for classes and views.
+
+    # These views will be exposed through the View parameter of a Get-ScsmPx* command.
+    $viewMap = @{
+        'System.WorkItem.Incident' = @{
+                         Active = 'System.WorkItem.Incident.Active.View'
+                      ActiveDcm = 'System.WorkItem.Incident.DCM.View'
+                    ActiveEmail = 'System.WorkItem.Incident.Email.View'
+                 ActiveExtended = 'System.WorkItem.Incident.ActiveExtended.View'
+                   ActiveParent = 'System.WorkItem.Incident.Parent.View'
+                   ActivePortal = 'System.WorkItem.Incident.Portal.View'
+                     ActiveScom = 'System.WorkItem.Incident.SCOM.View'
+                    ActiveTier1 = 'System.WorkItem.Incident.Queue.Tier1.View'
+                    ActiveTier2 = 'System.WorkItem.Incident.Queue.Tier2.View'
+                    ActiveTier3 = 'System.WorkItem.Incident.Queue.Tier3.View'
+                            All = 'System.WorkItem.Incident.AllIncidents.View'
+                   AssignedToMe = 'System.WorkItem.Incident.AssignedToMe.View'
+            AssignedToMeSlaInfo = 'System.WorkItem.Incident.AssignedToMeSLAInfo.View'
+                      Escalated = 'System.WorkItem.Incident.Escalated.View'
+                        OverDue = 'System.WorkItem.Incident.OverDue.View'
+                        Pending = 'System.WorkItem.Incident.Pending.View'
+                    SlaBreached = 'System.WorkItem.Incident.SLABreached.View'
+                     SlaWarning = 'System.WorkItem.Incident.SLAWarning.View'
+                     Unassigned = 'System.WorkItem.Incident.Active.Unassigned.View'
+                UnassignedTier1 = 'System.WorkItem.Incident.Queue.Tier1.Unassigned.View'
+                UnassignedTier2 = 'System.WorkItem.Incident.Queue.Tier2.Unassigned.View'
+                UnassignedTier3 = 'System.WorkItem.Incident.Queue.Tier3.Unassigned.View'
         }
-        'ConsoleHost' {
-            $writeHostColors = @{
-                ForegroundColor = $Host.PrivateData.ErrorForegroundColor
-                BackgroundColor = $Host.PrivateData.ErrorBackgroundColor
+        'System.Build' = @{
+            All = 'AllBuildCIsView'
+        }
+        'Microsoft.Windows.Computer' = @{
+                                    All = 'AllComputersView'
+            AllWithActiveChangeRequests = 'AllComputersViewWithActiveChangeRequests'
+                 AllWithActiveIncidents = 'AllComputersViewWithActiveIncidents'
+        }
+        'System.Environment' = @{
+            All = 'AllEnvironmentCIsView'
+        }
+        'Microsoft.AD.Printer' = @{
+            All = 'AllPrintersView'
+        }
+        'System.SoftwareItem' = @{
+                                    All = 'AllSoftwaresView'
+            AllWithActiveChangeRequests = 'AllSoftwaresViewWithActiveChangeRequests'
+                 AllWithActiveIncidents = 'AllSoftwaresViewWithActiveIncidents'
+        }
+        'System.SoftwareUpdate' = @{
+                                    All = 'AllSoftwareUpdatesView'
+            AllWithActiveChangeRequests = 'AllSoftwareUpdatesWithActiveChangeRequestsView'
+                 AllWithActiveIncidents = 'AllSoftwareUpdatesWithActiveIncidentsView'
+        }
+        'System.WorkItem.ChangeRequest' = @{
+                     All = 'ChangeManagement.Views.AllChangeRequests'
+            AssignedToMe = 'ChangeManagement.Views.ChangeRequestsAssignedToMe'
+               Cancelled = 'ChangeManagement.Views.ChangeRequestsCancelled'
+                  Closed = 'ChangeManagement.Views.ChangeRequestsClosed'
+               Completed = 'ChangeManagement.Views.ChangeRequestsCompleted'
+                  Failed = 'ChangeManagement.Views.ChangeRequestsFailed'
+                InReview = 'ChangeManagement.Views.ChangeRequestsInReview'
+              InProgress = 'ChangeManagement.Views.ChangeRequestsManualActivityInProgress'
+                  OnHold = 'ChangeManagement.Views.ChangeRequestsOnHold'
+                Rejected = 'ChangeManagement.Views.ChangeRequestsRejected'
+        }
+        'System.WorkItem.ReleaseRecord' = @{
+                     All = 'ReleaseManagement.Views.AllReleaseRecords'
+                   Child = 'ReleaseManagement.Views.ChildReleaseRecords'
+            AssignedToMe = 'ReleaseManagement.Views.ReleaseRecordsAssignedToMe'
+               Cancelled = 'ReleaseManagement.Views.ReleaseRecordsCanceled'
+                  Closed = 'ReleaseManagement.Views.ReleaseRecordsClosed'
+               Completed = 'ReleaseManagement.Views.ReleaseRecordsCompleted'
+               InEditing = 'ReleaseManagement.Views.ReleaseRecordsEditing'
+                  Failed = 'ReleaseManagement.Views.ReleaseRecordsFailed'
+              InProgress = 'ReleaseManagement.Views.ReleaseRecordsInProgress'
+                  OnHold = 'ReleaseManagement.Views.ReleaseRecordsOnHold'
+        }
+        'System.Domain.User' = @{
+            All = 'ServiceManager.ConfigurationManagement.Library.View.User'
+        }
+        'System.WorkItem.Problem' = @{
+            ActiveKnownError = 'ServiceManager.ProblemManagement.Configuration.View.ActiveKnownErrors'
+                      Active = 'ServiceManager.ProblemManagement.Configuration.View.ActiveProblem'
+                AssignedToMe = 'ServiceManager.ProblemManagement.Configuration.View.AssignedToMe'
+                      Closed = 'ServiceManager.ProblemManagement.Configuration.View.Closed'
+               NeedingReview = 'ServiceManager.ProblemManagement.Configuration.View.NeedingReview'
+                    Resolved = 'ServiceManager.ProblemManagement.Configuration.View.Resolved'
+        }
+        'System.RequestOffering' = @{
+                    All = 'ServiceManager.RequestOffering.Library.View.AllOfferings'
+                  Draft = 'ServiceManager.RequestOffering.Library.View.AllDraftOfferings'
+              Published = 'ServiceManager.RequestOffering.Library.View.AllPublishedOfferings'
+             Standalone = 'ServiceManager.RequestOffering.Library.View.AllStandaloneOfferings'
+        }
+        'Microsoft.SystemCenter.Orchestrator.RunbookItem' = @{
+            All = 'ServiceManager.Runbook.Configuration.View'
+        }
+        'System.ServiceOffering' = @{
+                  All = 'ServiceManager.ServiceOffering.Library.View.AllOfferings'
+                Draft = 'ServiceManager.ServiceOffering.Library.View.AllDraftOfferings'
+            Published = 'ServiceManager.ServiceOffering.Library.View.AllPublishedOfferings'
+        }
+        'System.WorkItem.ServiceRequest' = @{
+                            Open = 'ServiceManager.ServiceRequest.Library.View.AllOpen'
+                    AssignedToMe = 'ServiceManager.ServiceRequest.Library.View.AssignedToMe'
+                       Cancelled = 'ServiceManager.ServiceRequest.Library.View.Canceled'
+                          Closed = 'ServiceManager.ServiceRequest.Library.View.Closed'
+                       Completed = 'ServiceManager.ServiceRequest.Library.View.Completed'
+                          Failed = 'ServiceManager.ServiceRequest.Library.View.Failed'
+            ServiceLevelBreached = 'ServiceManager.ServiceRequest.Library.View.SLABreached'
+             ServiceLevelWarning = 'ServiceManager.ServiceRequest.Library.View.SLAWarning'
+        }
+        'System.Knowledge.Article' = @{
+                  All = 'KnowledgeView'
+             Archived = 'ArchivedKnowledgeArticle'
+                Draft = 'DraftKnowledgeArticle'
+            Published = 'PublishedKnowledgeArticle'
+        }
+        'Microsoft.SystemCenter.Orchestrator.RunbookAutomationActivity' = @{
+                              All = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivities.All'
+                       InProgress = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesActive'
+            AssignedToMeOrMyGroup = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesAssignedToMe'
+                        Cancelled = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesCancelled'
+                        Completed = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesCompleted'
+                           Failed = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesFailed'
+                       Unassigned = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesUnassigned'
+        }
+        'System.WorkItem.Activity.DependentActivity' = @{
+                              All = 'ActivityManagement.Views.AllDependentActivities'
+                       InProgress = 'ActivityManagement.Views.DependentActivitiesActive'
+            AssignedToMeOrMyGroup = 'ActivityManagement.Views.DependentActivitiesAssignedToMe'
+                        Cancelled = 'ActivityManagement.Views.DependentActivitiesCancelled'
+                        Completed = 'ActivityManagement.Views.DependentActivitiesCompleted'
+                           Failed = 'ActivityManagement.Views.DependentActivitiesFailed'
+                       Unassigned = 'ActivityManagement.Views.DependentActivitiesUnassigned'
+        }
+        'System.WorkItem.Activity.ManualActivity' = @{
+                     All = 'ActivityManagement.Views.AllManualActivities'
+              InProgress = 'ActivityManagement.Views.ManualActivitiesActive'
+            AssignedToMe = 'ActivityManagement.Views.ManualActivitiesAssignedToMe'
+               Cancelled = 'ActivityManagement.Views.ManualActivitiesCancelled'
+               Completed = 'ActivityManagement.Views.ManualActivitiesCompleted'
+                  Failed = 'ActivityManagement.Views.ManualActivitiesFailed'
+              Unassigned = 'ActivityManagement.Views.ManualActivitiesUnassigned'
+        }
+        'System.WorkItem.Activity.ParallelActivity' = @{
+                              All = 'ActivityManagement.Views.AllParallelActivities'
+                       InProgress = 'ActivityManagement.Views.ParallelActivitiesActive'
+            AssignedToMeOrMyGroup = 'ActivityManagement.Views.ParallelActivitiesAssignedToMe'
+                        Cancelled = 'ActivityManagement.Views.ParallelActivitiesCancelled'
+                        Completed = 'ActivityManagement.Views.ParallelActivitiesCompleted'
+                           Failed = 'ActivityManagement.Views.ParallelActivitiesFailed'
+                       Unassigned = 'ActivityManagement.Views.ParallelActivitiesUnassigned'
+        }
+        'System.WorkItem.Activity.ReviewActivity' = @{
+                     All = 'ActivityManagement.Views.AllReviewActivities'
+              InProgress = 'ActivityManagement.Views.ReviewActivitiesActive'
+                Approved = 'ActivityManagement.Views.ReviewActivitiesApproved'
+            AssignedToMe = 'ActivityManagement.Views.ReviewActivitiesAssignedToMe'
+               Cancelled = 'ActivityManagement.Views.ReviewActivitiesCancelled'
+                Rejected = 'ActivityManagement.Views.ReviewActivitiesRejected'
+        }
+        'System.WorkItem.Activity.SequentialActivity' = @{
+                              All = 'ActivityManagement.Views.AllSequentialActivities'
+                       InProgress = 'ActivityManagement.Views.SequentialActivitiesActive'
+            AssignedToMeOrMyGroup = 'ActivityManagement.Views.SequentialActivitiesAssignedToMe'
+                        Cancelled = 'ActivityManagement.Views.SequentialActivitiesCancelled'
+                        Completed = 'ActivityManagement.Views.SequentialActivitiesCompleted'
+                           Failed = 'ActivityManagement.Views.SequentialActivitiesFailed'
+                       Unassigned = 'ActivityManagement.Views.SequentialActivitiesUnassigned'
+        }
+    }
+
+    # Only config items get the Restore capability
+    $nounMap = @{
+                   AdGroup = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.AD.Group'                                           ; ConfigItem = $true  }
+                 AdPrinter = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.AD.Printer'                                         ; ConfigItem = $true  }
+                    AdUser = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.AD.User'                                            ; ConfigItem = $true  }
+                     Build = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Build'                                                 ; ConfigItem = $true  }
+           BusinessService = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.SystemCenter.BusinessService'                       ; ConfigItem = $true  }
+             ChangeRequest = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.ChangeRequest'                                ; ConfigItem = $false }
+                ConfigItem = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.ConfigItem'                                            ; ConfigItem = $true  }
+                    DwCube = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.Warehouse.SystemCenterCube'            ; ConfigItem = $false }
+              DwDataSource = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.DataWarehouse.DataSource'              ; ConfigItem = $false }
+               Environment = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Environment'                                           ; ConfigItem = $true  }
+            FileAttachment = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.FileAttachment'                                        ; ConfigItem = $false }
+                  Incident = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Incident'                                     ; ConfigItem = $false }
+          KnowledgeArticle = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Knowledge.Article'                                     ; ConfigItem = $true  }
+          ManagementServer = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.SystemCenter.ManagementServer'                      ; ConfigItem = $true  }
+                   Problem = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Problem'                                      ; ConfigItem = $false }
+             ReleaseRecord = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.ReleaseRecord'                                ; ConfigItem = $false }
+           RequestOffering = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.RequestOffering'                                       ; ConfigItem = $false }
+                   Runbook = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.Orchestrator.RunbookItem'              ; ConfigItem = $false }
+           ServiceOffering = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.ServiceOffering'                                       ; ConfigItem = $false }
+            ServiceRequest = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.WorkItem.ServiceRequest'                               ; ConfigItem = $true  }
+              SoftwareItem = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.SoftwareItem'                                          ; ConfigItem = $true  }
+            SoftwareUpdate = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.SoftwareUpdate'                                        ; ConfigItem = $true  }
+               UserOrGroup = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Domain.User'                                           ; ConfigItem = $true  }
+           WindowsComputer = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.Windows.Computer'                                   ; ConfigItem = $true  }
+         DependentActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.DependentActivity'                   ; ConfigItem = $false }
+            ManualActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.ManualActivity'                      ; ConfigItem = $false }
+          ParallelActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.ParallelActivity'                    ; ConfigItem = $false }
+            ReviewActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.ReviewActivity'                      ; ConfigItem = $false }
+        SequentialActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.SequentialActivity'                  ; ConfigItem = $false }
+           RunbookActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.Orchestrator.RunbookAutomationActivity'; ConfigItem = $false }
+    }
+
+    foreach ($noun in $nounMap.Keys) {
+        foreach ($verb in $nounMap.$noun.Verbs) {
+            $newProxyFunctionDefinitionParameters = @{
+                      Verb = $verb
+                      Noun = $noun
+                NounPrefix = 'ScsmPx'
+                 ClassName = $nounMap.$noun.Class
             }
-            break
+            if ($nounMap.$noun.ConfigItem) {
+                $newProxyFunctionDefinitionParameters['ConfigItem'] = $true
+            }
+            if ($viewMap.ContainsKey($nounMap.$noun.Class)) {
+                $newProxyFunctionDefinitionParameters['Views'] = $viewMap[$nounMap.$noun.Class]
+            }
+            . (New-ScsmPxProxyFunctionDefinition @newProxyFunctionDefinitionParameters)
         }
-        default {
-            $writeHostColors = @{}
-            break
-        }
     }
-    $initializeNativeScsmEnvironmentException | Out-String | Write-Host @writeHostColors
-    throw $initializeNativeScsmEnvironmentException
+
+    #endregion
+} catch {
+    throw
 }
-
-#endregion
-
-#region Import helper (private) function definitions.
-
-Invoke-Snippet -Name ScriptFile.Import -Parameters @{
-    Path = Join-Path -Path $PSModuleRoot -ChildPath helpers
-}
-
-#endregion
-
-#region Import public function definitions.
-
-Invoke-Snippet -Name ScriptFile.Import -Parameters @{
-    Path = Join-Path -Path $PSModuleRoot -ChildPath functions
-}
-
-#endregion
-
-#region Add a custom ToString method to the ManagementPackEnumeration type.
-
-Update-TypeData -TypeName Microsoft.EnterpriseManagement.Configuration.ManagementPackEnumeration -MemberName ToString -MemberType ScriptMethod -Value {$this.DisplayName} -Force
-
-#endregion
-
-#region Add a Name parameter to the Workflow type.
-
-Update-TypeData -TypeName Microsoft.EnterpriseManagement.ServiceManager.Sdk.Workflows.Workflow -MemberName Name -MemberType ScriptProperty -Value {$this.WorkflowSubscription.Name} -Force
-
-#endregion
-
-#region Define proxy functions for classes and views.
-
-# These views will be exposed through the View parameter of a Get-ScsmPx* command.
-$viewMap = @{
-    'System.WorkItem.Incident' = @{
-                     Active = 'System.WorkItem.Incident.Active.View'
-                  ActiveDcm = 'System.WorkItem.Incident.DCM.View'
-                ActiveEmail = 'System.WorkItem.Incident.Email.View'
-             ActiveExtended = 'System.WorkItem.Incident.ActiveExtended.View'
-               ActiveParent = 'System.WorkItem.Incident.Parent.View'
-               ActivePortal = 'System.WorkItem.Incident.Portal.View'
-                 ActiveScom = 'System.WorkItem.Incident.SCOM.View'
-                ActiveTier1 = 'System.WorkItem.Incident.Queue.Tier1.View'
-                ActiveTier2 = 'System.WorkItem.Incident.Queue.Tier2.View'
-                ActiveTier3 = 'System.WorkItem.Incident.Queue.Tier3.View'
-                        All = 'System.WorkItem.Incident.AllIncidents.View'
-               AssignedToMe = 'System.WorkItem.Incident.AssignedToMe.View'
-        AssignedToMeSlaInfo = 'System.WorkItem.Incident.AssignedToMeSLAInfo.View'
-                  Escalated = 'System.WorkItem.Incident.Escalated.View'
-                    OverDue = 'System.WorkItem.Incident.OverDue.View'
-                    Pending = 'System.WorkItem.Incident.Pending.View'
-                SlaBreached = 'System.WorkItem.Incident.SLABreached.View'
-                 SlaWarning = 'System.WorkItem.Incident.SLAWarning.View'
-                 Unassigned = 'System.WorkItem.Incident.Active.Unassigned.View'
-            UnassignedTier1 = 'System.WorkItem.Incident.Queue.Tier1.Unassigned.View'
-            UnassignedTier2 = 'System.WorkItem.Incident.Queue.Tier2.Unassigned.View'
-            UnassignedTier3 = 'System.WorkItem.Incident.Queue.Tier3.Unassigned.View'
-    }
-    'System.Build' = @{
-        All = 'AllBuildCIsView'
-    }
-    'Microsoft.Windows.Computer' = @{
-                                All = 'AllComputersView'
-        AllWithActiveChangeRequests = 'AllComputersViewWithActiveChangeRequests'
-             AllWithActiveIncidents = 'AllComputersViewWithActiveIncidents'
-    }
-    'System.Environment' = @{
-        All = 'AllEnvironmentCIsView'
-    }
-    'Microsoft.AD.Printer' = @{
-        All = 'AllPrintersView'
-    }
-    'System.SoftwareItem' = @{
-                                All = 'AllSoftwaresView'
-        AllWithActiveChangeRequests = 'AllSoftwaresViewWithActiveChangeRequests'
-             AllWithActiveIncidents = 'AllSoftwaresViewWithActiveIncidents'
-    }
-    'System.SoftwareUpdate' = @{
-                                All = 'AllSoftwareUpdatesView'
-        AllWithActiveChangeRequests = 'AllSoftwareUpdatesWithActiveChangeRequestsView'
-             AllWithActiveIncidents = 'AllSoftwareUpdatesWithActiveIncidentsView'
-    }
-    'System.WorkItem.ChangeRequest' = @{
-                 All = 'ChangeManagement.Views.AllChangeRequests'
-        AssignedToMe = 'ChangeManagement.Views.ChangeRequestsAssignedToMe'
-           Cancelled = 'ChangeManagement.Views.ChangeRequestsCancelled'
-              Closed = 'ChangeManagement.Views.ChangeRequestsClosed'
-           Completed = 'ChangeManagement.Views.ChangeRequestsCompleted'
-              Failed = 'ChangeManagement.Views.ChangeRequestsFailed'
-            InReview = 'ChangeManagement.Views.ChangeRequestsInReview'
-          InProgress = 'ChangeManagement.Views.ChangeRequestsManualActivityInProgress'
-              OnHold = 'ChangeManagement.Views.ChangeRequestsOnHold'
-            Rejected = 'ChangeManagement.Views.ChangeRequestsRejected'
-    }
-    'System.WorkItem.ReleaseRecord' = @{
-                 All = 'ReleaseManagement.Views.AllReleaseRecords'
-               Child = 'ReleaseManagement.Views.ChildReleaseRecords'
-        AssignedToMe = 'ReleaseManagement.Views.ReleaseRecordsAssignedToMe'
-           Cancelled = 'ReleaseManagement.Views.ReleaseRecordsCanceled'
-              Closed = 'ReleaseManagement.Views.ReleaseRecordsClosed'
-           Completed = 'ReleaseManagement.Views.ReleaseRecordsCompleted'
-           InEditing = 'ReleaseManagement.Views.ReleaseRecordsEditing'
-              Failed = 'ReleaseManagement.Views.ReleaseRecordsFailed'
-          InProgress = 'ReleaseManagement.Views.ReleaseRecordsInProgress'
-              OnHold = 'ReleaseManagement.Views.ReleaseRecordsOnHold'
-    }
-    'System.Domain.User' = @{
-        All = 'ServiceManager.ConfigurationManagement.Library.View.User'
-    }
-    'System.WorkItem.Problem' = @{
-        ActiveKnownError = 'ServiceManager.ProblemManagement.Configuration.View.ActiveKnownErrors'
-                  Active = 'ServiceManager.ProblemManagement.Configuration.View.ActiveProblem'
-            AssignedToMe = 'ServiceManager.ProblemManagement.Configuration.View.AssignedToMe'
-                  Closed = 'ServiceManager.ProblemManagement.Configuration.View.Closed'
-           NeedingReview = 'ServiceManager.ProblemManagement.Configuration.View.NeedingReview'
-                Resolved = 'ServiceManager.ProblemManagement.Configuration.View.Resolved'
-    }
-    'System.RequestOffering' = @{
-                All = 'ServiceManager.RequestOffering.Library.View.AllOfferings'
-              Draft = 'ServiceManager.RequestOffering.Library.View.AllDraftOfferings'
-          Published = 'ServiceManager.RequestOffering.Library.View.AllPublishedOfferings'
-         Standalone = 'ServiceManager.RequestOffering.Library.View.AllStandaloneOfferings'
-    }
-    'Microsoft.SystemCenter.Orchestrator.RunbookItem' = @{
-        All = 'ServiceManager.Runbook.Configuration.View'
-    }
-    'System.ServiceOffering' = @{
-              All = 'ServiceManager.ServiceOffering.Library.View.AllOfferings'
-            Draft = 'ServiceManager.ServiceOffering.Library.View.AllDraftOfferings'
-        Published = 'ServiceManager.ServiceOffering.Library.View.AllPublishedOfferings'
-    }
-    'System.WorkItem.ServiceRequest' = @{
-                        Open = 'ServiceManager.ServiceRequest.Library.View.AllOpen'
-                AssignedToMe = 'ServiceManager.ServiceRequest.Library.View.AssignedToMe'
-                   Cancelled = 'ServiceManager.ServiceRequest.Library.View.Canceled'
-                      Closed = 'ServiceManager.ServiceRequest.Library.View.Closed'
-                   Completed = 'ServiceManager.ServiceRequest.Library.View.Completed'
-                      Failed = 'ServiceManager.ServiceRequest.Library.View.Failed'
-        ServiceLevelBreached = 'ServiceManager.ServiceRequest.Library.View.SLABreached'
-         ServiceLevelWarning = 'ServiceManager.ServiceRequest.Library.View.SLAWarning'
-    }
-    'System.Knowledge.Article' = @{
-              All = 'KnowledgeView'
-         Archived = 'ArchivedKnowledgeArticle'
-            Draft = 'DraftKnowledgeArticle'
-        Published = 'PublishedKnowledgeArticle'
-    }
-    'Microsoft.SystemCenter.Orchestrator.RunbookAutomationActivity' = @{
-                          All = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivities.All'
-                   InProgress = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesActive'
-        AssignedToMeOrMyGroup = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesAssignedToMe'
-                    Cancelled = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesCancelled'
-                    Completed = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesCompleted'
-                       Failed = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesFailed'
-                   Unassigned = 'ServiceManager.RunbookActivity.Configuration.View.RunbookAutomationActivitiesUnassigned'
-    }
-    'System.WorkItem.Activity.DependentActivity' = @{
-                          All = 'ActivityManagement.Views.AllDependentActivities'
-                   InProgress = 'ActivityManagement.Views.DependentActivitiesActive'
-        AssignedToMeOrMyGroup = 'ActivityManagement.Views.DependentActivitiesAssignedToMe'
-                    Cancelled = 'ActivityManagement.Views.DependentActivitiesCancelled'
-                    Completed = 'ActivityManagement.Views.DependentActivitiesCompleted'
-                       Failed = 'ActivityManagement.Views.DependentActivitiesFailed'
-                   Unassigned = 'ActivityManagement.Views.DependentActivitiesUnassigned'
-    }
-    'System.WorkItem.Activity.ManualActivity' = @{
-                 All = 'ActivityManagement.Views.AllManualActivities'
-          InProgress = 'ActivityManagement.Views.ManualActivitiesActive'
-        AssignedToMe = 'ActivityManagement.Views.ManualActivitiesAssignedToMe'
-           Cancelled = 'ActivityManagement.Views.ManualActivitiesCancelled'
-           Completed = 'ActivityManagement.Views.ManualActivitiesCompleted'
-              Failed = 'ActivityManagement.Views.ManualActivitiesFailed'
-          Unassigned = 'ActivityManagement.Views.ManualActivitiesUnassigned'
-    }
-    'System.WorkItem.Activity.ParallelActivity' = @{
-                          All = 'ActivityManagement.Views.AllParallelActivities'
-                   InProgress = 'ActivityManagement.Views.ParallelActivitiesActive'
-        AssignedToMeOrMyGroup = 'ActivityManagement.Views.ParallelActivitiesAssignedToMe'
-                    Cancelled = 'ActivityManagement.Views.ParallelActivitiesCancelled'
-                    Completed = 'ActivityManagement.Views.ParallelActivitiesCompleted'
-                       Failed = 'ActivityManagement.Views.ParallelActivitiesFailed'
-                   Unassigned = 'ActivityManagement.Views.ParallelActivitiesUnassigned'
-    }
-    'System.WorkItem.Activity.ReviewActivity' = @{
-                 All = 'ActivityManagement.Views.AllReviewActivities'
-          InProgress = 'ActivityManagement.Views.ReviewActivitiesActive'
-            Approved = 'ActivityManagement.Views.ReviewActivitiesApproved'
-        AssignedToMe = 'ActivityManagement.Views.ReviewActivitiesAssignedToMe'
-           Cancelled = 'ActivityManagement.Views.ReviewActivitiesCancelled'
-            Rejected = 'ActivityManagement.Views.ReviewActivitiesRejected'
-    }
-    'System.WorkItem.Activity.SequentialActivity' = @{
-                          All = 'ActivityManagement.Views.AllSequentialActivities'
-                   InProgress = 'ActivityManagement.Views.SequentialActivitiesActive'
-        AssignedToMeOrMyGroup = 'ActivityManagement.Views.SequentialActivitiesAssignedToMe'
-                    Cancelled = 'ActivityManagement.Views.SequentialActivitiesCancelled'
-                    Completed = 'ActivityManagement.Views.SequentialActivitiesCompleted'
-                       Failed = 'ActivityManagement.Views.SequentialActivitiesFailed'
-                   Unassigned = 'ActivityManagement.Views.SequentialActivitiesUnassigned'
-    }
-}
-
-# Only config items get the Restore capability
-$nounMap = @{
-               AdGroup = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.AD.Group'                                           ; ConfigItem = $true  }
-             AdPrinter = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.AD.Printer'                                         ; ConfigItem = $true  }
-                AdUser = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.AD.User'                                            ; ConfigItem = $true  }
-                 Build = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Build'                                                 ; ConfigItem = $true  }
-       BusinessService = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.SystemCenter.BusinessService'                       ; ConfigItem = $true  }
-         ChangeRequest = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.ChangeRequest'                                ; ConfigItem = $false }
-            ConfigItem = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.ConfigItem'                                            ; ConfigItem = $true  }
-                DwCube = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.Warehouse.SystemCenterCube'            ; ConfigItem = $false }
-          DwDataSource = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.DataWarehouse.DataSource'              ; ConfigItem = $false }
-           Environment = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Environment'                                           ; ConfigItem = $true  }
-        FileAttachment = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.FileAttachment'                                        ; ConfigItem = $false }
-              Incident = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Incident'                                     ; ConfigItem = $false }
-      KnowledgeArticle = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Knowledge.Article'                                     ; ConfigItem = $true  }
-      ManagementServer = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.SystemCenter.ManagementServer'                      ; ConfigItem = $true  }
-               Problem = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Problem'                                      ; ConfigItem = $false }
-         ReleaseRecord = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.ReleaseRecord'                                ; ConfigItem = $false }
-       RequestOffering = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.RequestOffering'                                       ; ConfigItem = $false }
-               Runbook = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.Orchestrator.RunbookItem'              ; ConfigItem = $false }
-       ServiceOffering = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.ServiceOffering'                                       ; ConfigItem = $false }
-        ServiceRequest = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.WorkItem.ServiceRequest'                               ; ConfigItem = $true  }
-          SoftwareItem = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.SoftwareItem'                                          ; ConfigItem = $true  }
-        SoftwareUpdate = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.SoftwareUpdate'                                        ; ConfigItem = $true  }
-           UserOrGroup = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'System.Domain.User'                                           ; ConfigItem = $true  }
-       WindowsComputer = @{ Verbs = 'Get','Set','Rename','Remove','Restore'; Class = 'Microsoft.Windows.Computer'                                   ; ConfigItem = $true  }
-     DependentActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.DependentActivity'                   ; ConfigItem = $false }
-        ManualActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.ManualActivity'                      ; ConfigItem = $false }
-      ParallelActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.ParallelActivity'                    ; ConfigItem = $false }
-        ReviewActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.ReviewActivity'                      ; ConfigItem = $false }
-    SequentialActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'System.WorkItem.Activity.SequentialActivity'                  ; ConfigItem = $false }
-       RunbookActivity = @{ Verbs = 'Get','Set','Rename','Remove'          ; Class = 'Microsoft.SystemCenter.Orchestrator.RunbookAutomationActivity'; ConfigItem = $false }
-}
-
-foreach ($noun in $nounMap.Keys) {
-    foreach ($verb in $nounMap.$noun.Verbs) {
-        $newProxyFunctionDefinitionParameters = @{
-                  Verb = $verb
-                  Noun = $noun
-            NounPrefix = 'ScsmPx'
-             ClassName = $nounMap.$noun.Class
-        }
-        if ($nounMap.$noun.ConfigItem) {
-            $newProxyFunctionDefinitionParameters['ConfigItem'] = $true
-        }
-        if ($viewMap.ContainsKey($nounMap.$noun.Class)) {
-            $newProxyFunctionDefinitionParameters['Views'] = $viewMap[$nounMap.$noun.Class]
-        }
-        . (New-ScsmPxProxyFunctionDefinition @newProxyFunctionDefinitionParameters)
-    }
-}
-
-#endregion
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUc/9JeuZOQJZm+MQM5uvoedFN
-# 446gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZoa58Y1blBUFdJXmgY6D0bCo
+# beagghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -456,22 +429,22 @@ foreach ($noun in $nounMap.Keys) {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFGr//2mfZ07PAKcgOocRUdVJ2XaoMA0GCSqGSIb3DQEBAQUABIIBACst
-# KU5OHNLR4TjlYwU6Gauhh5dw9vZV+qX6KOosGCanKlZrS2nsQDeg2euBeHl9xZSc
-# rZpuqPbtMBLK/7yGIq2wNR0CDqGlqHWSgT155M2OfKTC9L2WZQK+ZQCk/WGDd8vC
-# Oi8/A86Hr+uBcwNxPw1qhxF8Jf+xpqgQse7H7tyPNiepn6NbiFNQWXkHTCi4n7+d
-# A1rgXLB7PoHjzhQasdiyvSlov0TSQ2T3KfdmMFxrQkKLbeJkpMVaelqqtRYI4Rxd
-# Q+64klJSmrZzMoS7UT3LdNogQLIdPZoCVgcpKi/NMl+IJhPgK1yT4fDUV0DCE/Nl
-# kthJF/FyFWCO6GWT68ehggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFA4mBv+eX2fBoiRqUdc0hVA2sqOyMA0GCSqGSIb3DQEBAQUABIIBAHZw
+# 6XBTwAAv7rl/jz2+QLkCRmvtFScQ7mEJI5k3xkVn3i+mkiYRFDXgMwfrFVm79Ut7
+# 8BLkLA3m2hqZWBsesjkgI5ky7lZ5WVXsnUWJU5wYagnK4By9+svS/o76P8rTw8u1
+# J4uXuh/bk5AynbPF6tiopaQTpK+qsv+h8N63tT63AJwLECVjfHjTPOAHskREYt86
+# pf9vKl5ZGqxbl7sJnPKOcVI1rvaRn+1v0412KWTYJy2kxnG/fzkW+I3cx1GQ4ePF
+# CLpX89Kaj3JElG46M8BCKw3d+eKMg1O8qZ0CHhfBnl1m+VsQfWyeme77Aem8mgFP
+# scCcND9Enxh30JPDaiyhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NTU0WjAjBgkqhkiG9w0B
-# CQQxFgQUCgArsQ2B6jjCzi+ZtvjwIwefB4AwDQYJKoZIhvcNAQEBBQAEggEAiif4
-# VcZ3uLR4yQLYPKgaOgTogVzzCtnZRhdTsTisF4Bcume0GxYjNTnuRUh6aIEEDDBh
-# uNMUZzDY950kaSLFr/0cKpuKUS9/cSKU716zPVv5bs5bqHympWqtDxw4diQM5KSW
-# cs+FL/VRE3zmEayo3rkRIqW+rtzGs/fL4LYMqSo/MDcwn2OkTrDtJQt/pSkkjAQr
-# ihzygFsRwE0d97MRL2mF8gfUuSd+9dl/f6G7sIoIc48f2XAAq8/gewG7qzjaaHSu
-# ERruvsOi5fc1GYxs5HRIke7v57oKu8BIHIXuA5jZQfgjHg/dlQscUkyCgkDWsPhA
-# 8VPfRgvlqyD3ByLAHg==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMzEzMjE1MTI5WjAjBgkqhkiG9w0B
+# CQQxFgQUrny135owhoGG25tqmcrGFYwmamAwDQYJKoZIhvcNAQEBBQAEggEAJ2MM
+# ng3Yk5BZhmoDrdG4crE9IUqFJYw8NVLmt12ATnwfY/3T3F+kiOYeNsg0enw4kwzc
+# 6FjnVK5Hw1ppheQ086EJQ4obcUXIDqBQKFUKv5Fars4M8jx0vR3Od/wxAKb8mOU4
+# FOGW5F4u6+YDTFi7oCucjyPhDWpunoucvxAXLNLBGjs5llWj8JBmj50w6JWMUgnT
+# VNuoWBygvnPAgph4z4tKnvIz95q+QdQTN/OVp5xkdZPO1q2QqburNnvQ22aHYIfh
+# 9MXoJjohS4cRtvQoJQuWJq09YcSaAy/1pumrhqodcT0nc2y/aBEZKGLsrj8VSEBp
+# 48BbhsqL3i100mxBGA==
 # SIG # End signature block

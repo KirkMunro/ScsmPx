@@ -133,31 +133,38 @@ function Get-ScsmPxViewData {
                             if ($propertyName -match '[\\/\.]') {
                                 $propertyNameParts = $propertyName -split '[\\/\.]'
                                 $propertyValues = @()
-                                foreach ($propertyValue in $psoPropertyValues[$propertyNameParts[0]]) {
-                                    foreach ($subPropertyName in $propertyNameParts[1..$($propertyNameParts.Count - 1)]) {
-                                        if (-not $propertyValue) {
-                                            break
+                                if ($psoPropertyValues.Keys -contains $propertyNameParts[0]) {
+                                    foreach ($propertyValue in $psoPropertyValues[$propertyNameParts[0]]) {
+                                        foreach ($subPropertyName in $propertyNameParts[1..$($propertyNameParts.Count - 1)]) {
+                                            if (-not $propertyValue) {
+                                                break
+                                            }
+                                            if (Get-Member -InputObject $propertyValue -Name $subPropertyName -ErrorAction SilentlyContinue) {
+                                                $propertyValue = $propertyValue.$subPropertyName
+                                            } elseif ($psoPropertyValues.Keys -contains $subPropertyName) {
+                                                $propertyValue = $psoPropertyValues.$subPropertyName
+                                            } else {
+                                                $propertyValue = $null
+                                            }
                                         }
-                                        if (Get-Member -InputObject $propertyValue -Name $subPropertyName -ErrorAction SilentlyContinue) {
-                                            $propertyValue = $propertyValue.$subPropertyName
-                                        } elseif ($psoPropertyValues.Keys -contains $subPropertyName) {
-                                            $propertyValue = $psoPropertyValues.$subPropertyName
-                                        } else {
-                                            $propertyValue = $null
+                                        if ($propertyValue) {
+                                            $propertyValues += $propertyValue
                                         }
                                     }
-                                    if ($propertyValue) {
-                                        $propertyValues += $propertyValue
+                                    if ($propertyValues.Count -eq 1) {
+                                        $psoPropertyValues[$propertyDisplayName] = $propertyValues[0]
+                                    } elseif ($propertyValues.Count -gt 1) {
+                                        $psoPropertyValues[$propertyDisplayName] = $propertyValues
+                                    } else {
+                                        $psoPropertyValues[$propertyDisplayName] = $null
                                     }
-                                }
-                                if ($propertyValues.Count -eq 1) {
-                                    $psoPropertyValues[$propertyDisplayName] = $propertyValues[0]
-                                } elseif ($propertyValues.Count -gt 1) {
-                                    $psoPropertyValues[$propertyDisplayName] = $propertyValues
                                 } else {
-                                    $psoPropertyValues[$propertyDisplayName] = $null
+                                    $psoPropertyValues[$propertyDisplayName] = $psoPropertyValues[$propertyNameParts[0]] = $null
                                 }
                             } else {
+                                if ($psoPropertyValues.Keys -notcontains $propertyName) {
+                                    $psoPropertyValues[$propertyName] = $null
+                                }
                                 $psoPropertyValues[$propertyDisplayName] = $psoPropertyValues[$propertyName]
                             }
                         }
@@ -576,8 +583,8 @@ Export-ModuleMember -Function Get-ScsmPxViewData
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+68x+YcEOYQSMvDIWLHpSnO+
-# yxugghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUaT+n+8KhB5bG2sKfM4Da+s/H
+# ceqgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -691,22 +698,22 @@ Export-ModuleMember -Function Get-ScsmPxViewData
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFNOFcLu/gDdUoBA/nbYjT5TJ6pe7MA0GCSqGSIb3DQEBAQUABIIBAJvJ
-# oHVeO5Ow9uAG5EA88/rD7cr5ymtpSBsK9TvtXt9iOcf7pfz0BH2HnGJjrnSlVXgi
-# 98lKEVnKDsKd1Pi71p5Ml+Ndchr+2D03BS42SVlRSE0L0wXuo/Ff+r4Wu5f7i6sc
-# yc3lwoevJx7bzKPFFhc/soIrGaaeb6bFMXh7CWmVPeUv2M32Lsa5ggP8V0fqmCdg
-# tBFYqfWGp8N1WSZR3CE+Icqs2siKn4/88FHoMRy3sDWqkAYBfeet3Hje/lOiX7/c
-# jNeRBMMwUtOL9ldWEmNSMEKECWsKmtSpFRjFf+wWX6dATaAhyDxkrleMge/JJt1f
-# RTTMt0v17CsAmmy4JG+hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFF3druoDRPISXyjv4jK7QmGJfJFuMA0GCSqGSIb3DQEBAQUABIIBAKBi
+# KnJ/FqWX6jEI5L3N438PK5NmtE07mMJc8OeGtOpGUsh742HB+8cVlPcem2Vwz6Z/
+# H9olz2zuqhwE2KwEw/vfROVO2KIk8L4b5KqUUF2L8ygMVEIq2a5oCwMWjL9ItcCO
+# TnDWDYzjFibTwEeUMOEvYxFDKIrFW6rzMbbJbbHF7h+VKST/6gIDhkDZxmiI58CI
+# FQpclkAXQfxvmDWaPEeGDGAFMvzVnshOqejTSbs4wcQ9m6BMZG0Aw05Qit0WHskq
+# JgeLPgdkI8LymfBcmxeeK5V+Up/AXp/zMHSuOWfJwNPtqPgjADoUbxPyr7sjEcgU
+# cLgT1tgVgK7n/2vkzoahggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMjI0MTk0NjA1WjAjBgkqhkiG9w0B
-# CQQxFgQUbmt8KpNETMbls/vunGs9xmf4L/gwDQYJKoZIhvcNAQEBBQAEggEAGgKn
-# uavC0fjiu+bZpCch7CqXIzItF6rMGMa8LV94gaWT/j/r1xsUydCU4GdbG6iIEnKA
-# qOlVkABXCEvQpzq7aJNr2Oqp0DpqnDvck4krCWAycCD6yA578hab/NQH/LCXg4d/
-# GoEvZxTQjEUEPi+TSTFqnFN1TtaeBfmvD4hzrzetTxm3DH+EOSF+y8CDRDBoXH3W
-# u/cvA/pgTybUmseiJ/Wpbm7mrktNaZueCvcycvjkXM3kduWKC2l5lAvWzvCWjPi/
-# qLNJunA90ehzrXtiWbAWH+a/kiwK5AY514GV1ticghDBbOZYK3UH5h2gcnyOccuD
-# cuDg4dGtpT6cUkZbUQ==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMzEzMjE1MTIwWjAjBgkqhkiG9w0B
+# CQQxFgQUJdgXLHv4niWv9CQZSgpCbIj7TmcwDQYJKoZIhvcNAQEBBQAEggEAYSTC
+# WXjYlqpSRvpco7POtsnnICwzraeb2JehOwwITJmbCeosGvHn6yNcUulQHD5tlceX
+# pS7LRTr9/wx2LEdV+bXRBUUQJem8hkDpJc560vZBCMlL2jdUqF04mqLYJ4w6iqMR
+# zpmKPwaRZdivJMFt+/uVQCTckdpJZRiKSMQ5Hy+LsXbRp7Z+ZpTkvc8niSFHKcaD
+# /y7+tfmElLsYjgGUWiLY49IIWzqI8mtUxb06AGjKq2pD5XSiV35cp6/RPeJ2bx71
+# cZwL6VopddhC1hbGfLVwoRmSJV6rcaaFhgUv9MNeLIuxV+qhy7SD+ZWLSOjkJV17
+# a3IVfChWwOR6rzoGXw==
 # SIG # End signature block
