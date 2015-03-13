@@ -24,7 +24,7 @@ limitations under the License.
 @{
       ModuleToProcess = 'ScsmPx.psm1'
 
-        ModuleVersion = '1.0.11.51'
+        ModuleVersion = '1.0.12.52'
 
                  GUID = '2fb132d0-0eea-434f-9619-e8c134e12c57'
 
@@ -40,10 +40,6 @@ limitations under the License.
 
         NestedModules = @(
                         'SnippetPx'
-                        )
-
-     ScriptsToProcess = @(
-                        'scripts\Initialize-NativeScsmEnvironment.ps1'
                         )
 
     FunctionsToExport = @(
@@ -389,9 +385,8 @@ limitations under the License.
                         'functions\Restore-ScsmPxObject.ps1'
                         'functions\Set-ScsmPxObject.ps1'
                         'helpers\ConvertTo-TypeProjectionCriteriaXml.ps1'
+                        'helpers\Initialize-NativeScsmEnvironment.ps1'
                         'helpers\Join-CriteriaXml.ps1'
-                        'scripts\Initialize-NativeScsmEnvironment.ps1'
-                        'scripts\Install-ScsmPxModule.ps1'
                         'xslt\emoCriteriaToProjectionCriteria.xslt'
                         )
 }

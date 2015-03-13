@@ -133,31 +133,38 @@ function Get-ScsmPxViewData {
                             if ($propertyName -match '[\\/\.]') {
                                 $propertyNameParts = $propertyName -split '[\\/\.]'
                                 $propertyValues = @()
-                                foreach ($propertyValue in $psoPropertyValues[$propertyNameParts[0]]) {
-                                    foreach ($subPropertyName in $propertyNameParts[1..$($propertyNameParts.Count - 1)]) {
-                                        if (-not $propertyValue) {
-                                            break
+                                if ($psoPropertyValues.Keys -contains $propertyNameParts[0]) {
+                                    foreach ($propertyValue in $psoPropertyValues[$propertyNameParts[0]]) {
+                                        foreach ($subPropertyName in $propertyNameParts[1..$($propertyNameParts.Count - 1)]) {
+                                            if (-not $propertyValue) {
+                                                break
+                                            }
+                                            if (Get-Member -InputObject $propertyValue -Name $subPropertyName -ErrorAction SilentlyContinue) {
+                                                $propertyValue = $propertyValue.$subPropertyName
+                                            } elseif ($psoPropertyValues.Keys -contains $subPropertyName) {
+                                                $propertyValue = $psoPropertyValues.$subPropertyName
+                                            } else {
+                                                $propertyValue = $null
+                                            }
                                         }
-                                        if (Get-Member -InputObject $propertyValue -Name $subPropertyName -ErrorAction SilentlyContinue) {
-                                            $propertyValue = $propertyValue.$subPropertyName
-                                        } elseif ($psoPropertyValues.Keys -contains $subPropertyName) {
-                                            $propertyValue = $psoPropertyValues.$subPropertyName
-                                        } else {
-                                            $propertyValue = $null
+                                        if ($propertyValue) {
+                                            $propertyValues += $propertyValue
                                         }
                                     }
-                                    if ($propertyValue) {
-                                        $propertyValues += $propertyValue
+                                    if ($propertyValues.Count -eq 1) {
+                                        $psoPropertyValues[$propertyDisplayName] = $propertyValues[0]
+                                    } elseif ($propertyValues.Count -gt 1) {
+                                        $psoPropertyValues[$propertyDisplayName] = $propertyValues
+                                    } else {
+                                        $psoPropertyValues[$propertyDisplayName] = $null
                                     }
-                                }
-                                if ($propertyValues.Count -eq 1) {
-                                    $psoPropertyValues[$propertyDisplayName] = $propertyValues[0]
-                                } elseif ($propertyValues.Count -gt 1) {
-                                    $psoPropertyValues[$propertyDisplayName] = $propertyValues
                                 } else {
-                                    $psoPropertyValues[$propertyDisplayName] = $null
+                                    $psoPropertyValues[$propertyDisplayName] = $psoPropertyValues[$propertyNameParts[0]] = $null
                                 }
                             } else {
+                                if ($psoPropertyValues.Keys -notcontains $propertyName) {
+                                    $psoPropertyValues[$propertyName] = $null
+                                }
                                 $psoPropertyValues[$propertyDisplayName] = $psoPropertyValues[$propertyName]
                             }
                         }
