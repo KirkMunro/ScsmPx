@@ -24,7 +24,7 @@ limitations under the License.
 @{
       ModuleToProcess = 'ScsmPx.psm1'
 
-        ModuleVersion = '1.0.12.52'
+        ModuleVersion = '1.0.12.53'
 
                  GUID = '2fb132d0-0eea-434f-9619-e8c134e12c57'
 
@@ -389,4 +389,15 @@ limitations under the License.
                         'helpers\Join-CriteriaXml.ps1'
                         'xslt\emoCriteriaToProjectionCriteria.xslt'
                         )
+
+
+          PrivateData = @{
+                            PSData = @{
+                                Tags = 'system center service manager scsm smlets'
+                                LicenseUri = 'http://apache.org/licenses/LICENSE-2.0.txt'
+                                ProjectUri = 'http://kirkmunro.github.io/ScsmPx'
+                                IconUri = ''
+                                ReleaseNotes = ''
+                            }
+                        }
 }
