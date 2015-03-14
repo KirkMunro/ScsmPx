@@ -24,7 +24,7 @@ limitations under the License.
 @{
       ModuleToProcess = 'ScsmPx.psm1'
 
-        ModuleVersion = '1.0.12.52'
+        ModuleVersion = '1.0.12.53'
 
                  GUID = '2fb132d0-0eea-434f-9619-e8c134e12c57'
 
@@ -389,12 +389,23 @@ limitations under the License.
                         'helpers\Join-CriteriaXml.ps1'
                         'xslt\emoCriteriaToProjectionCriteria.xslt'
                         )
+
+
+          PrivateData = @{
+                            PSData = @{
+                                Tags = 'system center service manager scsm smlets'
+                                LicenseUri = 'http://apache.org/licenses/LICENSE-2.0.txt'
+                                ProjectUri = 'http://kirkmunro.github.io/ScsmPx'
+                                IconUri = ''
+                                ReleaseNotes = ''
+                            }
+                        }
 }
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUCXS1AP92Ca+beLp/0kM8+6R4
-# swigghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUAdZsAOh3xcxoSExaDo6HJhoK
+# ATmgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -508,22 +519,22 @@ limitations under the License.
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFByxVhgbf4+0D15dXpF2903GWVrKMA0GCSqGSIb3DQEBAQUABIIBAMWX
-# l2H8wbLbwJIkohYNSaEKwQz+p0jldiXGfYWy0CMlYTrDZE6eU3SXhaKox2CbuGbh
-# paCMXYu7lzwI5OqtrbyOAD/FD9MHFRlVGzut8ncIXtrLws1lWJrRuDbOdrrCVfRE
-# TtBt9UJBIsSfW7xK+f+MCChxFuZsz4guiYQ5SuA4TZrCjaVZUMAf/fIyDtXHXrHZ
-# EJbQaY5hBQTi8gsq5Gz+v45qYjbVw/XTPV24ZV60/afoPkfBaqYbOs0J3rwF5e6Y
-# brXlacEGcXY9cuWUzRldy8qGlPWFKrQhg8VNBIY4UMdzqb6BdI3F+pKzmwd3KRl4
-# 6X14XYgI+NcGvdbuW6ShggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFCeWyatxIGvOhkyE1NZTSDJ8pUQ3MA0GCSqGSIb3DQEBAQUABIIBALUe
+# Hd4WuxHMpC9rRoTZkpdrYhmy1UsPB1k870NLWeUybKtOHcEdASdlZEhUgOv5Ct0x
+# /8IqSU/7TXijsSgOr5v+WuKdzva0qvEYWW1vdmq6DBjAA26MoOLJutGlSijozrgh
+# upSlxLj8CQp9fNHdi0iweyHWFBcEMcIguz0y/Dhg1FuA3rAcvhYG4/urFdKf16dh
+# t9dI8dpWmnl3eG1v2bL6pH47YMI+NsxcAQOhUjIgsF1F/hBwFV8kpcGJIIYBhStJ
+# 16HjnhgZ+WwfDMH45ys+WYt+lCKGkfM2z3DRfplTiyIF5mllvG/IyupEVrDpHiW3
+# 6PKt11q7sq/8iS24RQyhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMzEzMjE1MTE1WjAjBgkqhkiG9w0B
-# CQQxFgQUeMP4z9dyFbqkr72MwPUjA1JJnmcwDQYJKoZIhvcNAQEBBQAEggEAjeM7
-# F9kMmKoVPJMGBRFjE6Y4I/uybuxByvwnF38muONTaUkF/4rvXAdevh0l+jkKOYtg
-# 3k4M8WLZXbXuLKladbJPCmzz2Doxqz394KoyKC/6FNQTE4hwmJ9MP87zt4jZcj+G
-# A2izjoOUVAXwVcDp6lUAbrhu65CiCfFzEDAz++QBm45lRVPF4m6l86dODo8N0Bck
-# YK2Ez1cfzTZC2icvRL+ZIz7QYop/XLOKRpFYcqu00MJi0nfitKbKDh//gf48oa3D
-# oMk/wa5XmXCt6x4hZP/2IG+gbco7RZvEjnTQpaeye3haWTnOtw6TlfiKObgDRSuB
-# KBWgLn+Q1bfA8TpVgw==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMzE0MTU0NzE3WjAjBgkqhkiG9w0B
+# CQQxFgQUNFVd0rAhUBs6/R2Yl3dXMnPOpvQwDQYJKoZIhvcNAQEBBQAEggEAiX0e
+# Dbh/2iLcaCeiPWteSy7pHll/4CEBaLSIDisytuu3cUclGplKRY4ozOSNpHldspe4
+# WLO8c/6K7Ovoa+lRa78rYfW6UMF2sIEHoWB6xd3DdlGU6rId1Kc9o8I4EuHH2H2p
+# Vu6BpX/33Me1+337geawDq08EKTwMsm0ounr6vIUvMSo6ml7VnOWgEjeEZq4PwB1
+# CJ56/h0E31BDO94Zxv1dRsxetdoQf4DMpP5JN1ShTS3Z+XI9Ly6II4ck1TuQchUj
+# xM0nrXZGLEECxJK39J6DNCIP/toSM8qVSQuHlQHzD7k7qtad8jVHDuCoFsK2qfi/
+# vZh7de9tsuT8GvcX9w==
 # SIG # End signature block
