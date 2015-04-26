@@ -55,12 +55,15 @@ function Initialize-NativeScsmEnvironment {
         } else {
             $sessionStateProperty = 'RunspaceConfiguration'
         }
-        $typePs1xmlFiles = @($Host.Runspace.${sessionStateProperty}.Types)
-        for ($index = 0; $index -lt $typePs1xmlFiles.Count; $index++) {
-            if ($typePs1xmlFiles[$index].FileName -match 'SMLets\.Types\.ps1xml$') {
-                $Host.Runspace.${sessionStateProperty}.Types.RemoveItem($index)
-                Update-TypeData
-                break
+        if ((Get-Member -InputObject $Host.Runspace -Name $sessionStateProperty -ErrorAction Ignore) -and
+            $Host.Runspace.$sessionStateProperty) {
+            $typePs1xmlFiles = @($Host.Runspace.${sessionStateProperty}.Types)
+            for ($index = 0; $index -lt $typePs1xmlFiles.Count; $index++) {
+                if ($typePs1xmlFiles[$index].FileName -match 'SMLets\.Types\.ps1xml$') {
+                    $Host.Runspace.${sessionStateProperty}.Types.RemoveItem($index)
+                    Update-TypeData
+                    break
+                }
             }
         }
 
