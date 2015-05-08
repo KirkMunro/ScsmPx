@@ -55,12 +55,15 @@ function Initialize-NativeScsmEnvironment {
         } else {
             $sessionStateProperty = 'RunspaceConfiguration'
         }
-        $typePs1xmlFiles = @($Host.Runspace.${sessionStateProperty}.Types)
-        for ($index = 0; $index -lt $typePs1xmlFiles.Count; $index++) {
-            if ($typePs1xmlFiles[$index].FileName -match 'SMLets\.Types\.ps1xml$') {
-                $Host.Runspace.${sessionStateProperty}.Types.RemoveItem($index)
-                Update-TypeData
-                break
+        if ((Get-Member -InputObject $Host.Runspace -Name $sessionStateProperty -ErrorAction Ignore) -and
+            $Host.Runspace.$sessionStateProperty) {
+            $typePs1xmlFiles = @($Host.Runspace.${sessionStateProperty}.Types)
+            for ($index = 0; $index -lt $typePs1xmlFiles.Count; $index++) {
+                if ($typePs1xmlFiles[$index].FileName -match 'SMLets\.Types\.ps1xml$') {
+                    $Host.Runspace.${sessionStateProperty}.Types.RemoveItem($index)
+                    Update-TypeData
+                    break
+                }
             }
         }
 
@@ -141,8 +144,8 @@ function Initialize-NativeScsmEnvironment {
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUrnTxiefteIK586bN/1z2eWSG
-# HBSgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUj+tXlenm64XDMWXHTBmSTOW
+# zSqgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -256,22 +259,22 @@ function Initialize-NativeScsmEnvironment {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFDYrqOH+97mjE/aCVHRfIDPdy6X0MA0GCSqGSIb3DQEBAQUABIIBAHUn
-# w5Xfx/50V4QX4IB63MBzPQtwI/cCqibCpv/aUmLjaCQXrCZh5M7DjpOqC+tsr30h
-# Cu0kfy31mMUHbQgUJ2CW257f6ap7dOmx7dR5QfHwTWpV7RvNjxC8Qqd2dwG86uw6
-# sbf59ue4JFuqMG2S76EKGBLwMj1IhBMzrtyiAkT9rpvNaSFgSj3fddfB1IoKWBNc
-# rzFFpETGvUQ05J24+XZUoBL9sfbpkpTwd4Ucko0g0viSMcIh/3t/+lGD/yhwNh7I
-# bnNebwOLecSogHAaXhgSRA4NvMCnV/yJ+V5nMOG1MHhJQF2vOyMb+CHfZ42nDbeO
-# RRwBDRHkbwLMakKSvLmhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFMUL7s/c6HTPEJhWBBCtCXvWKulRMA0GCSqGSIb3DQEBAQUABIIBAJ6k
+# zmG120mHgY0rzluqn3z4cjc4CTTjP63HerZQyUddEltkAgYt8sx0+F/OPRXk/86P
+# Sc5rdF3F4ZlzYzRzaO3lZ0xvxFphVd9ze86euIwk1AwabB6Q2GaZYtB92q+Qkdcc
+# yh07+fyC8Ch541/xqTLuK4nsnsVXLdOHTV+3vAYhjeaQxU6bVX3HIiS2CwRCBNhO
+# sSkSNkUwpu6ujxEkzxNCHFGqyvkkbeVHqBtO7lWWpDO9HTlRjg/WRXCnF5j3Nagk
+# WglmqM1LdmZBCn8w6tR7+tiE8nvXqtNlvJkTfy6JSYecgGTOt7DoW87au5rB+N8S
+# m2jFlBLOe24dOdqFCoKhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwMzE0MTU0NzMxWjAjBgkqhkiG9w0B
-# CQQxFgQU0rXiumT6nLIzCSHMmVVUku9jlFcwDQYJKoZIhvcNAQEBBQAEggEAa5pU
-# iWqC1lMovnfxXz3tEq8PsqaZfQ66YTpkNnSOP1AzfsovPY3dAzRJo7EvOrpNEHwH
-# quCu2/9Ep4rg2CRHQ+JwabEtuGu6zEu7xacuLBRbuDhiNfxEyYsz/qbZGOnmU0ln
-# 3B4wtvUFjLwdZ6628xxAcAzVogZEu1hWigNx+i+HTbvKpX0e1gAa9QhAA6ZVeSQ9
-# kXyOd+ClAnFWaGAFOrInrYnpQ05ZGB54xB6zMQVBn8kLgi8v8keIgRH7d6KoIDne
-# 8ExF8c9lREWZx+/8qVnWriAw48owhsSG7vIocX2SMUFbfSutENVD4atItseAPV3x
-# Xjoe50odSsCUZu34RQ==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwNTA4MTc1NjQwWjAjBgkqhkiG9w0B
+# CQQxFgQUfwJYC+g4k+z4hmjrH52rid4EnWcwDQYJKoZIhvcNAQEBBQAEggEAkV+0
+# Voj7K2j+culD/kConPelSVZ/03Qqi5vvc/YT1prT8GhZaZVaZgHmQVAGfqAv6dAZ
+# wktEds9QGiE9nofdSPugBMTILfvKvBdvFr1ptl0vyegVPYWWTLcoKhMxJQAZHMZJ
+# Dmp/E57+BAwY7NYbX6R5URlXqxC+ucGgREU2fdib2XlFT93X9AQGuaVp415l8sIG
+# ebcuDN4P1gQdmnJjp9S8fIUpEpDPhO86qPAoqkl4BJcnQNCiimzZe5fCLvUqZF6T
+# yE/8pksi2DtB/v7uSCJvXrTNuoCy8XMYocDgJcaqNh/WPNcTlzyQfddMwfIs5ACj
+# W3oXgec9aVdLSqPHRA==
 # SIG # End signature block
