@@ -28,6 +28,14 @@ try {
 
     #endregion
 
+    #region Initialize the SCSM environment.
+
+    # This must be done before we try to import the function files, because it will make sure that
+    # the appropriate .NET binaries are loaded in the current session first
+    . $PSModuleRoot\scripts\Initialize-NativeScsmEnvironment.ps1
+
+    #endregion
+
     #region Import helper (private) function definitions.
 
     Invoke-Snippet -Name ScriptFile.Import -Parameters @{
@@ -41,12 +49,6 @@ try {
     Invoke-Snippet -Name ScriptFile.Import -Parameters @{
         Path = Join-Path -Path $PSModuleRoot -ChildPath functions
     }
-
-    #endregion
-
-    #region Initialize the SCSM environment.
-
-    Initialize-NativeScsmEnvironment
 
     #endregion
 
@@ -314,8 +316,8 @@ try {
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZoa58Y1blBUFdJXmgY6D0bCo
-# beagghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUkymLdsgvhcZ8UxZP0IX9fWgZ
+# d3agghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -429,22 +431,22 @@ try {
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFA4mBv+eX2fBoiRqUdc0hVA2sqOyMA0GCSqGSIb3DQEBAQUABIIBAHZw
-# 6XBTwAAv7rl/jz2+QLkCRmvtFScQ7mEJI5k3xkVn3i+mkiYRFDXgMwfrFVm79Ut7
-# 8BLkLA3m2hqZWBsesjkgI5ky7lZ5WVXsnUWJU5wYagnK4By9+svS/o76P8rTw8u1
-# J4uXuh/bk5AynbPF6tiopaQTpK+qsv+h8N63tT63AJwLECVjfHjTPOAHskREYt86
-# pf9vKl5ZGqxbl7sJnPKOcVI1rvaRn+1v0412KWTYJy2kxnG/fzkW+I3cx1GQ4ePF
-# CLpX89Kaj3JElG46M8BCKw3d+eKMg1O8qZ0CHhfBnl1m+VsQfWyeme77Aem8mgFP
-# scCcND9Enxh30JPDaiyhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFCTeCvIdtZZOzz9LmKvPqs+EGrNjMA0GCSqGSIb3DQEBAQUABIIBACa+
+# 5+BHHN7TQhLfMZYm2wQRHi36UmYjNnVaa6DU6xdR6mgLI+OS9AlZeXED8+OoB3h9
+# wRou8fzMNOlnEO6Hh4ji+/LkUD9ND9tHcIq9VUhOzq+/gZU18tKPOVSbr1F6juia
+# J6pW3Ot6LqkE1vVLqW/7vCTFWTH9rj7KmnGbjyqXky7uN8f4wvXpJRqlxKDk+Pqs
+# VsCSy5GztkZHi4VdvoFvAu13Zo435/qtYF948n1Gz02TNvpddmJKKF9Z+XlTbYqT
+# ds5Y7XnjbdPlVO78uaiHySNumnam2SxZKhU5KtoauMs1OgUR8Cp0ls3GrLm3W7fq
+# WBZoV8kQGIGs2x5rj5ChggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwNTA4MTc1NjM4WjAjBgkqhkiG9w0B
-# CQQxFgQUrny135owhoGG25tqmcrGFYwmamAwDQYJKoZIhvcNAQEBBQAEggEABEqF
-# ODWjmuMKOO/Wyc8gLFnB6iSQHJceeRT4GNqFx2ufEMqdBBf3X5a9lYi5BK2hLJyn
-# 4f/E/s3cxHCwcDiNJPRaHAE/kGkv+G/4BbCLoxlf7m/KK84JXV7qepDMHhFKyWRn
-# VUPT9+FheijQxSj1yEep/w1G38QKL1RT2eKTwwCXxaaNVuZHsiqWop7Ug47sXb5L
-# CF9HCCPtnKVsuLhaRJFpOPC9npKoryy3OKUewlXGJi37T4pgn5n9mjBFJFwHX0EY
-# UBFTPFM7ocF2frmc7VCRccXfuY8TT0L9sgqRkf1Z98W+ZA4NTFdkT5Gf9a71Emh6
-# wR7SJXeZoezykdavyQ==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMDMwMTU1OTMxWjAjBgkqhkiG9w0B
+# CQQxFgQUsWAjZZpwZANV7rRF6FyW20VFq+MwDQYJKoZIhvcNAQEBBQAEggEAGvlF
+# FmdzkdSRa9P4kKlvuQSTxi/ce2gpeP/e7+F4797tDpd2aMeef3GoVRTvdTAPUVK+
+# xSXrwiGkbF6wpceMPYhkEfk+rortXN57eChEFRMh/1HhYQXsO50cXDd1jR2MIxs/
+# yDkeLb2tybsLXdU3N563T1H5QpYac5ZvFM1Mp6aGSlwdakNvCuu+u6A2L3n5m8JG
+# It3VO2h8bI86iKMi+QhJplpTdZpY/A7rl5OJROqDwz9FOW79Ap6H0HGkpQixUimO
+# 20D1YmUaHvPambHmwO34DrVTd/Thy2TCVWFyiE3h8Byz7CUUzjrx3Suohs2ixGRv
+# Xr8vgZQiYRa6IoSGYw==
 # SIG # End signature block
