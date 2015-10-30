@@ -28,6 +28,14 @@ try {
 
     #endregion
 
+    #region Initialize the SCSM environment.
+
+    # This must be done before we try to import the function files, because it will make sure that
+    # the appropriate .NET binaries are loaded in the current session first
+    . $PSModuleRoot\scripts\Initialize-NativeScsmEnvironment.ps1
+
+    #endregion
+
     #region Import helper (private) function definitions.
 
     Invoke-Snippet -Name ScriptFile.Import -Parameters @{
@@ -41,12 +49,6 @@ try {
     Invoke-Snippet -Name ScriptFile.Import -Parameters @{
         Path = Join-Path -Path $PSModuleRoot -ChildPath functions
     }
-
-    #endregion
-
-    #region Initialize the SCSM environment.
-
-    Initialize-NativeScsmEnvironment
 
     #endregion
 

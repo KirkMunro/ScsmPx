@@ -24,7 +24,7 @@ limitations under the License.
 @{
       ModuleToProcess = 'ScsmPx.psm1'
 
-        ModuleVersion = '1.0.12.54'
+        ModuleVersion = '1.0.13.55'
 
                  GUID = '2fb132d0-0eea-434f-9619-e8c134e12c57'
 
@@ -384,9 +384,10 @@ limitations under the License.
                         'functions\Reset-ScsmPxCommandCache.ps1'
                         'functions\Restore-ScsmPxObject.ps1'
                         'functions\Set-ScsmPxObject.ps1'
+                        'helpers\Add-ClassHierarchyToTypeNameList.ps1'
                         'helpers\ConvertTo-TypeProjectionCriteriaXml.ps1'
-                        'helpers\Initialize-NativeScsmEnvironment.ps1'
                         'helpers\Join-CriteriaXml.ps1'
+                        'scripts\Initialize-NativeScsmEnvironment.ps1'
                         'xslt\emoCriteriaToProjectionCriteria.xslt'
                         )
 
