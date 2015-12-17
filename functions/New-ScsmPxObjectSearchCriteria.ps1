@@ -67,23 +67,65 @@ function New-ScsmPxObjectSearchCriteria {
 
         #endregion
 
-        #region Replace any property names that are not using the correct case-sensitivity.
+        #region Replace any property names that are not using the correct case-sensitivity, and any values that are variables.
 
         $properties = @{}
         foreach ($item in @($Class) + @($Class.GetBaseTypes())) {
             foreach ($property in $item.GetProperties()) {
-                if (-not $properties.ContainsKey($property.Name)) {
+                if (-not $properties.Contains($property.Name)) {
                     $properties[$property.Name] = $property
                 }
             }
         }
+        # Determine how far up the stack we want to look for variables when evaluating the filter parameter.
+        $scope = 0
+        foreach ($callStackEntry in Get-PSCallStack) {
+            if (($callStackEntry.InvocationInfo.MyCommand.Parameters -ne $null) -and
+                $callStackEntry.InvocationInfo.MyCommand.Parameters.ContainsKey('Filter')) {
+                $scope++
+                continue
+            }
+            break
+        }
+        # Replace variables with values
         $stringBuilder = [System.Text.StringBuilder]$Filter
+        $tokenOffset = 0
         foreach ($token in [System.Management.Automation.PSParser]::Tokenize($Filter,([REF]$null))) {
+            # Skip tokens until we find a "command" (property to filter on)
             if ($token.Type -ne [System.Management.Automation.PSTokenType]::Command) {
                 continue
             }
-            if ($properties.ContainsKey($token.Content)) {
+
+            # Verify that the property exists on the object we are searching
+            if (-not $properties.Contains($token.Content)) {
+                throw "Invalid filter. Property '$($token.Content)' does not exist on management pack class '$($Class.Name)'."
+            }
+
+            # Workaround to the $foreach iterator bug
+            while ($foreach.Current -ne $token) {
+                if (-not $foreach.MoveNext()) {
+                    break
+                }
+            }
+
+            # Ensure the property name is using the correct case
+            if ($properties.Contains($token.Content)) {
                 $stringBuilder = $stringBuilder.Replace($token.Content, $properties[$token.Content].Name, $token.Start, $token.Length)
+            }
+            # If the next token is an operator, and the following one is a variable, replace the variable with its string equivalent
+            $foreach.MoveNext() > $null
+            if (($foreach.Current.Type -ne [System.Management.Automation.PSTokenType]::CommandParameter) -or
+                -not $operatorMap.Contains($foreach.Current.Content)) {
+                continue
+            }
+            $foreach.MoveNext() > $null
+            if ($foreach.Current.Type -eq [System.Management.Automation.PSTokenType]::Variable) {
+                $variableToken = $foreach.Current
+                $replacementValue = "'$((Get-Variable -Name $variableToken.Content -Scope $scope -ValueOnly) -as $properties[$token.Content].SystemType)'"
+                $stringBuilder = $stringBuilder.Replace("`$$($variableToken.Content)", $replacementValue, $variableToken.Start + $tokenOffset, $variableToken.Length)
+                # We need to update the offset so that multiple replacements in sequence work just fine; the -1 at
+                # the end ensures that we account for the $ preceding the variable token.
+                $tokenOffset += $replacementValue.Length - $variableToken.Content.Length - 1
             }
         }
         $Filter = [string]$stringBuilder

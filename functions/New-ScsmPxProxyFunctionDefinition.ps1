@@ -321,7 +321,7 @@ $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ConfigItem') -and $Con
                                         if ($PSPassThruParameters.Filter -notmatch '^\(.+\)$') {
                                             $PSPassThruParameters.Filter = "($($PSPassThruParameters.Filter))"
                                         }
-                                        $PSPassThruParameters.Filter = "(ObjectStatus -eq '$($statusValues.$item)) -and $($PSPassThruParameters.Filter)"
+                                        $PSPassThruParameters.Filter = "(ObjectStatus -eq '$($statusValues.$item)') -and $($PSPassThruParameters.Filter)"
                                     } else {
                                         $PSPassThruParameters.Filter = "ObjectStatus -eq '$($statusValues.$item)'"
                                     }
@@ -536,7 +536,7 @@ $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ConfigItem') -and $Con
                                 if ($PSPassThruParameters.Filter -notmatch '^\(.+\)$') {
                                     $PSPassThruParameters.Filter = "($($PSPassThruParameters.Filter))"
                                 }
-                                $PSPassThruParameters.Filter = "(ObjectStatus -eq '$($statusValues.$item)) -and $($PSPassThruParameters.Filter)"
+                                $PSPassThruParameters.Filter = "(ObjectStatus -eq '$($statusValues.$item)') -and $($PSPassThruParameters.Filter)"
                             } else {
                                 $PSPassThruParameters.Filter = "ObjectStatus -eq '$($statusValues.$item)'"
                             }

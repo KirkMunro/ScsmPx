@@ -129,6 +129,11 @@ function Get-ScsmPxRelatedObject {
                     # because those methods return more objects that you ask for.
                     if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName')) {
                         $relationship = [Microsoft.EnterpriseManagement.Configuration.ManagementPackRelationship](Get-SCRelationship -Name $RelationshipClassName @remotingParameters)
+                        if ($relationship -eq $null) {
+                            # TODO: Wrap Get-SCClass and Get-SCRelationship in ScsmPx proxies so that they error out by default if the named class/relationship is not found
+                            # TODO: Replace calls to Get-SCClass and Get-SCRelationship with Get-ScsmPxClass and Get-ScsmPxRelationship once they have been created
+                            throw "Relationship '${RelationshipClassName}' not found."
+                        }
                     } else {
                         $relationship = $RelationshipClass
                     }
