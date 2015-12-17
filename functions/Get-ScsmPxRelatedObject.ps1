@@ -129,6 +129,11 @@ function Get-ScsmPxRelatedObject {
                     # because those methods return more objects that you ask for.
                     if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName')) {
                         $relationship = [Microsoft.EnterpriseManagement.Configuration.ManagementPackRelationship](Get-SCRelationship -Name $RelationshipClassName @remotingParameters)
+                        if ($relationship -eq $null) {
+                            # TODO: Wrap Get-SCClass and Get-SCRelationship in ScsmPx proxies so that they error out by default if the named class/relationship is not found
+                            # TODO: Replace calls to Get-SCClass and Get-SCRelationship with Get-ScsmPxClass and Get-ScsmPxRelationship once they have been created
+                            throw "Relationship '${RelationshipClassName}' not found."
+                        }
                     } else {
                         $relationship = $RelationshipClass
                     }
@@ -222,8 +227,8 @@ Export-ModuleMember -Function Get-ScsmPxRelatedObject
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxHsp58Sgb95YFCA9Zr8RUust
-# 2P2gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU7jK1bRY5cZ3f+sl5FjOwI3YH
+# 4FygghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -337,22 +342,22 @@ Export-ModuleMember -Function Get-ScsmPxRelatedObject
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFKOaJB9SPvPuscZQIYHHMT/FalDWMA0GCSqGSIb3DQEBAQUABIIBAIgf
-# b0tTPNXZrql1d/IudlPfLxCc+nXBGAowoNn6EBKof8xHL43WG1b3UIUv58Tpn1O5
-# YNWf3o3olrRmESOXjQ+o3yERAl7N16Kne0itv896dLuCeaGNWbTYtuEM9PLQ1E9d
-# WMTTp5NalVL6c23MLE4Vn22vueZuD9UrjxTDa/ZUNUzewn6dRlaohjmE6kFaw3g2
-# 2+JikhGGzt9CjYscxX3pShsI8NMPG2RG/5rxLPKKZGdBICgxNa9IFzqDyPlkShMe
-# qd2fH6YUThWUQKNd+CSFfBT0UKcukaT21WXWAFkGN2GJOdJLmhNBxsS4yJyHTNuw
-# 35cKths/CFCSPdH/QY2hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFLzx9vAqRmDFthqTom7MYnIJGMpwMA0GCSqGSIb3DQEBAQUABIIBAAH2
+# BlPcalOt0kawyLMAhJyWM7827mCyaAN4/vNOrBw2oIrhYp/US/x+QxE2LnMb4U0Z
+# xj6L7Z5PFyChBHxJYlkT4lS6FP3ZIT77VBbZ/fpEd1YNQIMGqraKUC5oCUuoVJAm
+# yxsvbcyd/ERPVGbSNpgtwftMZC50mQmlgEcsNnJTfRrbHk9FyBpLTvEHKneolkTL
+# pnCcuETn796wXow0Etf37IZatV4Of3kqbY0My3inVjrD9aMsDvbZbM92U7UBJ3kz
+# 7j3jKTQz3/XA68M8yXaTWHUwLYJIOVvN4gSGIZJYwgqR0GdnbiAxytvmqW7wPa88
+# W2gNOiw/Yp6RhjpPV2GhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMDMwMTU1OTMyWjAjBgkqhkiG9w0B
-# CQQxFgQUJ5bdFM3c+OEcd0NKisHa+cu1YEcwDQYJKoZIhvcNAQEBBQAEggEAN3a+
-# qa8J/avfMUEnJDICQ0q7GxYju5o8MNDFfeTnSFIC9eLbHHjdeb1KfgVSvAj6UiJ7
-# 08IssKSha8A+QCnSOZCDuf8eve9boN43nQR2m88g4ABiyADY/dHayHX4N2NDES1J
-# MONkim/PJ2pByzB0eCcFxI60A25Xy3CoASCCXxfGhVPlRIPOMr5aqfKijPU+V1YN
-# dM0XSo+BTAKWVHnJCg6Hvqwp1YE4qtMw25dhkiCqlHGCQ0kAOIfgcI0GOu41ZcuV
-# dPZoH4pB24+AwPr31b4KLiFKQga6HXtXc42YMq6DJn5tpXt5QvwgPYRNYOdZjZ0s
-# PBkNNODJYiNgOaSh/Q==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMjE3MjEzODUzWjAjBgkqhkiG9w0B
+# CQQxFgQUN9cYnCFMFeX+Z+6uNnddbrAzxQAwDQYJKoZIhvcNAQEBBQAEggEAH0Hh
+# Dy4xD74HMxBHws/XDDgPvjwSj+qm6qVntF81gaZl00PT9Tt6jw7NKNlvlT8e6Gyb
+# eRsM19ebDDEceBtZb3qYHwsu2sEsQQtO7QHnFsjUhewlOu7XC1BR0F6tqU8EZTvG
+# RJJjDOIhUFb8gg25c+ZjS/QFwWgdWNzMQBr4gGzda/XtumQSpYhVuepVn8H/NxqL
+# 1CAerBkpH27rZ/Jh1YsdTqgNLyTPGdeZ12FwNBmKDAup7fzGN4JfxN4OxxtvHgjk
+# L56Z5J8k6r7wNvx2XeHGGi/MYgAdcckutZ5NDvY7dWacXKfNLV64SJkB68sQqkPI
+# YaURCVGDh6fnr8ZMAQ==
 # SIG # End signature block

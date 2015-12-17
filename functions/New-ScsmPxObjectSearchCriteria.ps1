@@ -67,23 +67,65 @@ function New-ScsmPxObjectSearchCriteria {
 
         #endregion
 
-        #region Replace any property names that are not using the correct case-sensitivity.
+        #region Replace any property names that are not using the correct case-sensitivity, and any values that are variables.
 
         $properties = @{}
         foreach ($item in @($Class) + @($Class.GetBaseTypes())) {
             foreach ($property in $item.GetProperties()) {
-                if (-not $properties.ContainsKey($property.Name)) {
+                if (-not $properties.Contains($property.Name)) {
                     $properties[$property.Name] = $property
                 }
             }
         }
+        # Determine how far up the stack we want to look for variables when evaluating the filter parameter.
+        $scope = 0
+        foreach ($callStackEntry in Get-PSCallStack) {
+            if (($callStackEntry.InvocationInfo.MyCommand.Parameters -ne $null) -and
+                $callStackEntry.InvocationInfo.MyCommand.Parameters.ContainsKey('Filter')) {
+                $scope++
+                continue
+            }
+            break
+        }
+        # Replace variables with values
         $stringBuilder = [System.Text.StringBuilder]$Filter
+        $tokenOffset = 0
         foreach ($token in [System.Management.Automation.PSParser]::Tokenize($Filter,([REF]$null))) {
+            # Skip tokens until we find a "command" (property to filter on)
             if ($token.Type -ne [System.Management.Automation.PSTokenType]::Command) {
                 continue
             }
-            if ($properties.ContainsKey($token.Content)) {
+
+            # Verify that the property exists on the object we are searching
+            if (-not $properties.Contains($token.Content)) {
+                throw "Invalid filter. Property '$($token.Content)' does not exist on management pack class '$($Class.Name)'."
+            }
+
+            # Workaround to the $foreach iterator bug
+            while ($foreach.Current -ne $token) {
+                if (-not $foreach.MoveNext()) {
+                    break
+                }
+            }
+
+            # Ensure the property name is using the correct case
+            if ($properties.Contains($token.Content)) {
                 $stringBuilder = $stringBuilder.Replace($token.Content, $properties[$token.Content].Name, $token.Start, $token.Length)
+            }
+            # If the next token is an operator, and the following one is a variable, replace the variable with its string equivalent
+            $foreach.MoveNext() > $null
+            if (($foreach.Current.Type -ne [System.Management.Automation.PSTokenType]::CommandParameter) -or
+                -not $operatorMap.Contains($foreach.Current.Content)) {
+                continue
+            }
+            $foreach.MoveNext() > $null
+            if ($foreach.Current.Type -eq [System.Management.Automation.PSTokenType]::Variable) {
+                $variableToken = $foreach.Current
+                $replacementValue = "'$((Get-Variable -Name $variableToken.Content -Scope $scope -ValueOnly) -as $properties[$token.Content].SystemType)'"
+                $stringBuilder = $stringBuilder.Replace("`$$($variableToken.Content)", $replacementValue, $variableToken.Start + $tokenOffset, $variableToken.Length)
+                # We need to update the offset so that multiple replacements in sequence work just fine; the -1 at
+                # the end ensures that we account for the $ preceding the variable token.
+                $tokenOffset += $replacementValue.Length - $variableToken.Content.Length - 1
             }
         }
         $Filter = [string]$stringBuilder
@@ -122,8 +164,8 @@ Export-ModuleMember -Function New-ScsmPxObjectSearchCriteria
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU2LO1DxuMR3nBARw7QtNCA8TQ
-# ab6gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOJA9Q8pdwQwFQox77HFq0vFp
+# 16OgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -237,22 +279,22 @@ Export-ModuleMember -Function New-ScsmPxObjectSearchCriteria
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFDglDBtsqjp3D9ASS9jrdMaugLYcMA0GCSqGSIb3DQEBAQUABIIBACMk
-# Hvvcc4MITPcbxbsMVIvQwWHFlI6M0MGXNpC7dJnDiv8H8MzMYt93sQpXv+LUfE0T
-# PHM9vKQdzR3ofPEHg17fyMhP2zh3eIIuTGThBFcTlV3svjGiiBv/otIJ55EY8YwS
-# rKLJOzqizmi6Rp1mmSmUr/BbMV2TrpNDYgQGj+OsGFRiQ+6dw4mcCXqMVo3euzaI
-# 1143NMFg3sOPeWYpn2NmjEiCtR8E93WwMloTUnxburwgje8plfyM6CwSIFUnutA1
-# 9SjPcuIylvmfnHOi/NVaAejR6dYXOLvixDs0Zt0+eawNot/wZlm9ZzXQUjRS+KD8
-# rR/VjkQquhPXFIybNG6hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFLvb35ngs78ld+wGsSSL3QqnnmESMA0GCSqGSIb3DQEBAQUABIIBAHVV
+# eKhjaLORtpG/jvXiyUWQ7lzOXNxtmTeHYvNVDKP+OHZttGnl5KkiJrte1Ugp6SQA
+# 9aHL7D8mfZOVsWox/Hhpx+bYeHRuOCkomni/zkTgZUsF5wWc3WS5mlr6RParoiPv
+# tkLy3qTyoy+ovp1Uy7oShSXnsIxOxvllfTT4ZfPC6TB3MFsK4AyPT5EM/i2Fe4ej
+# sD3aBA7s7niNPT2utiUKXyJdqN1AAh1NIgAZ+u9wpDp+jooxm2f6uYz9zzzSKBAQ
+# VDRNpLP6KO1qwIic64bWj7x6heSz41WF0RO7cd5EbhhtoShSEKItnYL4ubOyCEGD
+# HyBORzdZM8FgN5zYc6GhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMDMwMTU1OTMyWjAjBgkqhkiG9w0B
-# CQQxFgQUQFsuxDrFkywgmI5jpJ7TB3ifuA8wDQYJKoZIhvcNAQEBBQAEggEAcWSv
-# 2dHh+QHkXSRLkX8wSlhO6HgTzjLjRQ7yUtAPofdJcgyVBaROp3ISBaPXniOYooEQ
-# SSuHvHcHVLGE0XFzR29sSk46Zs9LcC68jz82crHeyPCQy1iPZr2GCD/kS+gLnsF8
-# uUgwdbm1fqQplGZR01/NTvqQPy0xB+OMG/FpTj0LcT0vwrn/croi6KExl/aFlZgK
-# XON+XGHb7aUVcNvH9v97/fGMizj5+hFJv56v8hOEAsOVpoeQB9Ywe61W3Ky4i6k1
-# 2wH0YCxiGipNxRQz+WfGaBXRKPN24tfmuNNz9d4WJcVy78P7GXsQu89Kce1UzlUG
-# G+qQSLMHSUlDmvDEkw==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMjE3MjEzODUzWjAjBgkqhkiG9w0B
+# CQQxFgQUIfRNy6hLViPtUYRaChXC6qe0zHAwDQYJKoZIhvcNAQEBBQAEggEAi3h/
+# ATOa7pRt+Kk7USFdc01H7I4sBB9FioqV/y5UumalAKS9coc1nz+D9+8S1y2uXYf9
+# unj8l8m/Vh1glR5tcXR0oO3zn/8yRzs5wGw1D4T1ctdjZKSC+opFwtmuah8bxSHz
+# qO4t9wVZz/BT8HRK43b6dTMVYoZyjvv4i5kHs2ZtBJlK3jmjVsh5DnYBWo31s3kL
+# egq2v0CyFYfqUeEBIBVlMXHB5JkLHLKOs7eQu9U4pTwZa6yOhgJZO8ZwvL9vwuxJ
+# 8DggXY+WsGQSglLppt1wp2Mv/OTX2BMFGR/vMS/bUqBjFnThMfN9pRTN433A9a6s
+# JLR5xy4Eu1argv4uJQ==
 # SIG # End signature block

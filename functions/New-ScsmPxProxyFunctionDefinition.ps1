@@ -321,7 +321,7 @@ $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ConfigItem') -and $Con
                                         if ($PSPassThruParameters.Filter -notmatch '^\(.+\)$') {
                                             $PSPassThruParameters.Filter = "($($PSPassThruParameters.Filter))"
                                         }
-                                        $PSPassThruParameters.Filter = "(ObjectStatus -eq '$($statusValues.$item)) -and $($PSPassThruParameters.Filter)"
+                                        $PSPassThruParameters.Filter = "(ObjectStatus -eq '$($statusValues.$item)') -and $($PSPassThruParameters.Filter)"
                                     } else {
                                         $PSPassThruParameters.Filter = "ObjectStatus -eq '$($statusValues.$item)'"
                                     }
@@ -536,7 +536,7 @@ $(if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('ConfigItem') -and $Con
                                 if ($PSPassThruParameters.Filter -notmatch '^\(.+\)$') {
                                     $PSPassThruParameters.Filter = "($($PSPassThruParameters.Filter))"
                                 }
-                                $PSPassThruParameters.Filter = "(ObjectStatus -eq '$($statusValues.$item)) -and $($PSPassThruParameters.Filter)"
+                                $PSPassThruParameters.Filter = "(ObjectStatus -eq '$($statusValues.$item)') -and $($PSPassThruParameters.Filter)"
                             } else {
                                 $PSPassThruParameters.Filter = "ObjectStatus -eq '$($statusValues.$item)'"
                             }
@@ -1104,8 +1104,8 @@ Export-ModuleMember -Function New-ScsmPxProxyFunctionDefinition
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3RNkzAwMd6+wi6mI7CPuFZSw
-# wUigghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU0VJBpMNFwR6UiK5qJfVryvPT
+# Q72gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -1219,22 +1219,22 @@ Export-ModuleMember -Function New-ScsmPxProxyFunctionDefinition
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFGQQD+g2oVvfCNvxxT9ye/h06HRRMA0GCSqGSIb3DQEBAQUABIIBAEjT
-# CgjXoy63jHjZAwdoLP/8QNcBDOCT7PqE2IAfXMs5XTbLiVWfp4DlU/oXxM2d6vNj
-# fnHxDCvnnVnG1BnryOyVExHdTS1lKkUS1yNZVlTbNIDEl5noPKaLQwEk9NvbS/3H
-# kW+Tpa/IMflsNIVO1N3i7L0iLhNUkqEv6nZPJYmL2q2HB3f4eWcz5DrBPPlMIWEw
-# gzRLQBNq96ttkK/syYcsnh9EZoecvBlJv0KrYe3ptsbOdDjuHMPZUuOt58+Mq2TP
-# CsDIlsBD+1dF9u/ZO5eFbzlf6LDggBXC+fP6kn2HrvwPYvgYfwKBr5Jwr2Lw7ROp
-# uUpvXdb8jnuJ7wdEePShggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFGs/nKSHQ4kD7rLRNQdZTZjhrzjQMA0GCSqGSIb3DQEBAQUABIIBAGJR
+# Z62+0eUI6XM4MMvR5TahMGKnaJG3f+6P6Dv/Fm0TV9QqUiLK4e115TSjKSpU3GK+
+# 60exCODNgftkZp+dugfNimg3FiXyX1ZEi6wGWLDM0c2fgmOMtj9G4YuQWN/efVDT
+# hxtpg3v5HtBABT7YVFFE5QAtgqNygO6R9tPQqKqvXP/QiqfRqrBRLVLX91dUwXB7
+# K9JTx21p3TBLlnntiiznZzLmVulj03+2Csm40JI6qzzfs+2+Y+NWWWrYwlHBu9Ua
+# oG6dwT2+i3hqHTuNRj0tgfNzRVs78kY0EfjHH4lpXu/Jd/lM3Rsdx3fo8LTHcsBC
+# BWgYpsxoEfAYJV/Ojz+hggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMDMwMTU1OTMzWjAjBgkqhkiG9w0B
-# CQQxFgQUOlhj5u2wzrflJY5iSOM4Et+eQxAwDQYJKoZIhvcNAQEBBQAEggEAi2Ey
-# F34lJzgqTTh7gTzE+05nIx5IcHXSVDom1bCF81ehvpFBaALV2IiG4iCE2sdPIYLb
-# JOChU5uZ+IQqephIPIHPQu9SnLfsFRKyYOTtSzdPXTcFcG+nQjIUcTFHo6TLBncS
-# xAdJYovIVKy43E0qjZ6whIDVFSGnxLsVo3SN7NOynbpIhdm1OKgPKbxJMXw/7JVy
-# ST6uBXaDtlhz+xFuLgYmDUWBe1m1izcWeHbo2aoXX0EC9gWakRYQrs2TBzYVHKxe
-# pFPvhqsBtr3tCVvvvY92n2Mg+kXyWiWyCyCXaSH2SgXhbNzkpAAQwzcWLZmeD4Eh
-# CzYhdZH5gP7Xpyn4cQ==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMjE3MjEzODU0WjAjBgkqhkiG9w0B
+# CQQxFgQU7dmULKt4OuHKoYZUd65tpAtc4YAwDQYJKoZIhvcNAQEBBQAEggEARqC4
+# djOqnw9XfUkMhQiWZHgF+4aL5Q2XLDIUOQsUBs+gl49CzLdUdCPGviAwh9zgmQGz
+# ANjvEwaLQcRSQnDyGrZvCJ43i9oD5EcXEnjSMGIJxi/fLSQ1CzKcPXi5nfJRTR7I
+# KbyPmI2/bx+PbGfAErMC3XoMr/XupogcK9VPU/HbcIj4ZDgTW35vKyiFW9tf9jjW
+# rknAm0e0GqzvagmVDNJ8ha0GYERPdhw4m3Pm3Obft5Bu3egO4jPujoyH4PGZfkFl
+# J53nHxJvQLYg3lYwj67VG9zvVz20+9NYNuvQY0F4mPsfhogCJDR8DbuJeCo2Hqug
+# asINziZObi4Av7XGDQ==
 # SIG # End signature block
