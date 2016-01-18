@@ -110,17 +110,26 @@ function New-ScsmPxObjectSearchCriteria {
 
             # Ensure the property name is using the correct case
             if ($properties.Contains($token.Content)) {
-                $stringBuilder = $stringBuilder.Replace($token.Content, $properties[$token.Content].Name, $token.Start, $token.Length)
+                $replacementValue = $properties[$token.Content].Name;
+                $stringBuilder = $stringBuilder.Replace($token.Content, $replacementValue, $token.Start + $tokenOffset, $token.Length)
+                # We need to update the offset so that multiple replacements in sequence work just fine
+                $tokenOffset += $replacementValue.Length - $token.Content.Length
             }
             # If the next token is an operator, and the following one is a variable, replace the variable with its string equivalent
             $foreach.MoveNext() > $null
             if (($foreach.Current.Type -ne [System.Management.Automation.PSTokenType]::CommandParameter) -or
-                -not $operatorMap.Contains($foreach.Current.Content)) {
+                -not $operatorMap.Contains(($operator = $foreach.Current.Content))) {
                 continue
             }
             $foreach.MoveNext() > $null
             if ($foreach.Current.Type -eq [System.Management.Automation.PSTokenType]::Variable) {
                 $variableToken = $foreach.Current
+                # If the operator is -eq or -ne and the variable is $null, leave it for replacement later as this is a special case
+                if ((@('-eq','-ne') -contains $operator) -and
+                    ($variableToken.Content -eq 'null')) {
+                    continue
+                }
+                # Otherwise, replace the variable with its string equivalent
                 $replacementValue = "'$((Get-Variable -Name $variableToken.Content -Scope $scope -ValueOnly) -as $properties[$token.Content].SystemType)'"
                 $stringBuilder = $stringBuilder.Replace("`$$($variableToken.Content)", $replacementValue, $variableToken.Start + $tokenOffset, $variableToken.Length)
                 # We need to update the offset so that multiple replacements in sequence work just fine; the -1 at

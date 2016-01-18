@@ -24,7 +24,7 @@ limitations under the License.
 @{
       ModuleToProcess = 'ScsmPx.psm1'
 
-        ModuleVersion = '1.0.14.56'
+        ModuleVersion = '1.0.15.57'
 
                  GUID = '2fb132d0-0eea-434f-9619-e8c134e12c57'
 
