@@ -6,7 +6,7 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright 2015 Provance Technologies.
+Copyright 2016 Provance Technologies.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

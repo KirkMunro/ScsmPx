@@ -6,7 +6,7 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright 2015 Provance Technologies.
+Copyright 2016 Provance Technologies.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ limitations under the License.
 @{
       ModuleToProcess = 'ScsmPx.psm1'
 
-        ModuleVersion = '1.0.15.57'
+        ModuleVersion = '1.0.15.58'
 
                  GUID = '2fb132d0-0eea-434f-9619-e8c134e12c57'
 
@@ -32,7 +32,7 @@ limitations under the License.
 
           CompanyName = 'Provance Technologies'
 
-            Copyright = 'Copyright 2015 Provance Technologies'
+            Copyright = 'Copyright 2016 Provance Technologies'
 
           Description = 'The ScsmPx module facilitates automation with Microsoft System Center Service Manager by auto-loading the native modules that are included as part of that product and enabling automatic discovery of the commands that are contained within the native modules. It also includes dozens of complementary commands that are not available out of the box to allow you to do much more with your PowerShell automation efforts using the platform.'
 

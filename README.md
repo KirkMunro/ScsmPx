@@ -16,7 +16,7 @@ PowerShell automation efforts using the platform.
 
 ### License and Copyright
 
-Copyright 2015 Provance Technologies
+Copyright 2016 Provance Technologies
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
