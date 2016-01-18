@@ -6,7 +6,7 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright 2015 Provance Technologies.
+Copyright 2016 Provance Technologies.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ limitations under the License.
 @{
       ModuleToProcess = 'ScsmPx.psm1'
 
-        ModuleVersion = '1.0.14.56'
+        ModuleVersion = '1.0.15.58'
 
                  GUID = '2fb132d0-0eea-434f-9619-e8c134e12c57'
 
@@ -32,7 +32,7 @@ limitations under the License.
 
           CompanyName = 'Provance Technologies'
 
-            Copyright = 'Copyright 2015 Provance Technologies'
+            Copyright = 'Copyright 2016 Provance Technologies'
 
           Description = 'The ScsmPx module facilitates automation with Microsoft System Center Service Manager by auto-loading the native modules that are included as part of that product and enabling automatic discovery of the commands that are contained within the native modules. It also includes dozens of complementary commands that are not available out of the box to allow you to do much more with your PowerShell automation efforts using the platform.'
 
@@ -405,8 +405,8 @@ limitations under the License.
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUpX11W3z4gIszC6wL8ppRkGZg
-# diqgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUg4EtFofvvkfy2SbLrdHes35N
+# +d2gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -520,22 +520,22 @@ limitations under the License.
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFM8pdN3Q/ViySgGhlh8K1DMZOVRqMA0GCSqGSIb3DQEBAQUABIIBAIY6
-# u/u8AkQuME+Azvr1/ah787eJBzmBCcfv6YgBgxcHcPsOWaNgE4A0HDlOtfh5oMfZ
-# J6IA72ckcXngqTE+Iz3BAB5DFVxdBOb4VAvE67lpEzTSHDkTkZQ1oexFslrmVWvi
-# Nrwp7rK98daeW7ejXtlVLig6PK7/5rE5qIPr6Ow5mDHT61zzK49kr2G+jMuHH5rF
-# 4oFjuA04DrC+OzUO+xZ5f8XYlqPmklH/RyuRtNBwImoQtn+UBqT4l16f9nKcA6GC
-# IORrd62YoS5EesnuwjrDCmsqYuhzrY5B8nEUivBA6cG+7oanbC0yl1KTtLcAQuLQ
-# MrTrm6m01SlA44QaH/qhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFP12ma3AsKdItMcCUP9IyqUHVX7IMA0GCSqGSIb3DQEBAQUABIIBAJEl
+# NivuYrSG5QMmMXuHgTYxI4T6nE9dcFCJ8Ue6m2zWPLJ1B02nmPIpFJTVnSSBjCLH
+# U2kQ56mIG86Y3vrHHhvVMrcJSsbgtqCeevFJSlt5OoPuuNgX9dxnx/OcYn7+BaY1
+# HLQexNKat3EoVOX0KtpDrjoC5nJ25DVpx2BuOE5SBY3foMout9ap8B16ouD3oJJa
+# mDIZtLpgA1ONxYb8cb4401xHUP0kAaiXln87/ubZ+PWXuLqlpJj90cWyAq+IBAxZ
+# tHInsj2hpx+F1WdPNlZLd+ErEfyukaa0Z33omerr3LE5dSHAixDy8pckl1JPo0/g
+# AHvKXRbdLoykmGZt7ZehggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMjE3MjEzODQ4WjAjBgkqhkiG9w0B
-# CQQxFgQUASSm6bkmwK0ookRojZbwwhLGcUkwDQYJKoZIhvcNAQEBBQAEggEAPQ+G
-# XHXRmIf3rJ5DabNo1CEtnzUwvzsr1Xys87ySxo23At1rU0uOvMK08HtETlg+zUIe
-# Nlidk+4oubPK+uStHAVDxzMRCbijQQu+GDOVUZeyal4W9lieiRjl0F2k4hrv+oqS
-# ueID9JFVUalbJp79ZLZDBl8HKm+3imqNacg8CvzO4DowQEQlz5zUpdlSJHCLrPAl
-# 1fsQq6tyUKgOYyx0o/tF8IAnMF5dytkQPHRGOYAGtNKYpcdSfhrbzrsxRqAcAFSi
-# NdHsivrOU14kCZVlay3ETCyS7cXSj1DjKkEDr3bSlMsMHL6hvl3zuqBqVTS5PpiS
-# 4iDAFyyzfeadsjPZ1Q==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTE4MjAyNTUyWjAjBgkqhkiG9w0B
+# CQQxFgQUTSKGRdwZeqROo5skSnAbgKtnFNkwDQYJKoZIhvcNAQEBBQAEggEAHxy8
+# /ToWs5VK3s2wfxzVhvQeJEBtNpLnv6O2yt6rTirHpY8v1EqQbV7yT5+qeSbwvI7s
+# JIDX9hU8maZvz30BxipJMgLnAZ3RenHhBOglOd8OkAawGIx4TVv3L4osLrORNWr3
+# NlSSPMRj6c5RPjsjegG+JXOrvzY8OwfFtvWulTd9k4ItwRqYf+h/QDr21gp8dq3c
+# GfUIDOqAXI4zyRc75zAn6oVlapYxXtIGK1GT8vEgkGM1QEi0Vtsy4s+YYJSa5ay/
+# GqxCpsqNOsdSelrTemJw5kh1oK5AEKFi4AP4bxLOd6i4NG5CPtnOYIOD/3YPspAS
+# P4+3fd7bLj5U2ceGig==
 # SIG # End signature block

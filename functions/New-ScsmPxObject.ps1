@@ -6,7 +6,7 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright 2015 Provance Technologies.
+Copyright 2016 Provance Technologies.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -240,8 +240,8 @@ Export-ModuleMember -Function New-ScsmPxObject
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUqjJl3ZUSJg0GLXGNeRqX5yl
-# Dk+gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUwaPMSMfX1ATG/KhySy4cx8At
+# M8+gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -355,22 +355,22 @@ Export-ModuleMember -Function New-ScsmPxObject
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFPdvW6W9cNdZxF0QiX+ngRktQaAWMA0GCSqGSIb3DQEBAQUABIIBABgD
-# RBle6mwiNvvdX79429qhvQONoEnXWil0pj9uyj9rKDcw7S7OUuLpS64zgiFd74iu
-# 1ZMgt1h75xYBP0U6OecUoRF2pd8rYBAhC300bGy63fJC/GZUzTnwYMzHHezsQjlX
-# B60S2w0cU4FqqtgmJgrKWxAM+cLK9j1vD7URtu743/ZavjG/dMg8MueD23YX+mMR
-# pBoaPT8ILvuN61IzECwiLbFGcE4lhtqnF24Rm3P3PWMZNy+OB5Bu7JD1qUfyf8eX
-# 7rZExQK78iMBNkx9X0QWpr6pN/kFOUbPXCT3mpGxakgz8E5lSV8iu40MZglEY57z
-# bdqvWD8KQmqK3FiZLbmhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFFt3vBBcRmIHkWnGD3zFTtenv7fWMA0GCSqGSIb3DQEBAQUABIIBAFlO
+# YI9+npoeQIlwyl2ZPsIQQJ/Nde9QeyLKKQGpZBlj7g/2sfY+9hpiInKAQPPYwx2P
+# nbEOOPhyrr1CSYkWuy8/A3baMjY1htMH3A0DhPUgIUjTX8EC0mviRTaqMlm3bNgC
+# S61GuJsTYgwJiN7ePMZEmVzuDhUKQpUSoV3sPMNw57Z5nwiBxerOUrM89VFmKyea
+# Fd+Y6+JcQjxz/dhSdrHXfQlxBee9bkuTenxD2d7jmuZDxfTMf6Nr0EwEDr++kxiG
+# 01/pllgU8OTm77LusH7ISYR1r5rJmCns5jjKSy6VIDPfY2jHs/blqBmywAlPEDQP
+# cRq5X5oBcraWJHLyW3mhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMjE3MjEzODUzWjAjBgkqhkiG9w0B
-# CQQxFgQUxIg8DsIOXfTmJLMAarllDwNLkswwDQYJKoZIhvcNAQEBBQAEggEAe9Z2
-# 9b5UH9+b8WCpWjyqGvWPxBdjd8TOcM8LSon9AqV1mLyuxfT4GV/RMa3Ucwu62t8Z
-# RYsRSgHBsvwdB+CQQ8mVdQ4dKS5MDCFySEUkXtrFUVJ3OOkcTa5azyYhNgwHfoKz
-# iirMcmdxzXT1A0/vVUqZSpd3nMKGRMBrPwPhKdJ+4TyxWUNCVn8Qt9mWdd7LHqqE
-# lYb8ckkmbIaBrh9fRnGO72fe11yOJNXz4B4wM+D4eqEN/EMTdbfdF6Vgho3jzOAj
-# QJ3zuYXduprQh+T4g9zry36Jp18E9viGQMY0o8LjleGS0b3eq4KbdpEKwbOsAs7+
-# 4Cf5+CagIlC3Pjux/Q==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTE4MjAyNTU0WjAjBgkqhkiG9w0B
+# CQQxFgQUduUyoyO3zU1LE/lhHaS6XQSQoXcwDQYJKoZIhvcNAQEBBQAEggEAiUOm
+# Aea6qiD61Dh1mRRSQue94xlcQG7fz6kqz7nSxF6C/r4fi8gtDCRpHFIoGJAU+Dpu
+# eZeMqgOiMDp3wITuK5gUsTgVC2hC/ReWHNHfVdzkl2mi8WZ+LB2JmZPo86AvCWsS
+# sOtqqyM94ZZ5IfKJSTWCpgFnmFWyatfg4ApBF7foSI6tm+6fXALxhC9d1JZo6U80
+# ogFwp14bkiYAkMLpBXw2nUvxRBVDpLLILZvL3YxWpOs1cHTn3HviAl2F+7tsBDnn
+# h0slsKEXEEowyzjJbxbQgLxHdKYMQu9caWRO2z0RsNrkdfloOHHf4KXDrAWiVgAR
+# FRREHI7Z3iasYJmD1A==
 # SIG # End signature block

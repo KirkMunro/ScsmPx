@@ -6,7 +6,7 @@ within the native modules. It also includes dozens of complementary commands
 that are not available out of the box to allow you to do much more with your
 PowerShell automation efforts using the platform.
 
-Copyright 2015 Provance Technologies.
+Copyright 2016 Provance Technologies.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -110,17 +110,26 @@ function New-ScsmPxObjectSearchCriteria {
 
             # Ensure the property name is using the correct case
             if ($properties.Contains($token.Content)) {
-                $stringBuilder = $stringBuilder.Replace($token.Content, $properties[$token.Content].Name, $token.Start, $token.Length)
+                $replacementValue = $properties[$token.Content].Name;
+                $stringBuilder = $stringBuilder.Replace($token.Content, $replacementValue, $token.Start + $tokenOffset, $token.Length)
+                # We need to update the offset so that multiple replacements in sequence work just fine
+                $tokenOffset += $replacementValue.Length - $token.Content.Length
             }
             # If the next token is an operator, and the following one is a variable, replace the variable with its string equivalent
             $foreach.MoveNext() > $null
             if (($foreach.Current.Type -ne [System.Management.Automation.PSTokenType]::CommandParameter) -or
-                -not $operatorMap.Contains($foreach.Current.Content)) {
+                -not $operatorMap.Contains(($operator = $foreach.Current.Content))) {
                 continue
             }
             $foreach.MoveNext() > $null
             if ($foreach.Current.Type -eq [System.Management.Automation.PSTokenType]::Variable) {
                 $variableToken = $foreach.Current
+                # If the operator is -eq or -ne and the variable is $null, leave it for replacement later as this is a special case
+                if ((@('-eq','-ne') -contains $operator) -and
+                    ($variableToken.Content -eq 'null')) {
+                    continue
+                }
+                # Otherwise, replace the variable with its string equivalent
                 $replacementValue = "'$((Get-Variable -Name $variableToken.Content -Scope $scope -ValueOnly) -as $properties[$token.Content].SystemType)'"
                 $stringBuilder = $stringBuilder.Replace("`$$($variableToken.Content)", $replacementValue, $variableToken.Start + $tokenOffset, $variableToken.Length)
                 # We need to update the offset so that multiple replacements in sequence work just fine; the -1 at
@@ -164,8 +173,8 @@ Export-ModuleMember -Function New-ScsmPxObjectSearchCriteria
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOJA9Q8pdwQwFQox77HFq0vFp
-# 16OgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU598J5tFPxkFFrzE5dRqGZMcw
+# SHSgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -279,22 +288,22 @@ Export-ModuleMember -Function New-ScsmPxObjectSearchCriteria
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFLvb35ngs78ld+wGsSSL3QqnnmESMA0GCSqGSIb3DQEBAQUABIIBAHVV
-# eKhjaLORtpG/jvXiyUWQ7lzOXNxtmTeHYvNVDKP+OHZttGnl5KkiJrte1Ugp6SQA
-# 9aHL7D8mfZOVsWox/Hhpx+bYeHRuOCkomni/zkTgZUsF5wWc3WS5mlr6RParoiPv
-# tkLy3qTyoy+ovp1Uy7oShSXnsIxOxvllfTT4ZfPC6TB3MFsK4AyPT5EM/i2Fe4ej
-# sD3aBA7s7niNPT2utiUKXyJdqN1AAh1NIgAZ+u9wpDp+jooxm2f6uYz9zzzSKBAQ
-# VDRNpLP6KO1qwIic64bWj7x6heSz41WF0RO7cd5EbhhtoShSEKItnYL4ubOyCEGD
-# HyBORzdZM8FgN5zYc6GhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFL71vMTK6P5BItrielTKtpjcrtuCMA0GCSqGSIb3DQEBAQUABIIBAGsb
+# j7a1MIXhHMoawSHKqEhGKAv/3B4iIIUjQJTM1QkuYXT5UCiE+W/HZ4a222vdEZZ2
+# 2PxqvRzCPw9Wkxs9DoyTp0dmfDQqYmT9Br84ia9vej63cLmfrW1kGDfPleASV2/4
+# t1HYBq58KywB1ZQxT7rpzYonVkxo8YxDLG+5FYjCpfQs7nUqWpRUu75VUmIYIMr+
+# mJM136ZIGpNgA/06FHgsXvlcrATxPU7ovxcuCggq8dH6C80Nqx1aurA2U07GacH0
+# tUK7a5HhwBzvp+oC89NgAn4b7BT3hES0eqkgWjjEG3rjnFMtljQax7Y31qvg9jXU
+# Akeqny5dIyzW0dDsVbuhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUxMjE3MjEzODUzWjAjBgkqhkiG9w0B
-# CQQxFgQUIfRNy6hLViPtUYRaChXC6qe0zHAwDQYJKoZIhvcNAQEBBQAEggEAi3h/
-# ATOa7pRt+Kk7USFdc01H7I4sBB9FioqV/y5UumalAKS9coc1nz+D9+8S1y2uXYf9
-# unj8l8m/Vh1glR5tcXR0oO3zn/8yRzs5wGw1D4T1ctdjZKSC+opFwtmuah8bxSHz
-# qO4t9wVZz/BT8HRK43b6dTMVYoZyjvv4i5kHs2ZtBJlK3jmjVsh5DnYBWo31s3kL
-# egq2v0CyFYfqUeEBIBVlMXHB5JkLHLKOs7eQu9U4pTwZa6yOhgJZO8ZwvL9vwuxJ
-# 8DggXY+WsGQSglLppt1wp2Mv/OTX2BMFGR/vMS/bUqBjFnThMfN9pRTN433A9a6s
-# JLR5xy4Eu1argv4uJQ==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTE4MjAyNTU0WjAjBgkqhkiG9w0B
+# CQQxFgQUjksB/vcqyNPt7t+VJ3eO4BMcOrEwDQYJKoZIhvcNAQEBBQAEggEAMw8w
+# XLjgV3a74fLaC86plek4SWOk1nCqtLz6H8b73dqAj9UrOfDaQl2TA1Od3M8zgNhL
+# RGqr72vHTlgh0R64cW3j8gMdBXSXO2yS2ZWFuWvlLgE9DyhMahDEd/JZ4fUaN6jC
+# YvWIel3+JtcxztgVDd7ljH2R7oCrpbhNBRx5YLsNTM7jhz3jRMVpsF64kvjdQdSN
+# bNn8TvWfLGtEkaMBlw89J5PkYr3WxG3EfK3SvBHnyAEO29RIJBVHSTPa7HqhqjOz
+# 8YBnKrdPplsbxh4z0IpjrldfCVoX5wTx6MMla5eVYFL6q0jKOWaIVEMbuyBDzLXe
+# YX8z75V36U7fUTI+mg==
 # SIG # End signature block
