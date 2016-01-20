@@ -24,7 +24,7 @@ limitations under the License.
 @{
       ModuleToProcess = 'ScsmPx.psm1'
 
-        ModuleVersion = '1.0.15.58'
+        ModuleVersion = '1.0.16.59'
 
                  GUID = '2fb132d0-0eea-434f-9619-e8c134e12c57'
 
@@ -387,6 +387,7 @@ limitations under the License.
                         'helpers\Add-ClassHierarchyToTypeNameList.ps1'
                         'helpers\ConvertTo-TypeProjectionCriteriaXml.ps1'
                         'helpers\Join-CriteriaXml.ps1'
+                        'helpers\Test-LocalComputer.ps1'
                         'scripts\Initialize-NativeScsmEnvironment.ps1'
                         'xslt\emoCriteriaToProjectionCriteria.xslt'
                         )
@@ -405,8 +406,8 @@ limitations under the License.
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUg4EtFofvvkfy2SbLrdHes35N
-# +d2gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUiTAhTtLNmNCZ74sc/xuCuTFL
+# PxigghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -520,22 +521,22 @@ limitations under the License.
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFP12ma3AsKdItMcCUP9IyqUHVX7IMA0GCSqGSIb3DQEBAQUABIIBAJEl
-# NivuYrSG5QMmMXuHgTYxI4T6nE9dcFCJ8Ue6m2zWPLJ1B02nmPIpFJTVnSSBjCLH
-# U2kQ56mIG86Y3vrHHhvVMrcJSsbgtqCeevFJSlt5OoPuuNgX9dxnx/OcYn7+BaY1
-# HLQexNKat3EoVOX0KtpDrjoC5nJ25DVpx2BuOE5SBY3foMout9ap8B16ouD3oJJa
-# mDIZtLpgA1ONxYb8cb4401xHUP0kAaiXln87/ubZ+PWXuLqlpJj90cWyAq+IBAxZ
-# tHInsj2hpx+F1WdPNlZLd+ErEfyukaa0Z33omerr3LE5dSHAixDy8pckl1JPo0/g
-# AHvKXRbdLoykmGZt7ZehggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFHNB+pjqZDschIjpiiPkEhCy29czMA0GCSqGSIb3DQEBAQUABIIBACr+
+# nlWNwKzMHxvA6geQbqC6trvgbIdMo7Hm+on4EBoNZn/BMOn7UQdsWbk07Nf8vuY9
+# 7Aqc+qLYPLWJos2VcSGQF2KgvbhXKLgT4hRVvG9JS8ZYgbnGzoJJFo0OXltwMcf/
+# u4qq/Kr+RKozJ3CVcVoDLWjzGadPymMoGqOEXuDfO9WDlJk/j1D7nV+NfUaxBEQq
+# fdRsIK9lFNIsl7aJKHquRtU4rKQIDWtxBHoWrEKXDn+7L3p0Gx3B329hDR9zfHKf
+# xqVCdRQrxR8TifejNEZng1uxpfSrHUqmBnOAACr9HaSuy2dr6N/kIVKR+RWgh3DJ
+# LBelLcrRMkQNc3OtLGahggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTE4MjAyNTUyWjAjBgkqhkiG9w0B
-# CQQxFgQUTSKGRdwZeqROo5skSnAbgKtnFNkwDQYJKoZIhvcNAQEBBQAEggEAHxy8
-# /ToWs5VK3s2wfxzVhvQeJEBtNpLnv6O2yt6rTirHpY8v1EqQbV7yT5+qeSbwvI7s
-# JIDX9hU8maZvz30BxipJMgLnAZ3RenHhBOglOd8OkAawGIx4TVv3L4osLrORNWr3
-# NlSSPMRj6c5RPjsjegG+JXOrvzY8OwfFtvWulTd9k4ItwRqYf+h/QDr21gp8dq3c
-# GfUIDOqAXI4zyRc75zAn6oVlapYxXtIGK1GT8vEgkGM1QEi0Vtsy4s+YYJSa5ay/
-# GqxCpsqNOsdSelrTemJw5kh1oK5AEKFi4AP4bxLOd6i4NG5CPtnOYIOD/3YPspAS
-# P4+3fd7bLj5U2ceGig==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTIwMjExOTI4WjAjBgkqhkiG9w0B
+# CQQxFgQUD5AvaESNcmsjZTw7N6RgPtWr7y4wDQYJKoZIhvcNAQEBBQAEggEAmTDW
+# F7JoZid6JpDLkjeZHGrTNLPN8sAK2r5aEVwMjPd+nqBrCteZhQdkFj2ouw+C4hxH
+# wIPdPoXfUtv18WS7ygc3h3AJdazYh+iwMJRVGr60WQqVgNHb4UMb1FhibQ7qEBtW
+# IGE1AdGM5YH6GkCPgZc+x1VLYJMdLaTvfvQzHrhubyiIv17DjnqJjqyubh6kNqoz
+# FfdgwrDMzhpY63WakfKCNsIS7z1ixJJYXN5XE8PYxqUje4uVL4HdjEXgouQ7iiQV
+# S1OhHMKfDll3N3NiHzgCheglbZEgkobxeW+7qfm0jCJ9erxd3gFZ5oKnCdOM1Q9h
+# AbCXFxBmirPvAUhvYA==
 # SIG # End signature block

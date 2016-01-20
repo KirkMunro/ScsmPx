@@ -120,7 +120,7 @@ function Get-ScsmPxRelatedObject {
     }
     process {
         try {
-            foreach ($item in Get-Variable -Name $searchParameter -ValueOnly) {
+            foreach ($item in (Get-Variable -Name $searchParameter -ValueOnly)) {
                 if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName') -or
                     $PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClass')) {
                     #region Get the related items when we have a relationship class name to work with.
@@ -227,8 +227,8 @@ Export-ModuleMember -Function Get-ScsmPxRelatedObject
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUDD3EPnXVq2C84c3qRHYs/ncD
-# HxKgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUpt9cocH38UrjeOsvJBgx2wYk
+# jqWgghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -342,22 +342,22 @@ Export-ModuleMember -Function Get-ScsmPxRelatedObject
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFFQc3TQTcygaXuTM16ZO/4xW0mtLMA0GCSqGSIb3DQEBAQUABIIBAHS8
-# If9G/YJL3/cUKVoUlItUteFjN86jIT+pv9GYMqObIjZZkCw0PgCjrMSlN3sI6s4N
-# jEQ6R8QbEXLAZWB5uXvlzgDdGZlw8udR9uXc3J6TMjttQDTajyOMB1IXxwGLDePt
-# JhExBgzLq09x9QE19sx2eB73YLLlfNXdj3PywGpK/S5Vkovr4nnOYxs+VL0nw1GZ
-# JOZv1CZ9do6J+vypSNjvE4G1qGov6gQDPpKSARsWXgjqTKu4hv30MK9l3NYpaARb
-# BulqCY0nWmL4rCVZOJD4Lz1mCd5/EQBfBJlQtArzjAZd9fXjz0s3B+MOLm1FWwP9
-# 0E7W9rP1dJOpu98+JjqhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFJ6/4L8xfBMG+li06+XvVK1o2KPVMA0GCSqGSIb3DQEBAQUABIIBAC+u
+# wfy2mIVXPkHBf4BdOLMo3Ui5MgdYm1N4KIODNTdIbOnAMoxBXpiIvRMXkPYhQzx0
+# 5ISPzt99SlaZhMkwfC95bLohvcdznvUmY02zXfFAs6SFNbxDAk6LQgvXJuObGca+
+# iedLaJkFJVEFIKCZF8vGi3+EzXV2DuRuIoFI+N97qbFVUgu42PRApcntatTosAT8
+# 2l45y1ODrTkzNVL+H7L/fckNh2ubd+G0nEE2rYQarNoEOJ7E8X4POp1eXmMs6M5S
+# 4x5CP2JSabvywYwcLp7Ecj0/pS4LgVIe9CwBpz/PVgaokf5XS/KWjuH78rvdXnW5
+# r6v4Ir7NZlQZQLDFMLqhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTE4MjAyNTUzWjAjBgkqhkiG9w0B
-# CQQxFgQUgR6n17Vw8NGJK+urQBKZtT0k1m0wDQYJKoZIhvcNAQEBBQAEggEAgjdh
-# 2N7CFgrPgqY3/u5WDx1r0kVTu7tQd42II0XRoy0/hs9/iP8MHTnWAqF9NdavqMb8
-# 8MNCCtj1ggjUxg0ALUN/TPvcHQ940l6TPSn9V8EfQKjgJcrnFFXAYGso1NqZHl5y
-# ukuaHVWfhX3oysfCihy6cIaEdvwVd8QkffYmOczRhfw9ZrIWTkVz7zS5Z6Y5xvOP
-# GbpSbmMQZlo/ZgToIIYai9wcmDcNshVyTRkjXxDhKvd/aRHMujDSW+K2IehwfK4g
-# RyuElhYQj8QgLWXS5jDZ+531uhktfomb+DlY57Ea3vYd6+7f4eALNu78P/Q8DrCh
-# bYUGJ/wUQp53ihf2aQ==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTIwMjExOTI5WjAjBgkqhkiG9w0B
+# CQQxFgQUqmRhbxrjCDU3sDW3wvLAME50zrswDQYJKoZIhvcNAQEBBQAEggEARzBm
+# kfBT7S3Sn0Eazp3oKR14Afr8lvqVS8/DPAc5Tj0/Hrhbaz8EtG0tPgGdr0VnDvzJ
+# AUXFdTLJ4lMcv/0sg8k5ooDDm/iRgRfas1220ob1ghbtpUniMFz/jvr/3SaLwdzP
+# n5qQ1M1x0usBWKwNYOUxoVKJICZBig4Th75H6cJKsWCtVA6g0n2UFz1KH/SzK8op
+# 5A49qCS049Ii6U4WO5/HZWEzIWbUaNM3KUhPxHEKnBXsOONxE5uauKfmX9Jc6Zgy
+# uFpfllFyBDfvZQMbErXVZwFl4SQ8lbyfjT1NT7C5ut00LaQcZ6I7TEuduZ2K/QzR
+# OUFj3+EE/uWIt9z5wg==
 # SIG # End signature block
