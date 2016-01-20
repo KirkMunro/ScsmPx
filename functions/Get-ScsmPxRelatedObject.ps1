@@ -120,7 +120,7 @@ function Get-ScsmPxRelatedObject {
     }
     process {
         try {
-            foreach ($item in Get-Variable -Name $searchParameter -ValueOnly) {
+            foreach ($item in (Get-Variable -Name $searchParameter -ValueOnly)) {
                 if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClassName') -or
                     $PSCmdlet.MyInvocation.BoundParameters.ContainsKey('RelationshipClass')) {
                     #region Get the related items when we have a relationship class name to work with.
