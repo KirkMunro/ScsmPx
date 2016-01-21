@@ -56,13 +56,13 @@ function Get-ScsmPxConnectedUser {
             try {
                 $user = Get-ScsmPxUserOrGroup -Name "${domain}.${userName}" @PSBoundParameters
             } catch {
-                $user = $entry.Group
+                $user = $entry.Group[0]
             }
-            $connectedUserRecord = New-Object -TypeName PSCustomObject
-            Add-Member -InputObject $connectedUserRecord -MemberType NoteProperty -Name User -Value $user
-            Add-Member -InputObject $connectedUserRecord -MemberType NoteProperty -Name ConnectionCount -Value $entry.Count
-            $connectedUserRecord.PSTypeNames.Insert(0, 'ScsmPx.ConnectedUser')
-            $connectedUserRecord 
+            [pscustomobject]@{
+                     PSTypeName = 'ScsmPx.ConnectedUser'
+                           User = $user
+                ConnectionCount = $entry.Count
+            }
         }
 
         #endregion
@@ -75,8 +75,8 @@ Export-ModuleMember -Function Get-ScsmPxConnectedUser
 # SIG # Begin signature block
 # MIIZKQYJKoZIhvcNAQcCoIIZGjCCGRYCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUpbL90G1SpJUawxnwSLhCfXYO
-# nYygghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/gzbaKC1tJQYNafc4KntIXqb
+# pB6gghQZMIID7jCCA1egAwIBAgIQfpPr+3zGTlnqS5p31Ab8OzANBgkqhkiG9w0B
 # AQUFADCBizELMAkGA1UEBhMCWkExFTATBgNVBAgTDFdlc3Rlcm4gQ2FwZTEUMBIG
 # A1UEBxMLRHVyYmFudmlsbGUxDzANBgNVBAoTBlRoYXd0ZTEdMBsGA1UECxMUVGhh
 # d3RlIENlcnRpZmljYXRpb24xHzAdBgNVBAMTFlRoYXd0ZSBUaW1lc3RhbXBpbmcg
@@ -190,22 +190,22 @@ Export-ModuleMember -Function Get-ScsmPxConnectedUser
 # Q29kZSBTaWduaW5nIDIwMTAgQ0ECEFoK3xFLMAJgjzCKQnfx1JwwCQYFKw4DAhoF
 # AKB4MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcN
-# AQkEMRYEFHtzKZKYSS84/qZ2QHj/MB1yw7BKMA0GCSqGSIb3DQEBAQUABIIBAJ0Y
-# AGCjV4gZLXcWwOPHYPL9KZzFzFUBoG8gdUDC+YwaFp16yZn6g07fOgSpOZXoC9zN
-# 8pxfDtQSOa4QIXmhUKwzYaQbQrYE4/HVFlPCEeqMnjMvENTU3ooN7sOyglaxkbED
-# Wam0NYxcxzi57p9mTTRQ6vTyWFFca+D6+N6GWCcpafZhM2QnfZ0SpbYM7m9e/Aca
-# jk4CkLz2DYNLhFnGw4p64B6QqT3VJuiTUGmWcCgytCER6zU7J4SKQaRwbBWNKaGQ
-# fxk58XpVxPSKD8bQ5TwNz2eRsGnT3MD5LxreBi2eeHU7jlTF9QN8Y1beu9mY+Td3
-# xffgCLijojmvhNNPMdyhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
+# AQkEMRYEFLSlZZFbN5GiA63GThGPJd82rjdPMA0GCSqGSIb3DQEBAQUABIIBAFz8
+# g31PN3LCHvMYH1kHYfGkUK0qxegdDs9rm9IxkeBTwSry67XM16MnauN8ynjvX+tD
+# RnH/rbxt1TjG0jejegYKu45VNZzP6xchnYuLsHDLGWJP+hd6na9asreJiuSLqvSo
+# ihkJ63TTiTdKAMaREBdjGOx3zFtRcqguXMdZjA/9mympzLm+vEgLkMGjc1Qv55Fg
+# qoqxTBrF4asBOe9OwDIKr0u74nBCpnwnhf/NmAa2kemaWLgekBfsWLLZPeZSpdXd
+# 1VPzBIk8GL+2BK6udBwOJrlNxmjGnV+r0GqbdGVQNtEhOOLKGnyFDaziTGNF5znc
+# Pk1Dur+tlZaUpqQ38bqhggILMIICBwYJKoZIhvcNAQkGMYIB+DCCAfQCAQEwcjBe
 # MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xMDAu
 # BgNVBAMTJ1N5bWFudGVjIFRpbWUgU3RhbXBpbmcgU2VydmljZXMgQ0EgLSBHMgIQ
 # Ds/0OMj+vzVuBNhqmBsaUDAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqG
-# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTIwMjExOTI5WjAjBgkqhkiG9w0B
-# CQQxFgQU+IO+jnFwO1rkffa1YVL8E4abIPUwDQYJKoZIhvcNAQEBBQAEggEAT/o2
-# O3nislkFOFGcg6TsXzmJYulooDJpeS1b8phq6w/XAaNKSTowmN44OhXCHa9eF56o
-# YiNmQcdiHx2PtDheODugFjaTHfY8F/Qa0XQMFoIlyTJE0alPtZkVzSei+b431rTc
-# 870tCiWf/DikN80TF/pnQXfXKqeRL62dwTqkiHc7K9heyAmUraI/hx3TvDlC836m
-# ZgYfoGwNvsBIquAFyTlhgfkkGCrjZaNjQ/XD4jznLlIuFx2nZKi17nxViGpAE7NT
-# XKsTFP+vviw4SztD21gWz8eWuAu/9nTZKpIvRJiskFNb3tssXgtu6bCpdN0QFVMi
-# 07gvCB3/5wuQ967FgA==
+# SIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTYwMTIxMDIyNDEyWjAjBgkqhkiG9w0B
+# CQQxFgQUaQd7tITYDSyj1GM6JoTezfvu7KkwDQYJKoZIhvcNAQEBBQAEggEADnzO
+# 2KLvB+SXIOuh4rXofTd26Ndc7p/as+3Ipn+ICwqQqdjv511WZ44mQWWdS61Yyn7E
+# tm6QDwJHv+IU3dOm+P+UR3916+xSl7h3Rl8UhNbYuCMZF4xFwNX5wj5C1wqf6J0n
+# 9dGtpBbit+yD03irnOv/SvFvF6TuE7rEmJoeVuUbU1jdoIx+csZU/q2BNJj7Ijpg
+# Z/FoJqpCQNg82pHpMTdahxCrakfvyrA72cgOvfwe64xTwKzug63ERXNWjtkPmmS3
+# C9lVhC8x7yFYOYrSkO7Det8CazSarevRuScc96wMUgrdd61CctSUSFPEiXNpFj+p
+# ZukuIu4hS2012qz/vA==
 # SIG # End signature block
