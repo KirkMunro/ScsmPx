@@ -56,13 +56,13 @@ function Get-ScsmPxConnectedUser {
             try {
                 $user = Get-ScsmPxUserOrGroup -Name "${domain}.${userName}" @PSBoundParameters
             } catch {
-                $user = $entry.Group
+                $user = $entry.Group[0]
             }
-            $connectedUserRecord = New-Object -TypeName PSCustomObject
-            Add-Member -InputObject $connectedUserRecord -MemberType NoteProperty -Name User -Value $user
-            Add-Member -InputObject $connectedUserRecord -MemberType NoteProperty -Name ConnectionCount -Value $entry.Count
-            $connectedUserRecord.PSTypeNames.Insert(0, 'ScsmPx.ConnectedUser')
-            $connectedUserRecord 
+            [pscustomobject]@{
+                     PSTypeName = 'ScsmPx.ConnectedUser'
+                           User = $user
+                ConnectionCount = $entry.Count
+            }
         }
 
         #endregion
